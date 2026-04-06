@@ -1,0 +1,175 @@
+/* ─── Block Side Menu (traveling handle) ─── */
+
+.block-side-menu {
+  position: absolute;
+  top: 0;
+  /* Position with 10px gap to the left of block content.
+     ProseMirror padding-left is 3rem (48px).
+     Menu width = two 24px buttons + 1px gap ≈ 49px.
+     left = padding - menuWidth - gap = 48 - 49 - 10 = -11px
+     Clamp to 0 minimum to prevent clipping on narrow viewports. */
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+
+  /* Smooth travel between blocks */
+  transition:
+    transform 250ms ease-out,
+    opacity 150ms ease;
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+}
+
+.block-side-menu[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Invisible hit area bridging the gap between menu and block content.
+   Extends to the right of the menu so hovering in the gap doesn't
+   dismiss the menu. */
+.block-side-menu::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -16px; /* extend rightward into the gap */
+  width: 16px;
+  height: 100%;
+  pointer-events: auto;
+}
+
+/* ── Buttons (Plus + Grip) ── */
+
+.block-side-menu-btn,
+.block-side-menu-grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #7a7a85; /* zinc-500 */
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.block-side-menu-btn:hover,
+.block-side-menu-grip:hover {
+  background-color: #27272a; /* zinc-800 */
+  color: #e4e4e7; /* zinc-200 */
+}
+
+.block-side-menu-btn:active,
+.block-side-menu-grip:active {
+  background-color: #3f3f46; /* zinc-700 */
+}
+
+/* Grip handle: draggable cursor */
+.block-side-menu-grip {
+  cursor: grab;
+}
+
+.block-side-menu-grip:active {
+  cursor: grabbing;
+}
+
+/* ─── Block Context Menu (Dropdown) ─── */
+
+.block-context-menu {
+  width: 260px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+  background-color: #18181b; /* zinc-900 */
+  border: 1px solid #27272a; /* zinc-800 */
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+
+  /* Entry animation */
+  animation: block-menu-enter 100ms ease-out;
+}
+
+@keyframes block-menu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Menu items ── */
+
+.block-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #e4e4e7; /* zinc-200 */
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+.block-menu-item:hover,
+.block-menu-item:focus,
+.block-menu-item[data-highlighted] {
+  background-color: #27272a; /* zinc-800 */
+}
+
+/* ── Shortcut text ── */
+
+.block-menu-shortcut {
+  margin-left: auto;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: #71717a; /* zinc-500 */
+}
+
+/* ── Separators ── */
+
+.block-menu-separator {
+  height: 1px;
+  margin: 4px 0;
+  background-color: #27272a; /* zinc-800 */
+}
+
+/* ── Submenu content ── */
+
+.block-menu-sub-content {
+  min-width: 180px;
+  padding: 4px;
+  background-color: #18181b; /* zinc-900 */
+  border: 1px solid #27272a; /* zinc-800 */
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: block-menu-enter 100ms ease-out;
+}
+
+/* ── Scrollbar styling for the menu ── */
+
+.block-context-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.block-context-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.block-context-menu::-webkit-scrollbar-thumb {
+  background-color: #3f3f46; /* zinc-700 */
+  border-radius: 4px;
+}

@@ -1,11 +1,15 @@
+import { useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorProvider } from "./EditorProvider";
+import { BlockSideMenu } from "./menus/BlockSideMenu";
 import "./styles/editor.css";
 
 export function Editor() {
+  const editorWrapperRef = useRef<HTMLDivElement>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -34,9 +38,13 @@ export function Editor() {
     <EditorProvider editor={editor}>
       <div className="w-full flex justify-center py-12">
         <div
-          className="w-full max-w-[800px] min-h-screen bg-zinc-950 rounded-lg border
-         border-zinc-800/70 hover:border-zinc-800 transition-colors cursor-text"
+          ref={editorWrapperRef}
+          data-editor-wrapper
+          className="relative w-full max-w-[880px] min-h-screen bg-zinc-950 rounded-lg border
+           border-zinc-800/70 hover:border-zinc-800 transition-colors cursor-text
+           "
         >
+          <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
           <EditorContent editor={editor} />
         </div>
       </div>
