@@ -3,7 +3,7 @@
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.75;
-  color: var(--color-text-primary);
+  color: var(--editor-text);
   padding: 3rem;
   max-width: 800px;
   margin: 0 auto;
@@ -12,6 +12,8 @@
 .ProseMirror > * + * {
   margin-top: 0.75em;
 }
+
+/* ── Headings ──────────────────────────────────────────────────────── */
 
 .ProseMirror h1 {
   font-size: 2em;
@@ -39,16 +41,20 @@
   margin-bottom: 0.5em;
 }
 
+/* ── Placeholders ──────────────────────────────────────────────────── */
+
 .ProseMirror p.is-empty::before,
 .ProseMirror h1.is-empty::before,
 .ProseMirror h2.is-empty::before,
 .ProseMirror h3.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: var(--color-text-muted);
+  color: var(--editor-text-muted);
   pointer-events: none;
   height: 0;
 }
+
+/* ── Lists ─────────────────────────────────────────────────────────── */
 
 .ProseMirror ul,
 .ProseMirror ol {
@@ -59,6 +65,8 @@
   margin-top: 0.25em;
   margin-bottom: 0.25em;
 }
+
+/* ── Task List ─────────────────────────────────────────────────────── */
 
 .ProseMirror ul[data-type="taskList"] {
   list-style: none;
@@ -83,24 +91,36 @@
   flex: 1 1 auto;
 }
 
+/* ── Blockquote ────────────────────────────────────────────────────── */
+
 .ProseMirror blockquote {
-  border-left: 3px solid var(--color-border);
+  border-left: 3px solid var(--editor-border);
   padding-left: 1rem;
-  color: var(--color-text-secondary);
+  color: var(--editor-text-secondary);
 }
 
+/* ── Code ──────────────────────────────────────────────────────────── */
+
 .ProseMirror pre {
-  background: var(--color-surface);
-  color: var(--color-text-primary);
+  background: var(--editor-surface);
+  color: var(--editor-text);
   font-family: var(--font-mono);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
 }
 
 .ProseMirror code {
-  color: var(--color-accent);
-  background: var(--color-surface);
+  color: var(--editor-accent);
+  background: var(--editor-surface);
   padding: 0.2em 0.4em;
   border-radius: 0.25em;
   font-family: var(--font-mono);
+}
+
+/* ── Horizontal Rule ───────────────────────────────────────────────── */
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--editor-border);
+  margin: 1.5em 0;
 }
