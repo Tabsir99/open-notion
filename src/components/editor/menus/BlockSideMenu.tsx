@@ -16,22 +16,12 @@ interface BlockSideMenuProps {
  */
 export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const activeBlock = useActiveBlock(editor, menuOpen);
-
-  const menuRef = useRef<HTMLDivElement>(null);
   const [translateY, setTranslateY] = useState(0);
 
-  // Capture blockPos once when the menu transitions from closed → open
-  const lockedBlockPosRef = useRef(activeBlock.pos);
-  const prevMenuOpenRef = useRef(false);
-  if (menuOpen && !prevMenuOpenRef.current) {
-    lockedBlockPosRef.current = activeBlock.pos;
-  }
-  prevMenuOpenRef.current = menuOpen;
+  const menuRef = useRef<HTMLDivElement>(null);
+  const hasPositionedRef = useRef(false);
 
-  const effectiveBlockPos = menuOpen
-    ? lockedBlockPosRef.current
-    : activeBlock.pos;
+  const activeBlock = useActiveBlock({ editor, locked: menuOpen, menuRef });
 
   const visible =
     (activeBlock.isHovered || menuOpen) && activeBlock.element !== null;
@@ -49,9 +39,18 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
     );
     const firstLineCenter =
       blockRect.top - containerRect.top + container.scrollTop + lineHeight / 2;
-    const menuHeight = menuRef.current?.offsetHeight ?? 28;
 
+    const menuHeight = menuRef.current?.offsetHeight ?? 28;
     setTranslateY(firstLineCenter - menuHeight / 2);
+
+    if (hasPositionedRef.current) return;
+
+    menuRef.current?.style.setProperty("transition", "opacity 150ms ease");
+    hasPositionedRef.current = true;
+    // Force reflow then restore transition next frame
+    requestAnimationFrame(() => {
+      menuRef.current?.style.removeProperty("transition");
+    });
   }, [activeBlock.element, containerRef]);
 
   const handlePlusClick = useCallback(() => {
@@ -67,7 +66,6 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
     <div
       ref={menuRef}
       className="block-side-menu"
-      data-block-side-menu
       data-visible={visible}
       style={{ transform: `translateY(${translateY}px)` }}
     >
@@ -81,7 +79,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
 
       <BlockContextMenu
         editor={editor}
-        blockPos={effectiveBlockPos}
+        blockPos={activeBlock.pos}
         open={menuOpen}
         onOpenChange={setMenuOpen}
       />

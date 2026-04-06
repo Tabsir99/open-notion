@@ -139,5 +139,3 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 <!-- Leave breadcrumbs for the next agent/session -->
 
 Working on Phase 2 UX bug fixes round 2 (2026-04-06). See Current Issues for the task list.
-
-Key architecture note: `data-editor-wrapper` attribute on the container div in Editor.tsx. `data-block-side-menu` attribute on the side menu div. These are used by useActiveBlock to detect hover transitions between blocks and menu.

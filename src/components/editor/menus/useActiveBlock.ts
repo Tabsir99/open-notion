@@ -17,25 +17,19 @@ const INIT_STATE: ActiveBlockInfo = {
   isHovered: false,
 };
 
-/**
- * Returns true if the element belongs to the side menu or a Radix dropdown portal.
- * Prevents clearing hover state when cursor moves to these UI surfaces.
- */
-function isMenuOrPortalElement(el: Element | null): boolean {
-  if (!el) return false;
-  return !!(
-    (el as HTMLElement).closest?.("[data-block-side-menu]") ||
-    (el as HTMLElement).closest?.("[data-radix-popper-content-wrapper]")
-  );
+interface UseActiveBlockOptions {
+  editor: Editor | null;
+  locked?: boolean;
+  menuRef: React.RefObject<HTMLDivElement | null>;
 }
-
 /**
  * Tracks which top-level block is "active" via cursor position or mouse hover.
  *
  * - Hover always wins over cursor position.
  * - When `locked` is true (context menu open), all tracking freezes.
  */
-export function useActiveBlock(editor: Editor | null, locked: boolean = false) {
+export function useActiveBlock(params: UseActiveBlockOptions) {
+  const { editor, locked = false, menuRef } = params;
   const [activeBlock, setActiveBlock] = useState<ActiveBlockInfo>(INIT_STATE);
 
   const hoveredBlockRef = useRef<HTMLElement | null>(null);
@@ -82,8 +76,6 @@ export function useActiveBlock(editor: Editor | null, locked: boolean = false) {
     if (!editor) return;
 
     const proseMirror = editor.view.dom;
-    const wrapper = proseMirror.closest("[data-editor-wrapper]");
-    const menuEl = wrapper?.querySelector("[data-block-side-menu]");
 
     const handleMouseMove = (e: MouseEvent) => {
       if (lockedRef.current) return;
@@ -98,7 +90,8 @@ export function useActiveBlock(editor: Editor | null, locked: boolean = false) {
 
     const handleMouseLeave = (e: MouseEvent) => {
       if (lockedRef.current) return;
-      if (isMenuOrPortalElement(e.relatedTarget as Element)) return;
+      // if the mouse is hovering over the menu it self don't make isHovered false
+      if (menuRef.current?.contains(e.relatedTarget as Node)) return;
 
       hoveredBlockRef.current = null;
       setActiveBlock((prev) => ({ ...prev, isHovered: false }));
@@ -106,21 +99,14 @@ export function useActiveBlock(editor: Editor | null, locked: boolean = false) {
 
     proseMirror.addEventListener("mousemove", handleMouseMove);
     proseMirror.addEventListener("mouseleave", handleMouseLeave);
-    menuEl?.addEventListener("mouseleave", handleMouseLeave as EventListener);
+    menuRef.current?.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       proseMirror.removeEventListener("mousemove", handleMouseMove);
       proseMirror.removeEventListener("mouseleave", handleMouseLeave);
-      menuEl?.removeEventListener(
-        "mouseleave",
-        handleMouseLeave as EventListener,
-      );
+      menuRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, [editor, getBlockFromHover, resolveBlockInfo]);
-
-  useEffect(() => {
-    console.log(activeBlock);
-  }, [activeBlock]);
 
   return activeBlock;
 }
