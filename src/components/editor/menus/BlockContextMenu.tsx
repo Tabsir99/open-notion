@@ -20,8 +20,9 @@ import {
   Palette,
   MessageSquare,
   GripVertical,
+  Type,
 } from "lucide-react";
-import { TurnIntoSubmenu } from "./TurnIntoSubmenu";
+import { TurnIntomenu } from "./TurnIntoMenu";
 import { Button } from "@/components/ui/button";
 
 // ── Data ──────────────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ export function BlockContextMenu({
 
   const handleSelect = useCallback(
     (id: string) => {
+      console.log("selected", id, editor, blockPos);
       const node = editor.state.doc.nodeAt(blockPos);
 
       switch (id) {
@@ -118,7 +120,7 @@ export function BlockContextMenu({
       <DropdownMenuItem
         key={id}
         className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
-        onSelect={() => handleSelect(id)}
+        onClick={() => handleSelect(id)}
       >
         <Icon className="size-4" />
         <span>{label}</span>
@@ -131,7 +133,7 @@ export function BlockContextMenu({
     ));
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger
         render={
           <Button
@@ -159,7 +161,10 @@ export function BlockContextMenu({
 
         <DropdownMenuSeparator className="h-px my-1" />
 
-        <TurnIntoSubmenu editor={editor} blockPos={blockPos} onClose={close} />
+        <TurnIntomenu editor={editor} blockPos={blockPos} isSubMenu>
+          <Type className="size-4" />
+          <span>Turn into</span>
+        </TurnIntomenu>
 
         <DropdownMenuSeparator className="h-px my-1" />
 

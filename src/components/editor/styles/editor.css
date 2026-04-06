@@ -124,3 +124,17 @@
   border-top: 1px solid var(--editor-border);
   margin: 1.5em 0;
 }
+
+/* ── Links ─────────────────────────────────────────────────────────── */
+
+.ProseMirror a.editor-link {
+  color: var(--editor-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.ProseMirror a.editor-link:hover {
+  opacity: 0.8;
+}

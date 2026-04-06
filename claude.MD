@@ -12,7 +12,7 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 
 - [x] Phase 1 — Core Editor
 - [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu)
-- [ ] Phase 3 — Bubble Menu
+- [ ] Phase 3 — Bubble Menu (in progress)
 - [ ] Phase 4 — Slash Commands
 - [ ] Phase 5 — Link Popover
 - [ ] Phase 6 — Custom Blocks
@@ -90,6 +90,11 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | 2026-04-06 | Migrated block-side-menu.css to Tailwind | Only scrollbar styles remain in CSS (`::-webkit-scrollbar` not supported by Tailwind). Everything else uses Tailwind classes. |
 | 2026-04-06 | shadcn-defaults-first styling | No hardcoded color classes on shadcn components. Colors flow through CSS variables only. Structural classes (layout/sizing/spacing) are the only additions. Theme finalization in Phase 7 by editing global.css variables. |
 | 2026-04-06 | Editor vars renamed to `--editor-*` namespace | Avoids collision with shadcn vars (`--accent`, `--border`, `--background`). Defined in `:root`/`.dark`, mapped to Tailwind utilities via `@theme inline`. |
+| 2026-04-06 | BubbleToolbar uses data-driven toggles | Mark items defined as `MarkItem[]` with `markName` + `command`. Rendered via `.map()` with shadcn `Toggle` (`pressed` = `editor.isActive(markName)`). |
+| 2026-04-06 | `shouldRerenderOnTransaction: true` | Required in v3 so that Toggle `pressed` state updates when marks are toggled. Without it, toolbar buttons don't reflect current state. |
+| 2026-04-06 | Link extension: `openOnClick: false` | Prevents navigation when clicking links during editing. Links styled via `editor-link` class in `editor.css`. |
+| 2026-04-06 | BubbleMenu `shouldShow` filter | Hides on empty selections and NodeSelections. Only shows for text range selections. |
+| 2026-04-06 | Installed shadcn: Toggle, Separator, Popover | Toggle uses `@base-ui/react/toggle`, Separator uses `@base-ui/react/separator`, Popover uses `@base-ui/react/popover`. All Base UI primitives. |
 
 ## Gotchas & Fixes
 
@@ -114,8 +119,8 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | TaskItem | `@tiptap/extension-list` | ✅ | v3 merged import |
 | Placeholder | `@tiptap/extensions` | ✅ | Per-node: "Type '/' for commands..." on paragraphs, "Heading N" on headings |
 | Image | `@tiptap/extension-image` | ❌ | Phase 6 |
-| Link | `@tiptap/extension-link` | ❌ | Phase 3 (Bubble Menu) or Phase 5 |
-| Underline | `@tiptap/extension-underline` | ❌ | Phase 3 (Bubble Menu) |
+| Link | `@tiptap/extension-link` | ✅ | `openOnClick: false`, styled via `.editor-link` class |
+| Underline | `@tiptap/extension-underline` | ✅ | Toggled via BubbleToolbar |
 | CodeBlockLowlight | `@tiptap/extension-code-block-lowlight` | ❌ | Phase 6 |
 | Slash | `@harshtalks/slash-tiptap` | ❌ | Phase 4, MIT, headless |
 
@@ -137,6 +142,10 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | `src/components/editor/menus/block-side-menu.css` | Scrollbar styles only (webkit) | ✅ |
 | `src/components/ui/button.tsx` | shadcn Button (Base UI) | ✅ |
 | `src/components/ui/dropdown-menu.tsx` | shadcn DropdownMenu (Base UI) | ✅ |
+| `src/components/ui/toggle.tsx` | shadcn Toggle (Base UI) | ✅ |
+| `src/components/ui/separator.tsx` | shadcn Separator (Base UI) | ✅ |
+| `src/components/ui/popover.tsx` | shadcn Popover (Base UI) | ✅ |
+| `src/components/editor/menus/BubbleToolbar.tsx` | Text selection toolbar — formatting toggles, link, turn-into dropdown | ✅ |
 
 ## Current Issues
 
@@ -151,12 +160,12 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 
 ## Notes for Next Session
 
-Phase 2 complete and confirmed. Next up: **Phase 3 — Bubble Menu**.
+Phase 3 (Bubble Menu) implemented — awaiting user testing.
 
-Key context for Phase 3:
-- Import `BubbleMenu` from `@tiptap/react/menus` (v3 path)
-- Need to install: `@tiptap/extension-link`, `@tiptap/extension-underline` for the toolbar buttons
-- shadcn components needed: `Toggle`, `Separator`, `Popover` (for link editing). Install via `npx shadcn@latest add toggle separator popover`
-- Remember: shadcn uses Base UI (`@base-ui/react`), not Radix. Check actual component APIs after installing.
-- Follow data-driven pattern established in Phase 2 for toolbar buttons
-- Research Notion's selection toolbar before implementing
+Key context:
+- `BubbleToolbar.tsx` renders inside `<BubbleMenu>` from `@tiptap/react/menus`
+- `shouldRerenderOnTransaction: true` added to `useEditor` so Toggle pressed states update reactively
+- Link button currently uses `window.prompt()` for URL input — will be replaced by `LinkPopover` in Phase 5
+- Turn-into dropdown in bubble menu operates on current selection (unlike BlockContextMenu which targets `blockPos`)
+- shadcn Toggle `pressed` prop is controlled via `editor.isActive(markName)` — works because of `shouldRerenderOnTransaction`
+- Popover component installed but not used yet — reserved for Phase 5 (LinkPopover)

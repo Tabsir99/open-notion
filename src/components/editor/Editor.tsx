@@ -5,6 +5,7 @@ import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions";
 import { EditorProvider } from "./EditorProvider";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
+import { BubbleToolbar } from "./menus/BubbleToolbar";
 import "./styles/editor.css";
 
 export function Editor() {
@@ -12,7 +13,14 @@ export function Editor() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: "editor-link",
+          },
+        },
+      }),
       TaskList,
       TaskItem,
       Placeholder.configure({
@@ -44,6 +52,7 @@ export function Editor() {
            "
         >
           <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
+          <BubbleToolbar editor={editor} />
           <EditorContent editor={editor} />
         </div>
       </div>

@@ -6,6 +6,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 import {
   Type,
@@ -18,20 +21,23 @@ import {
   Quote,
   Code,
   AlertCircle,
+  Check,
 } from "lucide-react";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
-interface TurnIntoItem {
+export interface TurnIntoItem {
   label: string;
   icon: LucideIcon;
   action: (editor: Editor, blockPos: number) => void;
+  isActive: (editor: Editor) => boolean;
 }
 
-const turnIntoItems: TurnIntoItem[] = [
+export const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Text",
     icon: Type,
+    isActive: (editor) => editor.isActive("paragraph"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -43,6 +49,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Heading 1",
     icon: Heading1,
+    isActive: (editor) => editor.isActive("heading", { level: 1 }),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -54,6 +61,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Heading 2",
     icon: Heading2,
+    isActive: (editor) => editor.isActive("heading", { level: 2 }),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -65,6 +73,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Heading 3",
     icon: Heading3,
+    isActive: (editor) => editor.isActive("heading", { level: 3 }),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -76,6 +85,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Bullet List",
     icon: List,
+    isActive: (editor) => editor.isActive("bulletList"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -87,6 +97,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Numbered List",
     icon: ListOrdered,
+    isActive: (editor) => editor.isActive("orderedList"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -98,6 +109,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Task List",
     icon: ListChecks,
+    isActive: (editor) => editor.isActive("taskList"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -109,6 +121,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Quote",
     icon: Quote,
+    isActive: (editor) => editor.isActive("blockquote"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -120,6 +133,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Code Block",
     icon: Code,
+    isActive: (editor) => editor.isActive("codeBlock"),
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -131,6 +145,7 @@ const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Callout",
     icon: AlertCircle,
+    isActive: (editor) => editor.isActive("callout"),
     action: (editor, blockPos) => {
       // Callout extension not yet implemented — log for now
       console.log("Turn into callout — extension not yet available");
@@ -147,38 +162,50 @@ const turnIntoItems: TurnIntoItem[] = [
 
 interface TurnIntoSubmenuProps {
   editor: Editor;
-  blockPos: number;
-  onClose: () => void;
+  blockPos: number | ((editor: Editor) => number);
+  children: React.ReactNode;
+  isSubMenu?: boolean;
+  className?: string;
 }
 
-export function TurnIntoSubmenu({
+export function TurnIntomenu({
   editor,
   blockPos,
-  onClose,
+  isSubMenu,
+  children,
+  className,
 }: TurnIntoSubmenuProps) {
+  const Menu = isSubMenu ? DropdownMenuSub : DropdownMenu;
+  const MenuTrigger = isSubMenu ? DropdownMenuSubTrigger : DropdownMenuTrigger;
+  const MenuContent = isSubMenu ? DropdownMenuSubContent : DropdownMenuContent;
+
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        className={cn("flex items-center gap-2 h-8 px-2 py-1")}
+    <Menu>
+      <MenuTrigger
+        className={cn("flex items-center gap-2 h-8 px-2 py-1", className)}
       >
-        <Type className="size-4" />
-        <span>Turn into</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className={cn("min-w-[180px] p-1")}>
-        {turnIntoItems.map(({ label, icon: Icon, action }) => (
+        {children}
+      </MenuTrigger>
+      <MenuContent className={cn("min-w-[180px] p-1")}>
+        {turnIntoItems.map(({ label, icon: Icon, action, isActive }) => (
           <DropdownMenuItem
             key={label}
             className={cn("flex items-center gap-2 h-8 px-2 py-1")}
-            onSelect={() => {
-              action(editor, blockPos);
-              onClose();
+            onClick={() => {
+              action(
+                editor,
+                typeof blockPos === "function" ? blockPos(editor) : blockPos,
+              );
             }}
           >
             <Icon className="size-4" />
-            <span>{label}</span>
+            <span className="flex-1">{label}</span>
+            {isActive(editor) && (
+              <Check className="size-4 text-muted-foreground" />
+            )}
           </DropdownMenuItem>
         ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+      </MenuContent>
+    </Menu>
   );
 }
