@@ -159,37 +159,22 @@ export function TurnIntoSubmenu({
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger
-        className={cn(
-          "flex items-center gap-2 h-8 px-2 py-1",
-          "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-          "transition-colors duration-75",
-          "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
-        )}
+        className={cn("flex items-center gap-2 h-8 px-2 py-1")}
       >
-        <Type className="size-4 text-zinc-400" />
+        <Type className="size-4" />
         <span>Turn into</span>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent
-        className={cn(
-          "min-w-[180px] p-1",
-          "bg-zinc-900 border border-zinc-800 rounded-[10px]",
-          "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-          "animate-in fade-in zoom-in-95 duration-100 ease-out",
-        )}
-      >
+      <DropdownMenuSubContent className={cn("min-w-[180px] p-1")}>
         {turnIntoItems.map(({ label, icon: Icon, action }) => (
           <DropdownMenuItem
             key={label}
-            className={cn(
-              "flex items-center gap-2 h-8 px-2 py-1",
-              "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            )}
+            className={cn("flex items-center gap-2 h-8 px-2 py-1")}
             onSelect={() => {
               action(editor, blockPos);
               onClose();
             }}
           >
-            <Icon className="size-4 text-zinc-400" />
+            <Icon className="size-4" />
             <span>{label}</span>
           </DropdownMenuItem>
         ))}

@@ -39,7 +39,6 @@ export function Editor() {
       <div className="w-full flex justify-center pt-20">
         <div
           ref={editorWrapperRef}
-          data-editor-wrapper
           className="relative w-full max-w-[880px] min-h-screen bg-zinc-950 rounded-lg border
            border-zinc-800/70 hover:border-zinc-800 transition-colors cursor-text
            "

@@ -132,24 +132,27 @@ export function BlockContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          className="flex items-center justify-center w-7 h-7 p-0 rounded"
-          aria-label="Block options"
-          draggable
-        >
-          <GripVertical className="size-4.5" />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Block options"
+            draggable
+          >
+            <GripVertical className="size-4.5" />
+          </Button>
+        }
+      />
 
       <DropdownMenuContent
         side="right"
         align="start"
         sideOffset={8}
         className="w-[260px] max-h-[400px] overflow-y-auto p-1 rounded-[10px]"
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
+        finalFocus={() => {
           editor.commands.focus();
+          return false;
         }}
       >
         {renderItems(topItems)}
