@@ -37,6 +37,11 @@ export function useActiveBlock(params: UseActiveBlockOptions) {
   const lockedRef = useRef(locked);
   lockedRef.current = locked;
 
+  const clearHover = useCallback(() => {
+    hoveredBlockRef.current = null;
+    setActiveBlock((prev) => ({ ...prev, isHovered: false }));
+  }, []);
+
   /** Walks up from `target` to find the direct child of .ProseMirror (top-level block). */
   const getBlockFromHover = useCallback(
     (target: HTMLElement): HTMLElement | null => {
@@ -93,8 +98,7 @@ export function useActiveBlock(params: UseActiveBlockOptions) {
       // if the mouse is hovering over the menu it self don't make isHovered false
       if (menuRef.current?.contains(e.relatedTarget as Node)) return;
 
-      hoveredBlockRef.current = null;
-      setActiveBlock((prev) => ({ ...prev, isHovered: false }));
+      clearHover();
     };
 
     proseMirror.addEventListener("mousemove", handleMouseMove);
@@ -108,5 +112,5 @@ export function useActiveBlock(params: UseActiveBlockOptions) {
     };
   }, [editor, getBlockFromHover, resolveBlockInfo]);
 
-  return activeBlock;
+  return { activeBlock, clearHover };
 }

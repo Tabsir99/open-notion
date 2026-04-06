@@ -149,7 +149,7 @@ export function BlockContextMenu({
         side="right"
         align="start"
         sideOffset={8}
-        className="w-[260px] max-h-[400px] overflow-y-auto p-1 rounded-[10px]"
+        className="w-[260px] max-h-[400px] overflow-y-auto"
         finalFocus={() => {
           editor.commands.focus();
           return false;

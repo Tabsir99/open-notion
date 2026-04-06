@@ -23,7 +23,11 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const hasPositionedRef = useRef(false);
 
-  const activeBlock = useActiveBlock({ editor, locked: menuOpen, menuRef });
+  const { activeBlock, clearHover } = useActiveBlock({
+    editor,
+    locked: menuOpen,
+    menuRef,
+  });
 
   const visible =
     (activeBlock.isHovered || menuOpen) && activeBlock.element !== null;
@@ -89,7 +93,10 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
         editor={editor}
         blockPos={activeBlock.pos}
         open={menuOpen}
-        onOpenChange={setMenuOpen}
+        onOpenChange={(open) => {
+          setMenuOpen(open);
+          if (!open) clearHover();
+        }}
       />
     </div>
   );
