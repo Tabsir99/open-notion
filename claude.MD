@@ -12,7 +12,7 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 
 - [x] Phase 1 — Core Editor
 - [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu)
-- [ ] Phase 3 — Bubble Menu (in progress)
+- [x] Phase 3 — Bubble Menu
 - [ ] Phase 4 — Slash Commands
 - [ ] Phase 5 — Link Popover
 - [ ] Phase 6 — Custom Blocks

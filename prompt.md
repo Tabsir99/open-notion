@@ -14,6 +14,7 @@ Before writing ANY code for a feature, you MUST:
 4. **Verify import paths** — Tiptap v3 changed many imports (see Tech Stack below). Always confirm the correct import before using it.
 5. **Never assume an API** — if you're unsure whether a method/prop exists, search first. Wrong guesses waste iterations.
 6. **shadcn-first** — when a UI element is needed (dropdown, popover, dialog, toggle, button, tooltip, etc.), always search the latest [shadcn/ui docs](https://ui.shadcn.com) first. Use the shadcn component if one exists. Only build custom elements when shadcn doesn't cover the use case.
+7. **tiptap-components** -- (https://tiptap.dev/components) for various toolbar related components and utilities always search form here, read the docs properly, install and apply. But you can avoid it for now, we will see it in the last phase of work during polishing the UI. But keep in mind.
 
 ## Tech Stack (Verified Versions — April 2026)
 
