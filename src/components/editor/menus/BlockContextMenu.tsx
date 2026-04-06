@@ -36,32 +36,30 @@ export function BlockContextMenu({
   onOpenChange,
 }: BlockContextMenuProps) {
   const handleDelete = useCallback(() => {
-    const resolvedPos = editor.state.doc.resolve(blockPos);
-    if (resolvedPos.depth >= 1) {
-      const nodeSize = resolvedPos.node(1).nodeSize;
+    const node = editor.state.doc.nodeAt(blockPos);
+    if (node) {
       editor
         .chain()
         .focus()
-        .deleteRange({ from: blockPos, to: blockPos + nodeSize })
+        .deleteRange({ from: blockPos, to: blockPos + node.nodeSize })
         .run();
     }
     onOpenChange(false);
   }, [editor, blockPos, onOpenChange]);
 
   const handleDuplicate = useCallback(() => {
-    const resolvedPos = editor.state.doc.resolve(blockPos);
-    if (resolvedPos.depth >= 1) {
-      const node = resolvedPos.node(1);
-      const nodeSize = node.nodeSize;
-      const insertPos = blockPos + nodeSize;
-
-      editor.chain().focus().insertContentAt(insertPos, node.toJSON()).run();
+    const node = editor.state.doc.nodeAt(blockPos);
+    if (node) {
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(blockPos + node.nodeSize, node.toJSON())
+        .run();
     }
     onOpenChange(false);
   }, [editor, blockPos, onOpenChange]);
 
   const handleCopyLink = useCallback(() => {
-    // Copy a link to the current block (placeholder — would need block IDs)
     const url = `${window.location.href}#block-${blockPos}`;
     navigator.clipboard.writeText(url).catch(() => {
       console.warn("Failed to copy link to clipboard");
@@ -69,18 +67,8 @@ export function BlockContextMenu({
     onOpenChange(false);
   }, [blockPos, onOpenChange]);
 
-  const handleComment = useCallback(() => {
-    console.log("Open comment — not yet implemented");
-    onOpenChange(false);
-  }, [onOpenChange]);
-
-  const handleClose = useCallback(() => {
-    onOpenChange(false);
-  }, [onOpenChange]);
-
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      {/* Hidden trigger — menu is opened programmatically via the grip icon in BlockSideMenu */}
       <DropdownMenuTrigger asChild>
         <button
           className="block-side-menu-grip"
@@ -96,15 +84,11 @@ export function BlockContextMenu({
         align="start"
         sideOffset={8}
         className="block-context-menu"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          editor.commands.focus();
+        }}
       >
-        {/* AI Section placeholder */}
-        {/* <DropdownMenuItem disabled className="block-menu-item opacity-40">
-          <Sparkles className="size-4 text-zinc-400" />
-          <span>Ask AI</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="block-menu-separator" /> */}
-
-        {/* Primary actions */}
         <DropdownMenuItem className="block-menu-item" onSelect={handleDelete}>
           <Trash2 className="size-4 text-zinc-400" />
           <span>Delete</span>
@@ -131,12 +115,15 @@ export function BlockContextMenu({
 
         <DropdownMenuSeparator className="block-menu-separator" />
 
-        {/* Turn into submenu */}
-        <TurnIntoSubmenu editor={editor} blockPos={blockPos} onClose={handleClose} />
+        <TurnIntoSubmenu
+          editor={editor}
+          blockPos={blockPos}
+          onClose={() => onOpenChange(false)}
+        />
 
         <DropdownMenuSeparator className="block-menu-separator" />
 
-        {/* Move to & Color — placeholder submenus */}
+        {/* Placeholder submenus — will be implemented in later phases */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="block-menu-item">
             <ArrowRightLeft className="size-4 text-zinc-400" />
@@ -163,8 +150,10 @@ export function BlockContextMenu({
 
         <DropdownMenuSeparator className="block-menu-separator" />
 
-        {/* Comment */}
-        <DropdownMenuItem className="block-menu-item" onSelect={handleComment}>
+        <DropdownMenuItem
+          className="block-menu-item"
+          onSelect={() => onOpenChange(false)}
+        >
           <MessageSquare className="size-4 text-zinc-400" />
           <span>Comment</span>
           <DropdownMenuShortcut className="block-menu-shortcut">

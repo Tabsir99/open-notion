@@ -29,55 +29,100 @@ const turnIntoItems: TurnIntoItem[] = [
     label: "Text",
     icon: <Type className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setParagraph().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setParagraph()
+        .run(),
   },
   {
     label: "Heading 1",
     icon: <Heading1 className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setHeading({ level: 1 }).run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setHeading({ level: 1 })
+        .run(),
   },
   {
     label: "Heading 2",
     icon: <Heading2 className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setHeading({ level: 2 }).run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setHeading({ level: 2 })
+        .run(),
   },
   {
     label: "Heading 3",
     icon: <Heading3 className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setHeading({ level: 3 }).run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setHeading({ level: 3 })
+        .run(),
   },
   {
     label: "Bullet List",
     icon: <List className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).toggleBulletList().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .toggleBulletList()
+        .run(),
   },
   {
     label: "Numbered List",
     icon: <ListOrdered className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).toggleOrderedList().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .toggleOrderedList()
+        .run(),
   },
   {
     label: "Task List",
     icon: <ListChecks className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).toggleTaskList().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .toggleTaskList()
+        .run(),
   },
   {
     label: "Quote",
     icon: <Quote className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setBlockquote().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setBlockquote()
+        .run(),
   },
   {
     label: "Code Block",
     icon: <Code className="size-4 text-zinc-400" />,
     action: (editor, blockPos) =>
-      editor.chain().focus().setTextSelection(blockPos + 1).setCodeBlock().run(),
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .setCodeBlock()
+        .run(),
   },
   {
     label: "Callout",
@@ -85,7 +130,11 @@ const turnIntoItems: TurnIntoItem[] = [
     action: (editor, blockPos) => {
       // Callout extension not yet implemented — log for now
       console.log("Turn into callout — extension not yet available");
-      editor.chain().focus().setTextSelection(blockPos + 1).run();
+      editor
+        .chain()
+        .focus()
+        .setTextSelection(blockPos + 1)
+        .run();
     },
   },
 ];
@@ -96,7 +145,11 @@ interface TurnIntoSubmenuProps {
   onClose: () => void;
 }
 
-export function TurnIntoSubmenu({ editor, blockPos, onClose }: TurnIntoSubmenuProps) {
+export function TurnIntoSubmenu({
+  editor,
+  blockPos,
+  onClose,
+}: TurnIntoSubmenuProps) {
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger className="block-menu-item">

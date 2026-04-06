@@ -36,7 +36,7 @@ export function Editor() {
 
   return (
     <EditorProvider editor={editor}>
-      <div className="w-full flex justify-center py-12">
+      <div className="w-full flex justify-center pt-20">
         <div
           ref={editorWrapperRef}
           data-editor-wrapper
