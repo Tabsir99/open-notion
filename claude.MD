@@ -11,7 +11,7 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 ## Current Status
 
 - [x] Phase 1 — Core Editor
-- [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu) _(UX bugs fixed, awaiting confirmation)_
+- [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu) ✅
   - [x] Migrate CSS to Tailwind V4
   - [x] Remove unused CSS selectors
 - [ ] Phase 3 — Bubble Menu
@@ -132,12 +132,10 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 - Callout "Turn into" option logs a placeholder — needs the custom Callout extension from Phase 6.
 - **Pending functionality (not wired up yet):**
   - `+` button: currently logs to console, needs slash menu integration.
-  - Context menu actions (Delete, Duplicate): wired but not fully tested post-fix.
   - Drag-and-drop reorder: grip button has `draggable` attribute but no DnD logic.
-  - These will be a separate task — current fixes don't break the placeholder click handlers.
 
 ## Notes for Next Session
 
 <!-- Leave breadcrumbs for the next agent/session -->
 
-Working on Phase 2 UX bug fixes round 2 (2026-04-06). See Current Issues for the task list.
+Phase 2 complete (2026-04-06). Code refactored: BlockContextMenu & TurnIntoSubmenu are now data-driven with shared `menu-styles.ts`. Ready to start Phase 3 (Bubble Menu).

@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenuSub,
@@ -19,16 +20,18 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+// ── Data ──────────────────────────────────────────────────────────────
+
 interface TurnIntoItem {
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   action: (editor: Editor, blockPos: number) => void;
 }
 
 const turnIntoItems: TurnIntoItem[] = [
   {
     label: "Text",
-    icon: <Type className="size-4 text-zinc-400" />,
+    icon: Type,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -39,7 +42,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Heading 1",
-    icon: <Heading1 className="size-4 text-zinc-400" />,
+    icon: Heading1,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -50,7 +53,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Heading 2",
-    icon: <Heading2 className="size-4 text-zinc-400" />,
+    icon: Heading2,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -61,7 +64,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Heading 3",
-    icon: <Heading3 className="size-4 text-zinc-400" />,
+    icon: Heading3,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -72,7 +75,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Bullet List",
-    icon: <List className="size-4 text-zinc-400" />,
+    icon: List,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -83,7 +86,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Numbered List",
-    icon: <ListOrdered className="size-4 text-zinc-400" />,
+    icon: ListOrdered,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -94,7 +97,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Task List",
-    icon: <ListChecks className="size-4 text-zinc-400" />,
+    icon: ListChecks,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -105,7 +108,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Quote",
-    icon: <Quote className="size-4 text-zinc-400" />,
+    icon: Quote,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -116,7 +119,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Code Block",
-    icon: <Code className="size-4 text-zinc-400" />,
+    icon: Code,
     action: (editor, blockPos) =>
       editor
         .chain()
@@ -127,7 +130,7 @@ const turnIntoItems: TurnIntoItem[] = [
   },
   {
     label: "Callout",
-    icon: <AlertCircle className="size-4 text-zinc-400" />,
+    icon: AlertCircle,
     action: (editor, blockPos) => {
       // Callout extension not yet implemented — log for now
       console.log("Turn into callout — extension not yet available");
@@ -139,6 +142,8 @@ const turnIntoItems: TurnIntoItem[] = [
     },
   },
 ];
+
+// ── Component ─────────────────────────────────────────────────────────
 
 interface TurnIntoSubmenuProps {
   editor: Editor;
@@ -153,37 +158,39 @@ export function TurnIntoSubmenu({
 }: TurnIntoSubmenuProps) {
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}>
+      <DropdownMenuSubTrigger
+        className={cn(
+          "flex items-center gap-2 h-8 px-2 py-1",
+          "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+          "transition-colors duration-75",
+          "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
+        )}
+      >
         <Type className="size-4 text-zinc-400" />
         <span>Turn into</span>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className={cn(
-            "min-w-[180px] p-1",
-            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
-            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-            "animate-in fade-in zoom-in-95 duration-100 ease-out"
-          )}>
-        {turnIntoItems.map((item) => (
+      <DropdownMenuSubContent
+        className={cn(
+          "min-w-[180px] p-1",
+          "bg-zinc-900 border border-zinc-800 rounded-[10px]",
+          "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
+          "animate-in fade-in zoom-in-95 duration-100 ease-out",
+        )}
+      >
+        {turnIntoItems.map(({ label, icon: Icon, action }) => (
           <DropdownMenuItem
-            key={item.label}
+            key={label}
             className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}
+              "flex items-center gap-2 h-8 px-2 py-1",
+              "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            )}
             onSelect={() => {
-              item.action(editor, blockPos);
+              action(editor, blockPos);
               onClose();
             }}
           >
-            {item.icon}
-            <span>{item.label}</span>
+            <Icon className="size-4 text-zinc-400" />
+            <span>{label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuSubContent>

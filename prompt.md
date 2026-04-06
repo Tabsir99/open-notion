@@ -13,6 +13,7 @@ Before writing ANY code for a feature, you MUST:
 3. **Search for animation patterns** — before adding any animation, research the right approach (CSS transitions vs. framer-motion vs. CSS @starting-style). Don't guess.
 4. **Verify import paths** — Tiptap v3 changed many imports (see Tech Stack below). Always confirm the correct import before using it.
 5. **Never assume an API** — if you're unsure whether a method/prop exists, search first. Wrong guesses waste iterations.
+6. **shadcn-first** — when a UI element is needed (dropdown, popover, dialog, toggle, button, tooltip, etc.), always search the latest [shadcn/ui docs](https://ui.shadcn.com) first. Use the shadcn component if one exists. Only build custom elements when shadcn doesn't cover the use case.
 
 ## Tech Stack (Verified Versions — April 2026)
 
@@ -100,6 +101,55 @@ src/
 - **All editor child components** access editor via `useCurrentEditor()` or prop drilling. No global state library.
 - **No inline styles** — use Tailwind classes or CSS files.
 - **No `any` types** — type everything properly. Use Tiptap's exported types.
+
+### UI/UX Consistency Rules
+
+#### Theme & Colors
+
+- **Dark-only theme** using the Zinc palette. Never use plain red/blue/green — always use curated zinc shades.
+- Background: `zinc-950` (#09090b). Surface/panels: `zinc-900`. Hover states: `zinc-800`. Borders: `zinc-800`.
+- Primary text: `zinc-50`/`zinc-200`. Secondary text: `zinc-400`. Muted/placeholder: `zinc-500`/`zinc-600`.
+- Accent: `blue-500` for interactive highlights only.
+
+#### Menus & Dropdowns
+
+- All dropdown/context menus must use `shadcn DropdownMenu` (Radix-based).
+- Menu panels: `bg-zinc-900 border-zinc-800 rounded-[10px]`, shadow: `0_4px_24px_rgba(0,0,0,0.25)`.
+- Menu items: `h-8 px-2 py-1 text-[13px] rounded-md`, hover/focus: `bg-zinc-800`.
+- Icons inside menus: `size-4 text-zinc-400`.
+- Keyboard shortcuts: `text-xs font-mono text-zinc-500`, right-aligned with `ml-auto`.
+- Repetition is eliminated by defining items as data arrays and rendering via `.map()` — className appears once in the render function.
+
+#### Data-Driven UI
+
+- Menu items, toolbar buttons, and similar repeated structures must be defined as **data arrays** and rendered via `.map()` — never copy-paste JSX for each item.
+- Icons in data arrays use the `LucideIcon` component type, not pre-created JSX nodes.
+
+#### Animations
+
+- Entry animations: `animate-in fade-in zoom-in-95 duration-100 ease-out` (from Radix/shadcn).
+- Transitions: prefer CSS `transition-colors duration-75` for hover states, `duration-150` for visibility.
+- Side menu travel: `transition-[transform,opacity] duration-250 ease-out`.
+- Use `data-[visible]` / `data-[state]` attributes over conditional className toggling when possible.
+
+#### Spacing & Layout
+
+- Block gap: `0.75em`. Editor padding: `3rem` horizontal, `4rem` vertical.
+- Menu internal padding: `p-1` (4px). Separator: `h-px my-1 bg-zinc-800`.
+- Menu panel radius: `rounded-[10px]`. Buttons: `rounded` (6px).
+- Side menu buttons: `w-7 h-7` (28px square).
+
+#### Interaction Patterns
+
+- Always use Radix `onCloseAutoFocus` to restore editor focus after menu closes — never `setTimeout` hacks.
+- Use `modal={false}` on dropdown menus that coexist with the editor to avoid focus trapping.
+- Draggable elements: `cursor-grab active:cursor-grabbing`.
+
+#### Component Guidelines
+
+- **Always prefer shadcn components** — search the [latest shadcn/ui registry](https://ui.shadcn.com) first before building custom UI.
+- Use `cn()` from `@/lib/utils` for conditional/merged class names.
+- Direct Lucide imports only: `import { Icon } from "lucide-react"` — never barrel import.
 
 ## Phases
 

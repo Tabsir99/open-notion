@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { Editor } from "@tiptap/core";
-import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,6 +22,44 @@ import {
   GripVertical,
 } from "lucide-react";
 import { TurnIntoSubmenu } from "./TurnIntoSubmenu";
+import { Button } from "@/components/ui/button";
+
+// ── Data ──────────────────────────────────────────────────────────────
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  shortcut?: string;
+}
+
+interface PlaceholderSubmenu {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const topItems: MenuItem[] = [
+  { id: "delete", label: "Delete", icon: Trash2, shortcut: "Del" },
+  { id: "duplicate", label: "Duplicate", icon: Copy, shortcut: "Ctrl+D" },
+  { id: "copy-link", label: "Copy link to block", icon: Link },
+];
+
+const placeholderSubmenus: PlaceholderSubmenu[] = [
+  { id: "move-to", label: "Move to", icon: ArrowRightLeft },
+  { id: "color", label: "Color", icon: Palette },
+];
+
+const bottomItems: MenuItem[] = [
+  {
+    id: "comment",
+    label: "Comment",
+    icon: MessageSquare,
+    shortcut: "Ctrl+Shift+M",
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────────
 
 interface BlockContextMenuProps {
   editor: Editor;
@@ -36,196 +74,112 @@ export function BlockContextMenu({
   open,
   onOpenChange,
 }: BlockContextMenuProps) {
-  const handleDelete = useCallback(() => {
-    const node = editor.state.doc.nodeAt(blockPos);
-    if (node) {
-      editor
-        .chain()
-        .focus()
-        .deleteRange({ from: blockPos, to: blockPos + node.nodeSize })
-        .run();
-    }
-    onOpenChange(false);
-  }, [editor, blockPos, onOpenChange]);
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
-  const handleDuplicate = useCallback(() => {
-    const node = editor.state.doc.nodeAt(blockPos);
-    if (node) {
-      editor
-        .chain()
-        .focus()
-        .insertContentAt(blockPos + node.nodeSize, node.toJSON())
-        .run();
-    }
-    onOpenChange(false);
-  }, [editor, blockPos, onOpenChange]);
+  const handleSelect = useCallback(
+    (id: string) => {
+      const node = editor.state.doc.nodeAt(blockPos);
 
-  const handleCopyLink = useCallback(() => {
-    const url = `${window.location.href}#block-${blockPos}`;
-    navigator.clipboard.writeText(url).catch(() => {
-      console.warn("Failed to copy link to clipboard");
-    });
-    onOpenChange(false);
-  }, [blockPos, onOpenChange]);
+      switch (id) {
+        case "delete":
+          if (node) {
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from: blockPos, to: blockPos + node.nodeSize })
+              .run();
+          }
+          break;
+        case "duplicate":
+          if (node) {
+            editor
+              .chain()
+              .focus()
+              .insertContentAt(blockPos + node.nodeSize, node.toJSON())
+              .run();
+          }
+          break;
+        case "copy-link": {
+          const url = `${window.location.href}#block-${blockPos}`;
+          navigator.clipboard.writeText(url).catch(() => {
+            console.warn("Failed to copy link to clipboard");
+          });
+          break;
+        }
+      }
+
+      close();
+    },
+    [editor, blockPos, close],
+  );
+
+  const renderItems = (items: MenuItem[]) =>
+    items.map(({ id, label, icon: Icon, shortcut }) => (
+      <DropdownMenuItem
+        key={id}
+        className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
+        onSelect={() => handleSelect(id)}
+      >
+        <Icon className="size-4" />
+        <span>{label}</span>
+        {shortcut && (
+          <DropdownMenuShortcut className="ml-auto">
+            {shortcut}
+          </DropdownMenuShortcut>
+        )}
+      </DropdownMenuItem>
+    ));
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "flex items-center justify-center w-7 h-7 p-0",
-            "border-none rounded bg-transparent text-zinc-500",
-            "cursor-grab active:cursor-grabbing",
-            "transition-colors duration-100 ease",
-            "hover:bg-zinc-800 hover:text-zinc-200",
-            "active:bg-zinc-700"
-          )}
+        <Button
+          className="flex items-center justify-center w-7 h-7 p-0 rounded"
           aria-label="Block options"
           draggable
         >
           <GripVertical className="size-4.5" />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
         side="right"
         align="start"
         sideOffset={8}
-        className={cn(
-          "w-[260px] max-h-[400px] overflow-y-auto p-1",
-          "bg-zinc-900 border border-zinc-800 rounded-[10px]",
-          "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-          "animate-in fade-in zoom-in-95 duration-100 ease-out",
-          "block-context-menu"
-        )}
+        className="w-[260px] max-h-[400px] overflow-y-auto p-1 rounded-[10px]"
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           editor.commands.focus();
         }}
       >
-        <DropdownMenuItem className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )} onSelect={handleDelete}>
-          <Trash2 className="size-4 text-zinc-400" />
-          <span>Delete</span>
-          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
-            Del
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
+        {renderItems(topItems)}
 
-        <DropdownMenuItem
-          className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}
-          onSelect={handleDuplicate}
-        >
-          <Copy className="size-4 text-zinc-400" />
-          <span>Duplicate</span>
-          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
-            Ctrl+D
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
+        <DropdownMenuSeparator className="h-px my-1" />
 
-        <DropdownMenuItem className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )} onSelect={handleCopyLink}>
-          <Link className="size-4 text-zinc-400" />
-          <span>Copy link to block</span>
-        </DropdownMenuItem>
+        <TurnIntoSubmenu editor={editor} blockPos={blockPos} onClose={close} />
 
-        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
+        <DropdownMenuSeparator className="h-px my-1" />
 
-        <TurnIntoSubmenu
-          editor={editor}
-          blockPos={blockPos}
-          onClose={() => onOpenChange(false)}
-        />
+        {placeholderSubmenus.map(({ id, label, icon: Icon }) => (
+          <DropdownMenuSub key={id}>
+            <DropdownMenuSubTrigger className="flex items-center gap-2 h-8 px-2 py-1 rounded-md">
+              <Icon className="size-4" />
+              <span>{label}</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="min-w-[180px] p-1 rounded-[10px]">
+              <DropdownMenuItem
+                disabled
+                className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
+              >
+                <span>Coming soon...</span>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        ))}
 
-        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
+        <DropdownMenuSeparator className="h-px my-1" />
 
-        {/* Placeholder submenus — will be implemented in later phases */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}>
-            <ArrowRightLeft className="size-4 text-zinc-400" />
-            <span>Move to</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className={cn(
-            "min-w-[180px] p-1",
-            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
-            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-            "animate-in fade-in zoom-in-95 duration-100 ease-out"
-          )}>
-            <DropdownMenuItem disabled className={cn(
-                "flex items-center gap-2 h-8 px-2 py-1",
-                "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-                "transition-colors duration-75",
-                "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
-                "opacity-50"
-              )}>
-              <span>Coming soon...</span>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}>
-            <Palette className="size-4 text-zinc-400" />
-            <span>Color</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className={cn(
-            "min-w-[180px] p-1",
-            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
-            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
-            "animate-in fade-in zoom-in-95 duration-100 ease-out"
-          )}>
-            <DropdownMenuItem disabled className={cn(
-                "flex items-center gap-2 h-8 px-2 py-1",
-                "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-                "transition-colors duration-75",
-                "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
-                "opacity-50"
-              )}>
-              <span>Coming soon...</span>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
-
-        <DropdownMenuItem
-          className={cn(
-            "flex items-center gap-2 h-8 px-2 py-1",
-            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
-            "transition-colors duration-75",
-            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
-          )}
-          onSelect={() => onOpenChange(false)}
-        >
-          <MessageSquare className="size-4 text-zinc-400" />
-          <span>Comment</span>
-          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
-            Ctrl+Shift+M
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
+        {renderItems(bottomItems)}
       </DropdownMenuContent>
     </DropdownMenu>
   );
