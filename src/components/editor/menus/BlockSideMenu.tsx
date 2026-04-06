@@ -3,6 +3,7 @@ import type { Editor } from "@tiptap/core";
 import { Plus } from "lucide-react";
 import { useActiveBlock } from "./useActiveBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
+import { cn } from "@/lib/utils";
 import "./block-side-menu.css";
 
 interface BlockSideMenuProps {
@@ -65,12 +66,23 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
   return (
     <div
       ref={menuRef}
-      className="block-side-menu"
+      className={cn(
+        "absolute top-0 left-[10px] z-10 flex items-center gap-px",
+        "opacity-0 pointer-events-none transition-[transform,opacity] duration-250 ease-out",
+        "data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto",
+        "after:absolute after:top-0 after:-right-4 after:h-full after:w-4 after:pointer-events-auto after:content-['']"
+      )}
       data-visible={visible}
       style={{ transform: `translateY(${translateY}px)` }}
     >
       <button
-        className="block-side-menu-btn"
+        className={cn(
+          "flex items-center justify-center w-7 h-7 p-0",
+          "border-none rounded bg-transparent text-zinc-500 cursor-pointer",
+          "transition-colors duration-100 ease",
+          "hover:bg-zinc-800 hover:text-zinc-200",
+          "active:bg-zinc-700"
+        )}
         onClick={handlePlusClick}
         aria-label="Add block"
       >

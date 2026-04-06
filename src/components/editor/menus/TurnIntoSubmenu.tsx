@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
@@ -152,15 +153,30 @@ export function TurnIntoSubmenu({
 }: TurnIntoSubmenuProps) {
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="block-menu-item">
+      <DropdownMenuSubTrigger className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}>
         <Type className="size-4 text-zinc-400" />
         <span>Turn into</span>
       </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="block-menu-sub-content">
+      <DropdownMenuSubContent className={cn(
+            "min-w-[180px] p-1",
+            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
+            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
+            "animate-in fade-in zoom-in-95 duration-100 ease-out"
+          )}>
         {turnIntoItems.map((item) => (
           <DropdownMenuItem
             key={item.label}
-            className="block-menu-item"
+            className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}
             onSelect={() => {
               item.action(editor, blockPos);
               onClose();

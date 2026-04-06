@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { Editor } from "@tiptap/core";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -71,7 +72,14 @@ export function BlockContextMenu({
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
         <button
-          className="block-side-menu-grip"
+          className={cn(
+            "flex items-center justify-center w-7 h-7 p-0",
+            "border-none rounded bg-transparent text-zinc-500",
+            "cursor-grab active:cursor-grabbing",
+            "transition-colors duration-100 ease",
+            "hover:bg-zinc-800 hover:text-zinc-200",
+            "active:bg-zinc-700"
+          )}
           aria-label="Block options"
           draggable
         >
@@ -83,37 +91,58 @@ export function BlockContextMenu({
         side="right"
         align="start"
         sideOffset={8}
-        className="block-context-menu"
+        className={cn(
+          "w-[260px] max-h-[400px] overflow-y-auto p-1",
+          "bg-zinc-900 border border-zinc-800 rounded-[10px]",
+          "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
+          "animate-in fade-in zoom-in-95 duration-100 ease-out",
+          "block-context-menu"
+        )}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           editor.commands.focus();
         }}
       >
-        <DropdownMenuItem className="block-menu-item" onSelect={handleDelete}>
+        <DropdownMenuItem className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )} onSelect={handleDelete}>
           <Trash2 className="size-4 text-zinc-400" />
           <span>Delete</span>
-          <DropdownMenuShortcut className="block-menu-shortcut">
+          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
             Del
           </DropdownMenuShortcut>
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          className="block-menu-item"
+          className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}
           onSelect={handleDuplicate}
         >
           <Copy className="size-4 text-zinc-400" />
           <span>Duplicate</span>
-          <DropdownMenuShortcut className="block-menu-shortcut">
+          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
             Ctrl+D
           </DropdownMenuShortcut>
         </DropdownMenuItem>
 
-        <DropdownMenuItem className="block-menu-item" onSelect={handleCopyLink}>
+        <DropdownMenuItem className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )} onSelect={handleCopyLink}>
           <Link className="size-4 text-zinc-400" />
           <span>Copy link to block</span>
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator className="block-menu-separator" />
+        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
 
         <TurnIntoSubmenu
           editor={editor}
@@ -121,42 +150,79 @@ export function BlockContextMenu({
           onClose={() => onOpenChange(false)}
         />
 
-        <DropdownMenuSeparator className="block-menu-separator" />
+        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
 
         {/* Placeholder submenus — will be implemented in later phases */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="block-menu-item">
+          <DropdownMenuSubTrigger className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}>
             <ArrowRightLeft className="size-4 text-zinc-400" />
             <span>Move to</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="block-menu-sub-content">
-            <DropdownMenuItem disabled className="block-menu-item opacity-50">
+          <DropdownMenuSubContent className={cn(
+            "min-w-[180px] p-1",
+            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
+            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
+            "animate-in fade-in zoom-in-95 duration-100 ease-out"
+          )}>
+            <DropdownMenuItem disabled className={cn(
+                "flex items-center gap-2 h-8 px-2 py-1",
+                "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+                "transition-colors duration-75",
+                "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
+                "opacity-50"
+              )}>
               <span>Coming soon...</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="block-menu-item">
+          <DropdownMenuSubTrigger className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}>
             <Palette className="size-4 text-zinc-400" />
             <span>Color</span>
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="block-menu-sub-content">
-            <DropdownMenuItem disabled className="block-menu-item opacity-50">
+          <DropdownMenuSubContent className={cn(
+            "min-w-[180px] p-1",
+            "bg-zinc-900 border border-zinc-800 rounded-[10px]",
+            "shadow-[0_4px_24px_rgba(0,0,0,0.25)]",
+            "animate-in fade-in zoom-in-95 duration-100 ease-out"
+          )}>
+            <DropdownMenuItem disabled className={cn(
+                "flex items-center gap-2 h-8 px-2 py-1",
+                "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+                "transition-colors duration-75",
+                "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800",
+                "opacity-50"
+              )}>
               <span>Coming soon...</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
-        <DropdownMenuSeparator className="block-menu-separator" />
+        <DropdownMenuSeparator className="h-px my-1 bg-zinc-800" />
 
         <DropdownMenuItem
-          className="block-menu-item"
+          className={cn(
+            "flex items-center gap-2 h-8 px-2 py-1",
+            "rounded-md text-[13px] text-zinc-200 cursor-pointer select-none outline-none",
+            "transition-colors duration-75",
+            "hover:bg-zinc-800 focus:bg-zinc-800 data-highlighted:bg-zinc-800"
+          )}
           onSelect={() => onOpenChange(false)}
         >
           <MessageSquare className="size-4 text-zinc-400" />
           <span>Comment</span>
-          <DropdownMenuShortcut className="block-menu-shortcut">
+          <DropdownMenuShortcut className="ml-auto text-xs font-mono text-zinc-500">
             Ctrl+Shift+M
           </DropdownMenuShortcut>
         </DropdownMenuItem>
