@@ -11,8 +11,8 @@
 | Phase 3 — Bubble Menu | ✅ Complete (user-confirmed) |
 | Phase 4 — Slash Commands | ✅ Complete (user-confirmed) |
 | Phase 5.1 — Image Block | ✅ Complete |
-| Phase 5.2 — Code Block | ⬜ Next up |
-| Phase 5.3 — Link Popover | ⬜ Pending |
+| Phase 5.2 — Link Popover | ⬜ Pending |
+| Phase 5.3 — Code Block | ⬜ Next up |
 | Phase 5.4 — Callout Block | ⬜ Pending |
 | Phase 5.5 — Callout → TurnInto | ⬜ Pending |
 | Phase 6 — Polish & Animation | ⬜ Pending |

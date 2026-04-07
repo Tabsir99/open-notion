@@ -20,6 +20,7 @@ function _Editor() {
           HTMLAttributes: {
             class: "editor-link",
           },
+          enableClickSelection: true,
         },
       }),
       TaskList,

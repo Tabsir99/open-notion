@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { useEditorState } from "@tiptap/react";
@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TurnIntomenu } from "./TurnIntoMenu";
+import { LinkInput } from "./LinkInput";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -66,8 +67,6 @@ const markItems: MarkItem[] = [
   },
 ];
 
-// ── Turn-Into items are imported from TurnIntoSubmenu ─────────────────
-
 // ── Helpers ───────────────────────────────────────────────────────────
 
 /** Returns a human-readable label for the current block type */
@@ -84,7 +83,11 @@ interface BubbleToolbarProps {
   editor: Editor;
 }
 
+type LinkMode = "closed" | "open" | "closing";
+
 export function BubbleToolbar({ editor }: BubbleToolbarProps) {
+  const [linkMode, setLinkMode] = useState<LinkMode>("closed");
+
   const activeStates = useEditorState({
     editor,
     selector: (ctx) => ({
@@ -98,17 +101,10 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
     }),
   });
 
-  const handleLinkClick = useCallback(() => {
-    if (activeStates.link) {
-      editor.chain().focus().unsetLink().run();
-    } else {
-      // Phase 5: will open LinkPopover. For now, prompt for URL.
-      const url = window.prompt("Enter URL:");
-      if (url) {
-        editor.chain().focus().setLink({ href: url }).run();
-      }
-    }
-  }, [editor, activeStates.link]);
+  const handleLinkInputClose = useCallback(() => {
+    setLinkMode("closing");
+    setTimeout(() => setLinkMode("closed"), 150);
+  }, []);
 
   return (
     <BubbleMenu
@@ -122,7 +118,10 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
         const { empty } = selection;
 
         // Don't show on empty selections
-        if (empty) return false;
+        if (empty) {
+          setLinkMode("closed");
+          return false;
+        }
 
         // Don't show on node selections (images, etc.)
         if (selection.constructor.name === "NodeSelection") return false;
@@ -138,47 +137,60 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
           "animate-in fade-in-0 zoom-in-95 duration-150",
         )}
       >
-        {/* Formatting mark toggles */}
-        {markItems.map(({ id, label, icon: Icon, markName, command }) => (
-          <Toggle
-            key={id}
-            size="sm"
-            pressed={
-              activeStates[markName as keyof typeof activeStates] === true
-            }
-            onPressedChange={() => command(editor)}
-            aria-label={label}
-          >
-            <Icon className="size-4" />
-          </Toggle>
-        ))}
+        {linkMode !== "closed" ? (
+          /* ── Inline link input mode ────────────────────────── */
+          <LinkInput
+            editor={editor}
+            onClose={handleLinkInputClose}
+            initialUrl={editor.getAttributes("link").href}
+            isExiting={linkMode === "closing"}
+          />
+        ) : (
+          /* ── Normal toolbar mode ───────────────────────────── */
+          <>
+            {/* Formatting mark toggles */}
+            {markItems.map(({ id, label, icon: Icon, markName, command }) => (
+              <Toggle
+                key={id}
+                size="sm"
+                pressed={
+                  activeStates[markName as keyof typeof activeStates] === true
+                }
+                onPressedChange={() => command(editor)}
+                aria-label={label}
+              >
+                <Icon className="size-4" />
+              </Toggle>
+            ))}
 
-        <Separator orientation="vertical" className="mx-0.5 h-6" />
+            <Separator orientation="vertical" className="mx-0.5 h-6" />
 
-        {/* Link button */}
-        <Toggle
-          size="sm"
-          pressed={activeStates.link}
-          onPressedChange={handleLinkClick}
-          aria-label="Link"
-        >
-          <Link className="size-4" />
-        </Toggle>
+            {/* Link button */}
+            <Toggle
+              size="sm"
+              pressed={activeStates.link}
+              onPressedChange={() => setLinkMode("open")}
+              aria-label="Link"
+            >
+              <Link className="size-4" />
+            </Toggle>
 
-        <Separator orientation="vertical" className="mx-0.5 h-6" />
+            <Separator orientation="vertical" className="mx-0.5 h-6" />
 
-        <TurnIntomenu
-          editor={editor}
-          blockPos={() =>
-            editor.state.selection.$from.depth > 0
-              ? editor.state.selection.$from.before(1)
-              : 0
-          }
-          className={buttonVariants({ variant: "ghost" })}
-        >
-          <span>{activeStates.label}</span>
-          <ChevronDown className="size-3" />
-        </TurnIntomenu>
+            <TurnIntomenu
+              editor={editor}
+              blockPos={() =>
+                editor.state.selection.$from.depth > 0
+                  ? editor.state.selection.$from.before(1)
+                  : 0
+              }
+              className={buttonVariants({ variant: "ghost" })}
+            >
+              <span>{activeStates.label}</span>
+              <ChevronDown className="size-3" />
+            </TurnIntomenu>
+          </>
+        )}
       </div>
     </BubbleMenu>
   );
