@@ -17,6 +17,11 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+
+  /* .ProseMirror > * {
+    border-color: red !important;
+    border-width: 1px !important;
+  } */
 }
 
 /* ── Theme tokens (Tailwind v4 utilities) ────────────────────────────── */

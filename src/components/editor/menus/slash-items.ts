@@ -11,6 +11,7 @@ import {
   Quote,
   Code,
   Minus,
+  Image as ImageIcon,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -94,6 +95,17 @@ export const slashItems: SlashItem[] = [
       editor.chain().focus().deleteRange(range).toggleTaskList().run(),
   },
 
+  // ── Media ─────────────────────────────────────
+  {
+    id: "image",
+    title: "Image",
+    description: "Upload or embed with a link",
+    icon: ImageIcon,
+    group: "Media",
+    action: (editor, range) =>
+      editor.chain().focus().deleteRange(range).setImage({ src: "" }).run(),
+  },
+
   // ── Advanced ──────────────────────────────────
   {
     id: "quote",
@@ -129,11 +141,7 @@ export const slashItems: SlashItem[] = [
 /** Filter items by query, matching title or description */
 export function filterSlashItems(query: string): SlashItem[] {
   const q = query.toLowerCase();
-  return slashItems.filter(
-    (item) =>
-      item.title.toLowerCase().includes(q) ||
-      item.description.toLowerCase().includes(q),
-  );
+  return slashItems.filter((item) => item.title.toLowerCase().includes(q));
 }
 
 /** Group a flat item list by `group` field, preserving insertion order */

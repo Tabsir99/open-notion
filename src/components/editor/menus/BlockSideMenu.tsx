@@ -18,7 +18,6 @@ interface BlockSideMenuProps {
  */
 export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [translateY, setTranslateY] = useState(0);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const hasPositionedRef = useRef(false);
@@ -27,6 +26,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
     editor,
     locked: menuOpen,
     menuRef,
+    containerRef,
   });
 
   const visible =
@@ -34,22 +34,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
 
   // Recalculate vertical position when the active block changes
   useEffect(() => {
-    if (!activeBlock.element || !containerRef.current) return;
-
-    const container = containerRef.current;
-    const blockRect = activeBlock.element.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    const lineHeight = parseFloat(
-      window.getComputedStyle(activeBlock.element).lineHeight,
-    );
-    const firstLineCenter =
-      blockRect.top - containerRect.top + container.scrollTop + lineHeight / 2;
-
-    const menuHeight = menuRef.current?.offsetHeight ?? 28;
-    setTranslateY(firstLineCenter - menuHeight / 2);
-
-    if (hasPositionedRef.current) return;
+    if (hasPositionedRef.current || !activeBlock.element) return;
 
     menuRef.current?.style.setProperty("transition", "opacity 150ms ease");
     hasPositionedRef.current = true;
@@ -57,7 +42,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
     requestAnimationFrame(() => {
       menuRef.current?.style.removeProperty("transition");
     });
-  }, [activeBlock.element, containerRef]);
+  }, [activeBlock.element]);
 
   const handlePlusClick = useCallback(() => {
     editor
@@ -73,12 +58,14 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
       ref={menuRef}
       className={cn(
         "absolute top-0 left-[10px] z-10 flex items-center",
-        "opacity-0 pointer-events-none transition-[transform,opacity] duration-250 ease-out",
+        "opacity-0 pointer-events-none transition-[transform,opacity] duration-150 ease-linear",
         "data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto",
         "after:absolute after:top-0 after:-right-4 after:h-full after:w-4 after:pointer-events-auto after:content-['']",
+        // "*:border-red-500 *:border *:rounded-none!",
       )}
       data-visible={visible}
-      style={{ transform: `translateY(${translateY}px)` }}
+      style={{ transform: `translateY(${activeBlock.translateY}px)` }}
+      id="block-side-menu"
     >
       <Button
         variant="ghost"

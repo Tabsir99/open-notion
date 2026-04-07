@@ -221,21 +221,12 @@ Single traveling menu instance with `+` and `⠿` icons. Smooth `translateY` ani
 - Smooth fade-in animation
 - **Research**: Look up how Notion's selection toolbar looks and behaves. Match the spacing, grouping, and feel.
 
-### Phase 4 — Slash Commands
+### Phase 4 — Slash Commands ✅
 
 Typing `/` anywhere in the editor opens a Notion-style command menu for inserting blocks. Arrow keys navigate, enter executes, escape closes. Typing after `/` filters the list. Clicking the `+` button in `BlockSideMenu` triggers the same menu at that block position. Use @tiptap/suggetions possibly or just do everything custom.
 CODE QQUALITY AND UI MUST BE CLEAN, NO COMPLEX BS WHERE NOT NEEEDED.
 
-### Phase 5 — Link Popover
-- When cursor is on a link: show floating popover with URL, edit button, unlink button
-- When creating a link from bubble toolbar: popover with URL input + paste detection
-- Use shadcn `Popover` + `Input`
-
-### Phase 6 — Custom Blocks
-- **Callout block**: Colored left border, emoji picker, editable content. `ReactNodeViewRenderer`.
-- **Image block**: Click to add → URL input or file upload placeholder. Caption below.
-- **Code block**: Syntax highlighting with lowlight. Language selector dropdown.
-- Wire up "Callout" in TurnIntoSubmenu.
+### Phase 5- Custom blocks: Follow direct prompt thats given.
 
 ### Phase 7 — Polish & Animation
 - Drag-and-drop reorder (wire up grip button DnD)

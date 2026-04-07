@@ -6,6 +6,7 @@ import { Placeholder } from "@tiptap/extensions";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleToolbar } from "./menus/BubbleToolbar";
 import { SlashMenu } from "./menus/SlashMenu";
+import { CustomImage } from "./extensions/CustomImage";
 import "./styles/editor.css";
 
 function _Editor() {
@@ -34,8 +35,23 @@ function _Editor() {
           return "";
         },
       }),
+      CustomImage,
     ],
     content: "",
+
+    onUpdate(props) {
+      localStorage.setItem(
+        "editorContent",
+        JSON.stringify(props.editor.getJSON()),
+      );
+    },
+
+    onCreate(props) {
+      const savedContent = localStorage.getItem("editorContent");
+      if (savedContent) {
+        props.editor.commands.setContent(JSON.parse(savedContent));
+      }
+    },
   });
 
   if (!editor) {
@@ -46,7 +62,7 @@ function _Editor() {
     <div className="w-full flex justify-center pt-20">
       <div
         ref={editorWrapperRef}
-        className="relative w-full max-w-[880px] min-h-screen cursor-text bg-background border border-border
+        className="relative w-full max-w-4xl min-h-svh cursor-text bg-background border border-border
              "
         onPointerDown={() => editor.commands.focus()}
       >

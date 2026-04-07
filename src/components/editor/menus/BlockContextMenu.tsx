@@ -79,7 +79,6 @@ export function BlockContextMenu({
 
   const handleSelect = useCallback(
     (id: string) => {
-      console.log("selected", id, editor, blockPos);
       const node = editor.state.doc.nodeAt(blockPos);
 
       switch (id) {
