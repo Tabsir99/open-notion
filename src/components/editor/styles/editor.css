@@ -9,6 +9,17 @@
   margin: 0 auto;
 }
 
+.tiptap ::selection {
+  background: var(--editor-selected);
+}
+
+/* Light mode node selection */
+.tiptap .ProseMirror-selectednode {
+  background-color: var(--editor-selected);
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
 .ProseMirror > * + * {
   margin-top: 0.75em;
 }
@@ -119,10 +130,17 @@
 
 /* ── Horizontal Rule ───────────────────────────────────────────────── */
 
-.ProseMirror hr {
+.tiptap hr {
+  height: 1.5em; /* big hit + hover area */
   border: none;
-  border-top: 1px solid var(--editor-border);
-  margin: 1.5em 0;
+  background: linear-gradient(
+    transparent calc(50% - 0.5px),
+    #ccc calc(50% - 0.5px),
+    #ccc calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  margin: 0;
+  cursor: default;
 }
 
 /* ── Links ─────────────────────────────────────────────────────────── */

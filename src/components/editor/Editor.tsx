@@ -47,6 +47,7 @@ function _Editor() {
     },
 
     onCreate(props) {
+      props.editor.commands.focus();
       const savedContent = localStorage.getItem("editorContent");
       if (savedContent) {
         props.editor.commands.setContent(JSON.parse(savedContent));
@@ -64,7 +65,6 @@ function _Editor() {
         ref={editorWrapperRef}
         className="relative w-full max-w-4xl min-h-svh cursor-text bg-background border border-border
              "
-        onPointerDown={() => editor.commands.focus()}
       >
         <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
         <BubbleToolbar editor={editor} />
