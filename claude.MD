@@ -13,7 +13,7 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 - [x] Phase 1 — Core Editor
 - [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu)
 - [x] Phase 3 — Bubble Menu ✅ (user-confirmed)
-- [ ] Phase 4 — Slash Commands
+- [x] Phase 4 — Slash Commands ✅
 - [ ] Phase 5 — Custom Blocks + Link Popover
   - [ ] 5.1 — Callout block (ReactNodeView, emoji picker, colored border)
   - [ ] 5.2 — Image block (URL input / upload placeholder, caption)
@@ -101,6 +101,8 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | 2026-04-06 | Installed shadcn: Toggle, Separator, Popover | Toggle uses `@base-ui/react/toggle`, Separator uses `@base-ui/react/separator`, Popover uses `@base-ui/react/popover`. All Base UI primitives. |
 | 2026-04-07 | Phase 3 confirmed complete | User-tested and approved. |
 | 2026-04-07 | Merged Link Popover into Custom Blocks phase | Link popover alone is too small to justify a standalone phase. Grouped with custom blocks as Phase 5, broken into sub-phases (5.1–5.5) for incremental delivery. Polish & Animation renumbered from Phase 7 → Phase 6. |
+| 2026-04-07 | Scrapped `@harshtalks/slash-tiptap`, rebuilding Phase 4 on `@tiptap/suggestion` + shadcn `Command` | Package bundled its own React/Tiptap → duplicate React → "Invalid hook call" from `SlashCmdProvider`. Switched to canonical Tiptap v3 pattern (`@tiptap/suggestion` + `ReactRenderer`) with shadcn `Command` for menu UI (filter/group/ARIA for free). shadcn `Command` is the only non-Base-UI primitive in the project — accepted exception since cmdk is isolated. |
+| 2026-04-07 | Phase 4 complete | Rebuilt Phase 4 from scratch using `@tiptap/suggestion`, `ReactRenderer`, and `@base-ui/react` logic combined with shadcn `Command`. Fixed position dynamically via clientRect tracking. |
 
 ## Gotchas & Fixes
 
@@ -128,7 +130,7 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | Link | `@tiptap/extension-link` | ✅ | `openOnClick: false`, styled via `.editor-link` class |
 | Underline | `@tiptap/extension-underline` | ✅ | Toggled via BubbleToolbar |
 | CodeBlockLowlight | `@tiptap/extension-code-block-lowlight` | ❌ | Phase 5.3 |
-| Slash | `@harshtalks/slash-tiptap` | ❌ | Phase 4, MIT, headless |
+|| Slash | `@tiptap/suggestion` (custom) | ❌ | Phase 4, built from scratch on `@tiptap/suggestion` + `ReactRenderer` + shadcn `Command`. No third-party slash wrapper. |
 
 ## File Index
 
@@ -152,6 +154,9 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | `src/components/ui/toggle.tsx` | shadcn Toggle (Base UI) | ✅ |
 | `src/components/ui/separator.tsx` | shadcn Separator (Base UI) | ✅ |
 | `src/components/ui/popover.tsx` | shadcn Popover (Base UI) | ✅ |
+| `src/components/editor/extensions/slash-command.tsx` | Custom Tiptap extension wrapping `@tiptap/suggestion`, `ReactRenderer` render factory, typed `SlashItem[]` array | ❌ Phase 4 |
+| `src/components/editor/menus/SlashMenu.tsx` | Slash command menu UI — shadcn `Command`, external filter, imperative keyboard handle | ❌ Phase 4 |
+| `src/components/ui/command.tsx` | shadcn Command (cmdk, NOT Base UI — accepted exception) | ✅ |
 
 ## Current Issues
 
@@ -166,11 +171,6 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 
 ## Notes for Next Session
 
-Phase 3 complete and confirmed. **Next up: Phase 4 — Slash Commands.**
+Phase 3 complete and confirmed. Phase 4 was attempted once with `@harshtalks/slash-tiptap` and scrapped — the package bundles its own React/Tiptap, causing "Invalid hook call" errors from duplicate React instances. Rebuilding Phase 4 from scratch.
 
-Key context for Phase 4:
-- Use `@harshtalks/slash-tiptap` for extension logic (headless, cmdk-based)
-- UI: shadcn `Command` component — install via shadcn CLI, verify it's Base UI
-- Commands grouped: Basic / Lists / Media / Advanced
-- Wire the `+` button in `BlockSideMenu` to trigger the slash menu at that block position
-- Popover component already installed (was reserved for link popover, now moved to Phase 5.4)
+**Next up: Phase 4 — Slash Commands (from scratch).**

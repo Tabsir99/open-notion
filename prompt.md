@@ -223,26 +223,8 @@ Single traveling menu instance with `+` and `⠿` icons. Smooth `translateY` ani
 
 ### Phase 4 — Slash Commands
 
-Triggered by typing /
-Uses @harshtalks/slash-tiptap for both extension logic AND headless UI (SlashCmd.Root, SlashCmd.Cmd, SlashCmd.List, SlashCmd.Item, SlashCmd.Empty) — it's already cmdk-based, no shadcn Command needed
-Wrap editor in SlashCmdProvider; add enableKeyboardNavigation to editorProps.handleDOMEvents.keydown
-Suggestions defined via createSuggestionsItems() as a typed array with: title, searchTerms, icon (LucideIcon), description, shortcut, group, command
-Commands: Text, Heading 1–3, Bullet List, Numbered List, Task List, Quote, Code Block, Divider, Callout (placeholder until Phase 5.1), Image (placeholder until Phase 5.2)
-Grouped by category: Basic / Lists / Media / Advanced — rendered as section headers between mapped SlashCmd.Items
-Search/filter is built into cmdk — free, no extra work
-Style SlashCmd.* with Tailwind using shadcn semantic classes only (bg-popover, text-popover-foreground, border-border, shadow-md, rounded-[10px], p-1, w-[280px], max-h-[340px], overflow-y-auto). No hardcoded colors. Follow the same shadcn-defaults-first rules as every other menu
-Item row layout: icon (size-5, muted container) + title (text-sm) + description (text-xs, text-muted-foreground) + shortcut hint (ml-auto, text-xs font-mono text-muted-foreground)
-Wire + button in BlockSideMenu: on click, focus editor → setTextSelection(blockPos + 1) → insertContent('/'). The slash extension auto-detects and opens the menu at that position
-Research: Notion's slash menu — group header styling, item spacing, icon containers, description text, keyboard shortcut badges, open/close animation
-
-New files:
-
-src/components/editor/extensions/slash-command.tsx — Slash.configure() + createSuggestionsItems() array with typed SlashItem[]
-src/components/editor/menus/SlashMenu.tsx — renders SlashCmd.Root + item row component, consumes suggestions array
-Update Editor.tsx — add Slash extension, wrap in SlashCmdProvider, mount <SlashMenu />
-Update BlockSideMenu.tsx — wire + button click handler
-
-Deliverable: Typing / anywhere opens a Notion-style command menu. Arrow keys navigate, enter executes, escape closes. + button in the side menu triggers it at that block. All items either work or clearly log a placeholder (Callout, Image).
+Typing `/` anywhere in the editor opens a Notion-style command menu for inserting blocks. Arrow keys navigate, enter executes, escape closes. Typing after `/` filters the list. Clicking the `+` button in `BlockSideMenu` triggers the same menu at that block position. Use @tiptap/suggetions possibly or just do everything custom.
+CODE QQUALITY AND UI MUST BE CLEAN, NO COMPLEX BS WHERE NOT NEEEDED.
 
 ### Phase 5 — Link Popover
 - When cursor is on a link: show floating popover with URL, edit button, unlink button
@@ -258,12 +240,12 @@ Deliverable: Typing / anywhere opens a Notion-style command menu. Arrow keys nav
 ### Phase 7 — Polish & Animation
 - Drag-and-drop reorder (wire up grip button DnD)
 - Block hover transitions
-- Menu open/close animations refinement
 - Smooth cursor and selection rendering
-- Focus ring on the editor area
-- Responsive: works on mobile viewports (375px+)
-- Move to / Color submenus implementation
-- **Research**: CSS `@starting-style`, Base UI `data-[state]` attributes for transitions.
+- On <SlashMenu> add an element that smoothly travels to the position of the currently selected command. So it wll be like a
+hovered background but instead of appearing from nothing, its one element and travels between the things. Also, when it will appear the first time or same command is hovered multiple times without leaving to another it should open up with a transformation like
+0 --> 100% in size from center or something else. Also, do decoration such as when / is typed in the editor it should apply a
+good desgin, it can be conigured via the plugin options(decoration class and other things, search up the api if needed.)
+
 
 
 ## Design System

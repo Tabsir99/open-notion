@@ -72,7 +72,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
     <div
       ref={menuRef}
       className={cn(
-        "absolute top-0 left-[10px] z-10 flex items-center gap-px",
+        "absolute top-0 left-[10px] z-10 flex items-center",
         "opacity-0 pointer-events-none transition-[transform,opacity] duration-250 ease-out",
         "data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto",
         "after:absolute after:top-0 after:-right-4 after:h-full after:w-4 after:pointer-events-auto after:content-['']",

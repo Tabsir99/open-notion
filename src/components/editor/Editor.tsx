@@ -5,6 +5,7 @@ import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleToolbar } from "./menus/BubbleToolbar";
+import { SlashMenu } from "./menus/SlashMenu";
 import "./styles/editor.css";
 
 function _Editor() {
@@ -51,6 +52,8 @@ function _Editor() {
       >
         <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
         <BubbleToolbar editor={editor} />
+        <SlashMenu editor={editor} />
+
         <EditorContent editor={editor} />
       </div>
     </div>
