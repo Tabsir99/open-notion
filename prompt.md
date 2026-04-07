@@ -14,7 +14,7 @@ Before writing ANY code for a feature, you MUST:
 4. **Verify import paths** — Tiptap v3 changed many imports (see Tech Stack below). Always confirm the correct import before using it.
 5. **Never assume an API** — if you're unsure whether a method/prop exists, search first. Wrong guesses waste iterations.
 6. **shadcn-first** — when a UI element is needed (dropdown, popover, dialog, toggle, button, tooltip, etc.), always search the latest [shadcn/ui docs](https://ui.shadcn.com) first. Use the shadcn component if one exists. Only build custom elements when shadcn doesn't cover the use case.
-7. **tiptap-components** -- (https://tiptap.dev/components) for various toolbar related components and utilities always search form here, read the docs properly, install and apply. But you can avoid it for now, we will see it in the last phase of work during polishing the UI. But keep in mind.
+<!-- 7. **tiptap-components** -- (https://tiptap.dev/components) for various toolbar related components and utilities always search form here, read the docs properly, install and apply. But you can avoid it for now, we will see it in the last phase of work during polishing the UI. But keep in mind. -->
 
 ## Tech Stack (Verified Versions — April 2026)
 
@@ -214,7 +214,7 @@ Single traveling menu instance with `+` and `⠿` icons. Smooth `translateY` ani
 - Drag-and-drop reorder: grip has `draggable` but no DnD logic yet.
 - Move to / Color submenus: placeholder "Coming soon".
 
-### Phase 3 — Bubble Menu
+### Phase 3 — Bubble Menu ✅
 - Appears on text selection using `BubbleMenu` from `@tiptap/react/menus`
 - Buttons: Bold, Italic, Strikethrough, Code, Underline, Link, separator, turn-into dropdown
 - Built with shadcn `Toggle` + `Separator` + `Popover`
@@ -222,15 +222,27 @@ Single traveling menu instance with `+` and `⠿` icons. Smooth `translateY` ani
 - **Research**: Look up how Notion's selection toolbar looks and behaves. Match the spacing, grouping, and feel.
 
 ### Phase 4 — Slash Commands
-- Triggered by typing `/`
-- Uses `@harshtalks/slash-tiptap` for extension logic
-- UI uses shadcn `Command` (cmdk-based) for the dropdown
-- Commands: Text, Heading 1-3, Bullet List, Numbered List, Task List, Quote, Code Block, Divider, Callout, Image
-- Each item has: icon (Lucide), title, description, keyboard shortcut hint
-- Grouped by category: "Basic", "Lists", "Media", "Advanced"
-- Search/filter as user types
-- Wire up `+` button in BlockSideMenu to trigger slash menu
-- **Research**: Study Notion's slash menu grouping, icons, descriptions, and animation.
+
+Triggered by typing /
+Uses @harshtalks/slash-tiptap for both extension logic AND headless UI (SlashCmd.Root, SlashCmd.Cmd, SlashCmd.List, SlashCmd.Item, SlashCmd.Empty) — it's already cmdk-based, no shadcn Command needed
+Wrap editor in SlashCmdProvider; add enableKeyboardNavigation to editorProps.handleDOMEvents.keydown
+Suggestions defined via createSuggestionsItems() as a typed array with: title, searchTerms, icon (LucideIcon), description, shortcut, group, command
+Commands: Text, Heading 1–3, Bullet List, Numbered List, Task List, Quote, Code Block, Divider, Callout (placeholder until Phase 5.1), Image (placeholder until Phase 5.2)
+Grouped by category: Basic / Lists / Media / Advanced — rendered as section headers between mapped SlashCmd.Items
+Search/filter is built into cmdk — free, no extra work
+Style SlashCmd.* with Tailwind using shadcn semantic classes only (bg-popover, text-popover-foreground, border-border, shadow-md, rounded-[10px], p-1, w-[280px], max-h-[340px], overflow-y-auto). No hardcoded colors. Follow the same shadcn-defaults-first rules as every other menu
+Item row layout: icon (size-5, muted container) + title (text-sm) + description (text-xs, text-muted-foreground) + shortcut hint (ml-auto, text-xs font-mono text-muted-foreground)
+Wire + button in BlockSideMenu: on click, focus editor → setTextSelection(blockPos + 1) → insertContent('/'). The slash extension auto-detects and opens the menu at that position
+Research: Notion's slash menu — group header styling, item spacing, icon containers, description text, keyboard shortcut badges, open/close animation
+
+New files:
+
+src/components/editor/extensions/slash-command.tsx — Slash.configure() + createSuggestionsItems() array with typed SlashItem[]
+src/components/editor/menus/SlashMenu.tsx — renders SlashCmd.Root + item row component, consumes suggestions array
+Update Editor.tsx — add Slash extension, wrap in SlashCmdProvider, mount <SlashMenu />
+Update BlockSideMenu.tsx — wire + button click handler
+
+Deliverable: Typing / anywhere opens a Notion-style command menu. Arrow keys navigate, enter executes, escape closes. + button in the side menu triggers it at that block. All items either work or clearly log a placeholder (Callout, Image).
 
 ### Phase 5 — Link Popover
 - When cursor is on a link: show floating popover with URL, edit button, unlink button

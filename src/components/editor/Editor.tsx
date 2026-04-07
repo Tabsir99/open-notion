@@ -3,12 +3,17 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions";
-import { EditorProvider } from "./EditorProvider";
+import {
+  enableKeyboardNavigation,
+  SlashCmdProvider,
+} from "@harshtalks/slash-tiptap";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleToolbar } from "./menus/BubbleToolbar";
+import { SlashMenu } from "./menus/SlashMenu";
+import { slashExtension } from "./extensions/slash-command";
 import "./styles/editor.css";
 
-export function Editor() {
+function _Editor() {
   const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
@@ -23,6 +28,7 @@ export function Editor() {
       }),
       TaskList,
       TaskItem,
+      slashExtension,
       Placeholder.configure({
         placeholder: ({ node }) => {
           if (node.type.name === "heading") {
@@ -35,6 +41,11 @@ export function Editor() {
         },
       }),
     ],
+    editorProps: {
+      handleDOMEvents: {
+        keydown: (_view, event) => enableKeyboardNavigation(event),
+      },
+    },
     content: "",
   });
 
@@ -43,19 +54,26 @@ export function Editor() {
   }
 
   return (
-    <EditorProvider editor={editor}>
-      <div className="w-full flex justify-center pt-20">
-        <div
-          ref={editorWrapperRef}
-          className="relative w-full max-w-[880px] min-h-screen bg-zinc-950 rounded-lg border
-           border-zinc-800/70 hover:border-zinc-800 transition-colors cursor-text
-           "
-        >
-          <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
-          <BubbleToolbar editor={editor} />
-          <EditorContent editor={editor} />
-        </div>
+    <div className="w-full flex justify-center pt-20">
+      <div
+        ref={editorWrapperRef}
+        className="relative w-full max-w-[880px] min-h-screen cursor-text bg-background border border-border
+             "
+        onPointerDown={() => editor.commands.focus()}
+      >
+        <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
+        <BubbleToolbar editor={editor} />
+        <SlashMenu editor={editor} />
+        <EditorContent editor={editor} />
       </div>
-    </EditorProvider>
+    </div>
   );
 }
+
+export const Editor = () => {
+  return (
+    <SlashCmdProvider>
+      <_Editor />
+    </SlashCmdProvider>
+  );
+};

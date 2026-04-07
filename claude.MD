@@ -12,11 +12,15 @@ A Notion-style block editor built with Tiptap v3 (MIT), React 18, Vite, Tailwind
 
 - [x] Phase 1 — Core Editor
 - [x] Phase 2 — Block Side Menu (Drag Handle + Block Context Menu)
-- [x] Phase 3 — Bubble Menu
+- [x] Phase 3 — Bubble Menu ✅ (user-confirmed)
 - [ ] Phase 4 — Slash Commands
-- [ ] Phase 5 — Link Popover
-- [ ] Phase 6 — Custom Blocks
-- [ ] Phase 7 — Polish & Animation
+- [ ] Phase 5 — Custom Blocks + Link Popover
+  - [ ] 5.1 — Callout block (ReactNodeView, emoji picker, colored border)
+  - [ ] 5.2 — Image block (URL input / upload placeholder, caption)
+  - [ ] 5.3 — Code block (lowlight syntax highlighting, language selector)
+  - [ ] 5.4 — Link popover (cursor-on-link floating popover + bubble-toolbar link creation flow)
+  - [ ] 5.5 — Wire "Callout" into TurnIntoSubmenu
+- [ ] Phase 6 — Polish & Animation
 
 ## Critical Rules
 
@@ -88,13 +92,15 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | 2026-04-06 | Data-driven menu items | All menu items defined as typed arrays (`MenuItem[]`), rendered via `.map()`. Icons use `LucideIcon` type. Eliminates repeated JSX. |
 | 2026-04-06 | `finalFocus` for editor refocus | Base UI pattern: `finalFocus={() => { editor.commands.focus(); return false; }}` replaces Radix `onCloseAutoFocus`. |
 | 2026-04-06 | Migrated block-side-menu.css to Tailwind | Only scrollbar styles remain in CSS (`::-webkit-scrollbar` not supported by Tailwind). Everything else uses Tailwind classes. |
-| 2026-04-06 | shadcn-defaults-first styling | No hardcoded color classes on shadcn components. Colors flow through CSS variables only. Structural classes (layout/sizing/spacing) are the only additions. Theme finalization in Phase 7 by editing global.css variables. |
+| 2026-04-06 | shadcn-defaults-first styling | No hardcoded color classes on shadcn components. Colors flow through CSS variables only. Structural classes (layout/sizing/spacing) are the only additions. Theme finalization in Phase 6 by editing global.css variables. |
 | 2026-04-06 | Editor vars renamed to `--editor-*` namespace | Avoids collision with shadcn vars (`--accent`, `--border`, `--background`). Defined in `:root`/`.dark`, mapped to Tailwind utilities via `@theme inline`. |
 | 2026-04-06 | BubbleToolbar uses data-driven toggles | Mark items defined as `MarkItem[]` with `markName` + `command`. Rendered via `.map()` with shadcn `Toggle` (`pressed` = `editor.isActive(markName)`). |
 | 2026-04-06 | `shouldRerenderOnTransaction: true` | Required in v3 so that Toggle `pressed` state updates when marks are toggled. Without it, toolbar buttons don't reflect current state. |
 | 2026-04-06 | Link extension: `openOnClick: false` | Prevents navigation when clicking links during editing. Links styled via `editor-link` class in `editor.css`. |
 | 2026-04-06 | BubbleMenu `shouldShow` filter | Hides on empty selections and NodeSelections. Only shows for text range selections. |
 | 2026-04-06 | Installed shadcn: Toggle, Separator, Popover | Toggle uses `@base-ui/react/toggle`, Separator uses `@base-ui/react/separator`, Popover uses `@base-ui/react/popover`. All Base UI primitives. |
+| 2026-04-07 | Phase 3 confirmed complete | User-tested and approved. |
+| 2026-04-07 | Merged Link Popover into Custom Blocks phase | Link popover alone is too small to justify a standalone phase. Grouped with custom blocks as Phase 5, broken into sub-phases (5.1–5.5) for incremental delivery. Polish & Animation renumbered from Phase 7 → Phase 6. |
 
 ## Gotchas & Fixes
 
@@ -118,10 +124,10 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | TaskList | `@tiptap/extension-list` | ✅ | v3 merged import |
 | TaskItem | `@tiptap/extension-list` | ✅ | v3 merged import |
 | Placeholder | `@tiptap/extensions` | ✅ | Per-node: "Type '/' for commands..." on paragraphs, "Heading N" on headings |
-| Image | `@tiptap/extension-image` | ❌ | Phase 6 |
+| Image | `@tiptap/extension-image` | ❌ | Phase 5.2 |
 | Link | `@tiptap/extension-link` | ✅ | `openOnClick: false`, styled via `.editor-link` class |
 | Underline | `@tiptap/extension-underline` | ✅ | Toggled via BubbleToolbar |
-| CodeBlockLowlight | `@tiptap/extension-code-block-lowlight` | ❌ | Phase 6 |
+| CodeBlockLowlight | `@tiptap/extension-code-block-lowlight` | ❌ | Phase 5.3 |
 | Slash | `@harshtalks/slash-tiptap` | ❌ | Phase 4, MIT, headless |
 
 ## File Index
@@ -140,32 +146,31 @@ This project uses shadcn `base-nova` style. All primitives come from `@base-ui/r
 | `src/components/editor/menus/TurnIntoSubmenu.tsx` | Turn into submenu, data-driven items, targets blockPos not cursor | ✅ |
 | `src/components/editor/menus/useActiveBlock.ts` | Hook: tracks active block via hover + selection, lock mechanism for open menus | ✅ |
 | `src/components/editor/menus/block-side-menu.css` | Scrollbar styles only (webkit) | ✅ |
+| `src/components/editor/menus/BubbleToolbar.tsx` | Text selection toolbar — formatting toggles, link, turn-into dropdown | ✅ |
 | `src/components/ui/button.tsx` | shadcn Button (Base UI) | ✅ |
 | `src/components/ui/dropdown-menu.tsx` | shadcn DropdownMenu (Base UI) | ✅ |
 | `src/components/ui/toggle.tsx` | shadcn Toggle (Base UI) | ✅ |
 | `src/components/ui/separator.tsx` | shadcn Separator (Base UI) | ✅ |
 | `src/components/ui/popover.tsx` | shadcn Popover (Base UI) | ✅ |
-| `src/components/editor/menus/BubbleToolbar.tsx` | Text selection toolbar — formatting toggles, link, turn-into dropdown | ✅ |
 
 ## Current Issues
 
-### Pending Phase 2 Functionality (non-blocking)
+### Pending Earlier-Phase Functionality (non-blocking)
 - `+` button: sets cursor position only, needs slash menu integration (Phase 4)
-- Drag-and-drop reorder: grip has `draggable` attribute but no DnD logic (Phase 7)
-- Move to / Color submenus: placeholder "Coming soon" (Phase 7)
-- Callout Turn Into: logs placeholder, needs Callout extension (Phase 6)
+- Drag-and-drop reorder: grip has `draggable` attribute but no DnD logic (Phase 6)
+- Move to / Color submenus: placeholder "Coming soon" (Phase 6)
+- Callout Turn Into: logs placeholder, needs Callout extension (Phase 5.1 + 5.5)
 
 ### CSS Note
 - `global.css` has duplicate `--color-background` and `--color-accent` definitions — once in `@theme` block (custom) and once in shadcn inline theme. The shadcn vars use oklch and are consumed by shadcn components. The custom vars in `@theme` are consumed by `editor.css`. Both coexist but could cause confusion for future agents.
 
 ## Notes for Next Session
 
-Phase 3 (Bubble Menu) implemented — awaiting user testing.
+Phase 3 complete and confirmed. **Next up: Phase 4 — Slash Commands.**
 
-Key context:
-- `BubbleToolbar.tsx` renders inside `<BubbleMenu>` from `@tiptap/react/menus`
-- `shouldRerenderOnTransaction: true` added to `useEditor` so Toggle pressed states update reactively
-- Link button currently uses `window.prompt()` for URL input — will be replaced by `LinkPopover` in Phase 5
-- Turn-into dropdown in bubble menu operates on current selection (unlike BlockContextMenu which targets `blockPos`)
-- shadcn Toggle `pressed` prop is controlled via `editor.isActive(markName)` — works because of `shouldRerenderOnTransaction`
-- Popover component installed but not used yet — reserved for Phase 5 (LinkPopover)
+Key context for Phase 4:
+- Use `@harshtalks/slash-tiptap` for extension logic (headless, cmdk-based)
+- UI: shadcn `Command` component — install via shadcn CLI, verify it's Base UI
+- Commands grouped: Basic / Lists / Media / Advanced
+- Wire the `+` button in `BlockSideMenu` to trigger the slash menu at that block position
+- Popover component already installed (was reserved for link popover, now moved to Phase 5.4)

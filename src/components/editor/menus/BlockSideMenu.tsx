@@ -60,11 +60,11 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
   }, [activeBlock.element, containerRef]);
 
   const handlePlusClick = useCallback(() => {
-    // Will be wired to slash menu in Phase 4
     editor
       .chain()
       .focus()
       .setTextSelection(activeBlock.pos + 1)
+      .insertContent("/")
       .run();
   }, [editor, activeBlock.pos]);
 
