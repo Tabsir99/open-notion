@@ -19,11 +19,9 @@ import {
   ArrowRightLeft,
   Palette,
   MessageSquare,
-  GripVertical,
   Type,
 } from "lucide-react";
 import { TurnIntomenu } from "./TurnIntoMenu";
-import { Button } from "@/components/ui/button";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -67,6 +65,7 @@ interface BlockContextMenuProps {
   blockPos: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  children: React.ReactElement;
 }
 
 export function BlockContextMenu({
@@ -74,6 +73,7 @@ export function BlockContextMenu({
   blockPos,
   open,
   onOpenChange,
+  children,
 }: BlockContextMenuProps) {
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
@@ -133,18 +133,7 @@ export function BlockContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Block options"
-            draggable
-          >
-            <GripVertical className="size-4.5" />
-          </Button>
-        }
-      />
+      <DropdownMenuTrigger render={children} />
 
       <DropdownMenuContent
         side="right"

@@ -6,7 +6,7 @@
 
 ---
 
-## Agent Workflow Rules
+## Agent Workflow Rules YOU MUST FOLLOW ALL OF THESE
 
 - **Search before coding.** Before implementing any feature, search for latest docs, known issues, and UI references (Notion, Linear, Craft). Never assume an API exists.
 - **shadcn-first.** When a UI element is needed, check shadcn/ui first. Only build custom if shadcn doesn't cover it.
@@ -19,6 +19,7 @@
 - **Tailwind classes only** — no inline styles except dynamic `transform` values via `style` prop.
 - **Data-driven UI:** repeated structures use typed arrays + `.map()`. Icons use `LucideIcon` type. className appears once in render.
 - **Use `cn()`** from `@/lib/utils` for conditional class merging.
+- **Use Clean architechure and try to avoid verbose code. Write maintainable code.**
 
 ---
 
@@ -105,7 +106,7 @@ All color values defined exactly **once** in `global.css` under `:root` and `.da
 | Link | `@tiptap/extension-link` | ✅ | `openOnClick: false`. Styled via `.editor-link` class |
 | Underline | `@tiptap/extension-underline` | ✅ | Toggled via BubbleToolbar |
 | Slash | `@tiptap/suggestion` (custom) | ✅ | Phase 4. Standalone React state + Base UI Popover. No ReactRenderer or cmdk |
-| CodeBlockLowlight | `@tiptap/extension-code-block-lowlight` | ❌ | Phase 5.2 — next up |
+| CodeBlock (custom) | `@tiptap/extension-code-block` | ✅ | Phase 5.3. Shiki decorations, ReactNodeView `CodeBlock/index.tsx`. Language selector, copy button |
 
 ---
 
@@ -128,7 +129,10 @@ All color values defined exactly **once** in `global.css` under `:root` and `.da
 | `src/components/editor/menus/BubbleToolbar.tsx` | Text selection toolbar — mark toggles, link, turn-into |
 | `src/components/editor/menus/slash-items.ts` | `SlashItem[]` data — groups, names, icons, Tiptap actions |
 | `src/components/editor/menus/SlashMenu.tsx` | Slash UI — `@tiptap/suggestion` plugin + Base UI Popover |
-| `src/components/editor/blocks/ImageBlock.tsx` | Image ReactNodeView — URL/upload popover, alignment toolbar |
+| `src/components/editor/blocks/ImageBlock/index.tsx` | Image ReactNodeView — URL/upload popover, alignment toolbar |
+| `src/components/editor/blocks/CodeBlock/index.tsx` | Code block ReactNodeView — language selector, copy button |
+| `src/components/editor/blocks/CodeBlock/languages.ts` | Language data + preload list for shiki |
+| `src/components/editor/extensions/CustomCodeBlock.ts` | CodeBlock extension + shiki decoration plugin |
 | `src/components/ui/button.tsx` | shadcn Button (Base UI) |
 | `src/components/ui/dropdown-menu.tsx` | shadcn DropdownMenu (Base UI) |
 | `src/components/ui/toggle.tsx` | shadcn Toggle (Base UI) |

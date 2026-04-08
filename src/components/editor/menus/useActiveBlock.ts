@@ -126,11 +126,13 @@ export function useActiveBlock(params: UseActiveBlockOptions) {
     const handlePointerMove = (e: MouseEvent) => {
       if (lockedRef.current) return;
 
-      const blockEl = getBlockFromHover(e.target as HTMLElement);
-      if (!blockEl || blockEl === hoveredBlockRef.current) return;
-      hoveredBlockRef.current = blockEl;
-      const info = resolveBlockInfo(blockEl);
-      if (info) setActiveBlock({ ...info, isHovered: true });
+      requestAnimationFrame(() => {
+        const blockEl = getBlockFromHover(e.target as HTMLElement);
+        if (!blockEl || blockEl === hoveredBlockRef.current) return;
+        hoveredBlockRef.current = blockEl;
+        const info = resolveBlockInfo(blockEl);
+        if (info) setActiveBlock({ ...info, isHovered: true });
+      });
     };
 
     const handleMouseLeave = (e: MouseEvent) => {

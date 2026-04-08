@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Editor } from "@tiptap/core";
-import { Plus } from "lucide-react";
+import { GripVertical, Plus } from "lucide-react";
 import { useActiveBlock } from "./useActiveBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "@/lib/utils";
@@ -73,7 +73,7 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
         onClick={handlePlusClick}
         aria-label="Add block"
       >
-        <Plus className="size-4.5" />
+        <Plus className="size-4" />
       </Button>
 
       <BlockContextMenu
@@ -84,7 +84,16 @@ export function BlockSideMenu({ editor, containerRef }: BlockSideMenuProps) {
           setMenuOpen(open);
           if (!open) clearHover();
         }}
-      />
+      >
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Block options"
+          draggable
+        >
+          <GripVertical className="size-4" />
+        </Button>
+      </BlockContextMenu>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleToolbar } from "./menus/BubbleToolbar";
 import { SlashMenu } from "./menus/SlashMenu";
 import { CustomImage } from "./extensions/CustomImage";
+import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
 import "./styles/editor.css";
 
 function _Editor() {
@@ -15,6 +16,7 @@ function _Editor() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        codeBlock: false,
         link: {
           openOnClick: false,
           HTMLAttributes: {
@@ -23,6 +25,7 @@ function _Editor() {
           enableClickSelection: true,
         },
       }),
+      CustomCodeBlock,
       TaskList,
       TaskItem,
       Placeholder.configure({

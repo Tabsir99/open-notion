@@ -101,7 +101,7 @@ Appears on text selection. Buttons: Bold, Italic, Strikethrough, Code, Underline
 ### Phase 5 — Custom Blocks + Link Popover
 - **5.1 Image block** ✅ — URL input / upload placeholder, caption, alignment
 - **5.2 Link popover** ⬜ — cursor-on-link floating popover + bubble-toolbar link creation flow
-- **5.3 Code block** ⬜ — `CodeBlockLowlight`, lowlight syntax highlighting, language selector
+- **5.3 Code block** ⬜ — `CodeBlock`, with shiki syntax highlighting, language selector, Wire to turnintomenu
 - **5.4 Callout block** ⬜ — ReactNodeView, emoji picker, colored border
 - **5.5 Wire Callout into TurnIntoSubmenu** ⬜
 
