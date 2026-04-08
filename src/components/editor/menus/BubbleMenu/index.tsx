@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { Editor } from "@tiptap/core";
-import { BubbleMenu } from "@tiptap/react/menus";
+import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import { useEditorState } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -16,7 +16,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TurnIntomenu } from "./TurnIntoMenu";
+import { TurnIntomenu } from "../TurnIntoMenu";
 import { LinkInput } from "./LinkInput";
 
 // ── Data ──────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ interface BubbleToolbarProps {
 
 type LinkMode = "closed" | "open" | "closing";
 
-export function BubbleToolbar({ editor }: BubbleToolbarProps) {
+export function BubbleMenu({ editor }: BubbleToolbarProps) {
   const [linkMode, setLinkMode] = useState<LinkMode>("closed");
 
   const activeStates = useEditorState({
@@ -107,7 +107,7 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
   }, []);
 
   return (
-    <BubbleMenu
+    <TiptapBubbleMenu
       editor={editor}
       options={{
         placement: "top",
@@ -142,7 +142,6 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
           <LinkInput
             editor={editor}
             onClose={handleLinkInputClose}
-            initialUrl={editor.getAttributes("link").href}
             isExiting={linkMode === "closing"}
           />
         ) : (
@@ -192,6 +191,6 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
           </>
         )}
       </div>
-    </BubbleMenu>
+    </TiptapBubbleMenu>
   );
 }

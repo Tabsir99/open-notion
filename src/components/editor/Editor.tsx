@@ -4,7 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
-import { BubbleToolbar } from "./menus/BubbleToolbar";
+import { BubbleMenu } from "./menus/BubbleMenu";
 import { SlashMenu } from "./menus/SlashMenu";
 import { CustomImage } from "./extensions/CustomImage";
 import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
@@ -71,7 +71,7 @@ function _Editor() {
              "
       >
         <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
-        <BubbleToolbar editor={editor} />
+        <BubbleMenu editor={editor} />
         <SlashMenu editor={editor} />
 
         <EditorContent editor={editor} />

@@ -4,7 +4,7 @@ import { GripVertical, Plus } from "lucide-react";
 import { useActiveBlock } from "./useActiveBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "@/lib/utils";
-import "./block-side-menu.css";
+import "../styles/block-side-menu.css";
 import { Button } from "@/components/ui/button";
 
 interface BlockSideMenuProps {

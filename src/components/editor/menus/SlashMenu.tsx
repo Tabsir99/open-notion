@@ -5,7 +5,7 @@ import type { Editor } from "@tiptap/core";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { filterSlashItems, groupItems, type SlashItem } from "./slash-items";
+import { filterSlashItems, groupItems, type SlashItem } from "../constants/slash-items";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 

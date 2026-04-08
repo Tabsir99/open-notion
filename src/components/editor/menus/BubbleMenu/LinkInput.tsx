@@ -6,17 +6,16 @@ import { CornerDownLeft, ExternalLink, Unlink, X } from "lucide-react";
 
 interface LinkInputProps {
   editor: Editor;
-  initialUrl?: string;
   onClose: () => void;
   isExiting?: boolean;
 }
 
 export function LinkInput({
   editor,
-  initialUrl = "",
   onClose,
   isExiting = false,
 }: LinkInputProps) {
+  const initialUrl = editor.getAttributes("link").href as string;
   const [url, setUrl] = useState(initialUrl);
   const inputRef = useRef<HTMLInputElement>(null);
 
