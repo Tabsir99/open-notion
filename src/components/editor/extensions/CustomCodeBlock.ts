@@ -5,7 +5,25 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { CodeBlockView } from "../blocks/CodeBlock";
 import { preloadLangs } from "../blocks/CodeBlock/languages";
-import type { BundledTheme } from "shiki";
+
+import { createHighlighterCore } from "@shikijs/core";
+import { createJavaScriptRegexEngine } from "@shikijs/engine-javascript";
+import lightPlus from "@shikijs/themes/light-plus";
+import darkPlus from "@shikijs/themes/dark-plus";
+
+const langLoaders: Record<string, () => Promise<any>> = {
+  javascript: () => import("@shikijs/langs/javascript"),
+  typescript: () => import("@shikijs/langs/typescript"),
+  python: () => import("@shikijs/langs/python"),
+  json: () => import("@shikijs/langs/json"),
+  html: () => import("@shikijs/langs/html"),
+  css: () => import("@shikijs/langs/css"),
+  bash: () => import("@shikijs/langs/bash"),
+  rust: () => import("@shikijs/langs/rust"),
+};
+
+const darkTheme = darkPlus.name!;
+const lightTheme = lightPlus.name!;
 
 // ── Types (duck-typed to avoid shiki internal type deps) ──────────────
 
@@ -18,7 +36,6 @@ interface ShikiHighlighter {
   loadLanguage: (...langs: string[]) => Promise<void>;
 }
 
-const themes: BundledTheme[] = ["light-plus", "dark-plus"];
 // ── Decoration builder ────────────────────────────────────────────────
 
 export const shikiPluginKey = new PluginKey("shikiHighlight");
@@ -31,7 +48,8 @@ function buildDecorations(
   if (!highlighter) return DecorationSet.empty;
 
   const isDark = document.documentElement.classList.contains("dark");
-  const theme = isDark ? themes[1] : themes[0];
+  const theme = isDark ? darkTheme : lightTheme;
+
   const loaded = highlighter.getLoadedLanguages();
   const decorations: Decoration[] = [];
 
@@ -77,33 +95,38 @@ export const CustomCodeBlock = CodeBlock.configure({
   },
 
   onCreate() {
-    import("shiki").then(({ createHighlighter }) =>
-      createHighlighter({ themes, langs: [...preloadLangs] }).then(
-        async (h) => {
-          this.storage.highlighter = h as unknown as ShikiHighlighter;
-          if (this.editor.view.isDestroyed) return;
+    createHighlighterCore({
+      themes: [lightPlus, darkPlus],
+      langs: preloadLangs
+        .map((l) => langLoaders[l])
+        .filter(Boolean)
+        .map((loader) => loader()),
+      engine: createJavaScriptRegexEngine(),
+    }).then(async (h) => {
+      this.storage.highlighter = h;
+      if (this.editor.view.isDestroyed) return;
 
-          // Collect languages present in the restored doc
-          const needed = new Set<string>();
-          this.editor.state.doc.descendants((node) => {
-            if (node.type.name === this.name) {
-              const lang = node.attrs.language;
-              if (lang && lang !== "plaintext") needed.add(lang);
-            }
-          });
+      // Collect languages present in the restored doc
+      const needed = new Set<string>();
+      this.editor.state.doc.descendants((node) => {
+        if (node.type.name === this.name) {
+          const lang = node.attrs.language;
+          if (lang && lang !== "plaintext") needed.add(lang);
+        }
+      });
 
-          const loaded = new Set(h.getLoadedLanguages());
-          const toLoad = [...needed].filter((l) => !loaded.has(l));
-          if (toLoad.length) {
-            await (h as unknown as ShikiHighlighter).loadLanguage(...toLoad);
-          }
+      const loaded = new Set(h.getLoadedLanguages());
+      const toLoad = [...needed].filter(
+        (l) => !loaded.has(l) && langLoaders[l],
+      );
+      if (toLoad.length) {
+        await h.loadLanguage(...toLoad.map((l) => langLoaders[l]()));
+      }
 
-          this.editor.view.dispatch(
-            this.editor.view.state.tr.setMeta(shikiPluginKey, true),
-          );
-        },
-      ),
-    );
+      this.editor.view.dispatch(
+        this.editor.view.state.tr.setMeta(shikiPluginKey, true),
+      );
+    });
   },
 
   addNodeView() {
