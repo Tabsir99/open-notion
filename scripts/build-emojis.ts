@@ -1,5 +1,7 @@
 import rawEmojis from "emojibase-data/en/data.json";
 import groupData from "emojibase-data/meta/groups.json";
+import githubShortcodes from "emojibase-data/en/shortcodes/github.json";
+
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import type {
@@ -12,6 +14,7 @@ const build = (): void => {
   const emojis: Record<string, Emoji> = {};
   const categoryMap: Record<number, string[]> = {};
 
+  let shortcodecount = 0;
   for (const raw of rawEmojis) {
     // skip uncategorized
     if (raw.group === undefined) continue;
@@ -33,10 +36,13 @@ const build = (): void => {
     emojis[id] = {
       id,
       name: raw.label,
-      keywords: raw.tags ?? [],
+      tags: raw.tags ?? [],
       skins,
       group: raw.group,
       unicode: raw.emoji,
+      shortcodes: Array.isArray(githubShortcodes[id])
+        ? githubShortcodes[id]
+        : [githubShortcodes[id] ?? ""],
     };
 
     if (!categoryMap[raw.group]) categoryMap[raw.group] = [];
@@ -60,8 +66,9 @@ const build = (): void => {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(resolve(outDir, "emoji.json"), JSON.stringify(data));
 
+  console.log("shortcodecount", shortcodecount);
   console.log(
-    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → src/data/emoji.json`,
+    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → src/components/editor/blocks/EmojiPicker/emoji.json`,
   );
 };
 

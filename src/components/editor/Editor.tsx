@@ -3,14 +3,13 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
 import { Placeholder } from "@tiptap/extensions/placeholder";
-import { Emoji } from "@tiptap/extension-emoji";
-
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleMenu } from "./menus/BubbleMenu";
 import { SlashMenu } from "./menus/SlashMenu";
 import { CustomImage } from "./extensions/CustomImage";
 import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
 import "./styles/editor.css";
+import { EmojiNode } from "./extensions/Emoji";
 
 function _Editor() {
   const editorWrapperRef = useRef<HTMLDivElement>(null);
@@ -42,7 +41,7 @@ function _Editor() {
         },
       }),
       CustomImage,
-      Emoji.configure({ suggestion: { char: ":" }, enableEmoticons: true }),
+      EmojiNode,
     ],
     content: "",
 

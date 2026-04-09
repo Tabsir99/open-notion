@@ -10,9 +10,10 @@ export interface Emoji {
   id: string;
   name: string;
   unicode: string;
-  keywords: string[];
+  tags: string[];
   skins: EmojiSkin[];
   group: number;
+  shortcodes: string[];
 }
 
 export interface RawEmojiCategory {
@@ -25,6 +26,10 @@ export interface EmojiData {
   categories: typeof categories;
 }
 
+export const emojis = emojiData.emojis as Record<string, Emoji>;
+export const emojiArray = Object.values(emojis);
+export const rawCategories = emojiData.categories as RawEmojiCategory[];
+
 export const categories: { id: string; icon: string }[] = Object.entries({
   "smileys-emotion": "1F604", // 😄
   "people-body": "1F64B", // 🙋
@@ -36,9 +41,6 @@ export const categories: { id: string; icon: string }[] = Object.entries({
   symbols: "1F531", // 🔱
   flags: "1F3C1", // 🏁
 }).map(([key, value]) => ({ id: key, icon: value }));
-
-export const emojiArray = Object.values(emojiData.emojis);
-export { emojiData };
 
 export const getEmojiUrl = (id: string) => {
   return `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/${id}.svg`;
