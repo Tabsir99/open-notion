@@ -2,7 +2,9 @@ import { useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
-import { Placeholder } from "@tiptap/extensions";
+import { Placeholder } from "@tiptap/extensions/placeholder";
+import { Emoji } from "@tiptap/extension-emoji";
+
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleMenu } from "./menus/BubbleMenu";
 import { SlashMenu } from "./menus/SlashMenu";
@@ -40,6 +42,7 @@ function _Editor() {
         },
       }),
       CustomImage,
+      Emoji.configure({ suggestion: { char: ":" }, enableEmoticons: true }),
     ],
     content: "",
 

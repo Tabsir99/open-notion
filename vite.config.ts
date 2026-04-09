@@ -22,5 +22,4 @@ export default defineConfig({
     },
   },
   assetsInclude: ["**/*.svg"],
-  build: { sourcemap: false, cssMinify: "esbuild", minify: "esbuild" },
 });
