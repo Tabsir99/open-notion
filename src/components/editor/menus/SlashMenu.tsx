@@ -5,7 +5,11 @@ import type { Editor } from "@tiptap/core";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { filterSlashItems, groupItems, type SlashItem } from "../constants/slash-items";
+import {
+  filterSlashItems,
+  groupItems,
+  type SlashItem,
+} from "../constants/slash-items";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 
@@ -14,6 +18,7 @@ type State = {
   items: SlashItem[];
   selectedIndex: number;
   clientRect: DOMRect | null;
+  range: { from: number; to: number } | null;
 };
 
 const INITIAL: State = {
@@ -21,6 +26,7 @@ const INITIAL: State = {
   items: [],
   selectedIndex: 0,
   clientRect: null,
+  range: null,
 };
 
 function useLatest<T>(value: T) {
@@ -32,12 +38,10 @@ function useLatest<T>(value: T) {
 export function SlashMenu({ editor }: { editor: Editor }) {
   const [state, setState] = useState<State>(INITIAL);
   const latest = useLatest(state);
-  const commandRef = useRef<((item: SlashItem) => void) | null>(null);
   const editorDomRef = useRef<HTMLElement>(editor.view.dom);
   const listRef = useRef<HTMLDivElement>(null);
 
   const close = () => setState((s) => ({ ...s, open: false }));
-  const runCommand = (item: SlashItem) => commandRef.current?.(item);
 
   useEffect(() => {
     const plugin = Suggestion<SlashItem, SlashItem>({
@@ -46,19 +50,17 @@ export function SlashMenu({ editor }: { editor: Editor }) {
       pluginKey: PLUGIN_KEY,
       shouldResetDismissed: () => false,
       items: ({ query }) => filterSlashItems(query),
-      command: ({ editor, range, props: item }) => item.action(editor, range),
       render: () => ({
         onStart: (p) => {
-          commandRef.current = p.command;
           setState({
             open: true,
             items: p.items,
             selectedIndex: 0,
             clientRect: p.clientRect?.() ?? null,
+            range: p.range,
           });
         },
         onUpdate: (p) => {
-          commandRef.current = p.command;
           setState((s) => ({
             open: true,
             items: p.items,
@@ -67,14 +69,14 @@ export function SlashMenu({ editor }: { editor: Editor }) {
               Math.max(0, p.items.length - 1),
             ),
             clientRect: p.clientRect?.() ?? null,
+            range: p.range,
           }));
         },
         onExit: () => {
-          commandRef.current = null;
-          setState((s) => ({ ...s, open: false }));
+          setState((s) => ({ ...s, open: false, range: null }));
         },
         onKeyDown: ({ event }) => {
-          const { items, selectedIndex } = latest.current;
+          const { items, selectedIndex, range } = latest.current;
           if (!items.length) return false;
 
           switch (event.key) {
@@ -95,7 +97,7 @@ export function SlashMenu({ editor }: { editor: Editor }) {
               return true;
             case "Enter":
               event.preventDefault();
-              runCommand(items[selectedIndex]);
+              items[selectedIndex].action(editor, range!);
               return true;
             case "Escape":
               close();
@@ -168,7 +170,7 @@ export function SlashMenu({ editor }: { editor: Editor }) {
                       selected && "bg-accent",
                     )}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => runCommand(item)}
+                    onClick={() => item.action(editor, latest.current.range!)}
                     onPointerMove={(e) => {
                       if (e.movementX === 0 && e.movementY === 0) return;
                       const idx = indexById.get(item.id);

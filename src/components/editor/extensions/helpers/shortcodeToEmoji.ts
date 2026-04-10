@@ -1,4 +1,4 @@
-import type { Emoji } from "../../blocks/EmojiPicker/data";
+import type { Emoji } from "../../menus/EmojiPicker/data";
 
 export function shortcodeToEmoji(
   shortcode: string,

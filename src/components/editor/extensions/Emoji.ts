@@ -9,14 +9,12 @@ import {
 } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import type { SuggestionOptions } from "@tiptap/suggestion";
-import { Suggestion } from "@tiptap/suggestion";
 import emojiRegex from "emoji-regex";
 
-import { type Emoji } from "../blocks/EmojiPicker/data.js";
+import { type Emoji } from "../menus/EmojiPicker/data.js";
 import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
-import { getEmojiUrl } from "../blocks/EmojiPicker/getEmojiUrl.js";
+import { getEmojiUrl } from "../menus/EmojiPicker/getEmojiUrl.js";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -27,30 +25,19 @@ declare module "@tiptap/core" {
       setEmoji: (shortcode: string) => ReturnType;
     };
   }
-
-  interface Storage {
-    emoji: EmojiStorage;
-  }
 }
 
 export type EmojiOptions = {
   HTMLAttributes: Record<string, any>;
-  emojis: Emoji[];
-  suggestion: Omit<SuggestionOptions, "editor">;
   getEmojiUrl?: (hexcode: string) => string;
-};
-
-export type EmojiStorage = {
   emojis: Emoji[];
 };
-
-export const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
 
 export const inputRegex = /:([a-zA-Z0-9_+-]+):$/;
 
 export const pasteRegex = /(^|\s):([a-zA-Z0-9_+-]+):/g;
 
-export const EmojiNode = Node.create<EmojiOptions, EmojiStorage>({
+export const EmojiNode = Node.create<EmojiOptions>({
   name: "emoji",
 
   inline: true,
@@ -64,56 +51,8 @@ export const EmojiNode = Node.create<EmojiOptions, EmojiStorage>({
   addOptions() {
     return {
       HTMLAttributes: {},
-      emojis: [],
       getEmojiUrl: getEmojiUrl,
-      suggestion: {
-        char: ":",
-        pluginKey: EmojiSuggestionPluginKey,
-        command: ({ editor, range, props }) => {
-          // increase range.to by one when the next node is of type "text"
-          // and starts with a space character
-          const nodeAfter = editor.view.state.selection.$to.nodeAfter;
-          const overrideSpace = nodeAfter?.text?.startsWith(" ");
-
-          if (overrideSpace) {
-            range.to += 1;
-          }
-
-          editor
-            .chain()
-            .focus()
-            .insertContentAt(range, [
-              {
-                type: this.name,
-                attrs: props,
-              },
-              {
-                type: "text",
-                text: " ",
-              },
-            ])
-            .command(({ tr, state }) => {
-              tr.setStoredMarks(
-                state.doc.resolve(state.selection.to - 2).marks(),
-              );
-              return true;
-            })
-            .run();
-        },
-        allow: ({ state, range }) => {
-          const $from = state.doc.resolve(range.from);
-          const type = state.schema.nodes[this.name];
-          const allow = !!$from.parent.type.contentMatch.matchType(type);
-
-          return allow;
-        },
-      },
-    };
-  },
-
-  addStorage() {
-    return {
-      emojis: this.options.emojis,
+      emojis: [],
     };
   },
 
@@ -288,11 +227,6 @@ export const EmojiNode = Node.create<EmojiOptions, EmojiStorage>({
 
   addProseMirrorPlugins() {
     return [
-      Suggestion({
-        editor: this.editor,
-        ...this.options.suggestion,
-      }),
-
       new Plugin({
         key: new PluginKey("emoji"),
         props: {

@@ -40,7 +40,7 @@ export const EmojiCateogires = ({
             <img
               src={getEmojiUrl(icon, {
                 provider: "noto-animated",
-                format: "gif",
+                format: "webp",
               })}
             />
           </Button>

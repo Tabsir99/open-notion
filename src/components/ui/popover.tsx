@@ -32,7 +32,7 @@ function PopoverContent({
         side={side}
         sideOffset={sideOffset}
         anchor={anchor}
-        className="isolate z-50"
+        className="isolate z-50 transition-transform duration-150"
       >
         <PopoverPrimitive.Popup
           data-slot="popover-content"

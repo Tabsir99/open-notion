@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { use, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TaskList, TaskItem } from "@tiptap/extension-list";
@@ -10,9 +10,16 @@ import { CustomImage } from "./extensions/CustomImage";
 import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
 import "./styles/editor.css";
 import { EmojiNode } from "./extensions/Emoji";
+import { EmojiPickerMenu } from "./menus/EmojiPicker";
+import { getEmojiArray, loadEmojiData } from "./menus/EmojiPicker/data";
 
+const dataPromise = (async () => {
+  await loadEmojiData();
+  return getEmojiArray();
+})();
 function _Editor() {
   const editorWrapperRef = useRef<HTMLDivElement>(null);
+  const emojis = use(dataPromise);
 
   const editor = useEditor({
     extensions: [
@@ -41,9 +48,10 @@ function _Editor() {
         },
       }),
       CustomImage,
-      EmojiNode,
+      EmojiNode.configure({ emojis }),
     ],
     content: "",
+    immediatelyRender: false,
 
     onUpdate(props) {
       localStorage.setItem(
@@ -52,7 +60,9 @@ function _Editor() {
       );
     },
 
-    onCreate(props) {
+    autofocus: true,
+
+    async onCreate(props) {
       props.editor.commands.focus();
       const savedContent = localStorage.getItem("editorContent");
       if (savedContent) {
@@ -71,10 +81,12 @@ function _Editor() {
         ref={editorWrapperRef}
         className="relative w-full max-w-4xl min-h-svh cursor-text bg-background border border-border
              "
+        onClick={() => editor.chain().focus().run()}
       >
         <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
         <BubbleMenu editor={editor} />
         <SlashMenu editor={editor} />
+        <EmojiPickerMenu editor={editor} />
 
         <EditorContent editor={editor} />
       </div>

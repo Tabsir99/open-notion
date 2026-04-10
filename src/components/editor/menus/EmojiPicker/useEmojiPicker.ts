@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { categories, emojis, emojiArray, rawCategories } from "./data";
+import { getEmojiArray, getEmojiData, type EmojiCategory } from "./data";
 import { getEmojiUrl } from "./getEmojiUrl";
 
 const createGrid = (
@@ -8,6 +8,8 @@ const createGrid = (
   grid?: HTMLDivElement,
 ) => {
   const isNewGrid = !grid;
+  const emojiData = getEmojiData();
+  if (!emojiData) return;
 
   if (isNewGrid) {
     grid = document.createElement("div");
@@ -21,9 +23,9 @@ const createGrid = (
     const button = document.createElement("button");
     const className = `w-12 h-12 border-none rounded-md bg-transparent cursor-pointer
             flex items-center justify-center transition-colors duration-200
-            p-1 hover:bg-[#f3f4f6] text-2xl`;
+            p-2 hover:bg-[#f3f4f6] text-2xl`;
 
-    const emoji = emojis[id];
+    const emoji = emojiData.emojis[id];
 
     button.className = className;
 
@@ -54,7 +56,7 @@ const createHeader = (title: string, key: string, container: HTMLElement) => {
 
   header.className = `
   font-semibold text-sm text-gray-700
-  p-2 pb-1 pl-3.5
+  p-2 pb-1 pl-3.5 sticky top-0 bg-background z-10 capitalize
 `;
 
   header.id = `emoji-category-${key}`;
@@ -65,20 +67,25 @@ const createHeader = (title: string, key: string, container: HTMLElement) => {
 };
 
 interface UseEmojiPickerProps {
-  onEmojiSelect: (emojiId: string) => void;
+  onEmojiSelect: (shortcode: string) => void;
+  searchQuery: string;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
+export default function useEmojiPicker({
+  onEmojiSelect,
+  searchQuery,
+  containerRef,
+}: UseEmojiPickerProps) {
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const timeOutsRef = useRef<number[]>([]);
 
   // ─── Derived / computed ────────────────────────────────────────────────────
 
   const getFilteredEmojis = useCallback(() => {
     if (!searchQuery.trim()) return null;
+
+    const emojiArray = getEmojiArray();
 
     const query = searchQuery.toLowerCase();
     const filtered: string[] = [];
@@ -93,16 +100,18 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
     return filtered;
   }, [searchQuery]);
 
-  const emojiCategories = useMemo(() => {
-    if (recentEmojis.length === 0) return categories;
-    return [{ id: "recent", icon: "1F552" }, ...categories];
+  const emojiCategories: EmojiCategory[] = useMemo(() => {
+    const emojiData = getEmojiData();
+    if (!emojiData) return [];
+
+    if (recentEmojis.length === 0) return emojiData.categories;
+    return [
+      { id: "recent", icon: "231B", emojis: [] },
+      ...emojiData.categories,
+    ];
   }, [recentEmojis.length]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
-
-  const clearSearch = useCallback(() => {
-    setSearchQuery("");
-  }, []);
 
   const addRecentEmoji = useCallback((emojiId: string) => {
     setRecentEmojis((prev) => {
@@ -152,8 +161,9 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
       createGrid(recentEmojis, container);
     }
 
-    rawCategories.forEach((category, i) => {
-      const name = category.id.replace("-", " ");
+    const emojiData = getEmojiData();
+    emojiData?.categories.forEach((category, i) => {
+      const name = category.id.replace("-", " & ");
 
       timeOutsRef.current.push(
         setTimeout(() => {
@@ -192,7 +202,7 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
       }
 
       addRecentEmoji(img.id);
-      onEmojiSelect(img.id);
+      onEmojiSelect(getEmojiData()?.emojis[img.id].shortcodes[0] || "");
     };
 
     containerRef.current?.addEventListener("click", handleClick);
@@ -205,10 +215,7 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
   // ─── Return ───────────────────────────────────────────────────────────────
 
   return {
-    searchQuery,
     containerRef,
     categories: emojiCategories,
-    setSearchQuery,
-    clearSearch,
   };
 }

@@ -7,8 +7,22 @@ import { resolve } from "path";
 import type {
   Emoji,
   EmojiSkin,
-  RawEmojiCategory,
-} from "../src/components/editor/blocks/EmojiPicker/data";
+  EmojiCategory,
+} from "../src/components/editor/menus/EmojiPicker/data";
+
+const _categories = {
+  "smileys-emotion": "1F604", // 😄
+  "people-body": "1F44B", // 👋
+  "animals-nature": "1F431", // 🐱
+  "food-drink": "1F34E", // 🍎
+  "travel-places": "2708", // 🌍
+  activities: "1F3C6", // 🏆
+  objects: "1F4A1", // 💡
+  symbols: "1F4AF", // 💯
+  flags: "1F6A9", // 🚩
+};
+
+const DIRECTORY = "src/components/editor/menus/EmojiPicker";
 
 const build = (): void => {
   const emojis: Record<string, Emoji> = {};
@@ -50,25 +64,23 @@ const build = (): void => {
   }
 
   // groups is Record<string, string> e.g. { "0": "smileys-emotion", "1": "people-body" }
-  const categories: RawEmojiCategory[] = Object.entries(groupData.groups)
-    .map(([index, key]) => ({
+  const categories = Object.entries(groupData.groups)
+    .map<EmojiCategory>(([index, key]) => ({
       id: key,
       emojis: categoryMap[Number(index)] ?? [],
+      icon: _categories[key as keyof typeof _categories],
     }))
     .filter((cat) => cat.emojis.length > 0 && cat.id !== "component");
 
   const data = { emojis, categories };
 
-  const outDir = resolve(
-    process.cwd(),
-    "src/components/editor/blocks/EmojiPicker",
-  );
+  const outDir = resolve(process.cwd(), DIRECTORY);
   mkdirSync(outDir, { recursive: true });
   writeFileSync(resolve(outDir, "emoji.json"), JSON.stringify(data));
 
   console.log("shortcodecount", shortcodecount);
   console.log(
-    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → src/components/editor/blocks/EmojiPicker/emoji.json`,
+    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → ${DIRECTORY}/emoji.json`,
   );
 };
 
