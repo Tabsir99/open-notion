@@ -101,7 +101,7 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
       },
     });
 
-    editor.registerPlugin(plugin);
+    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
 
     return () => {
       editor.unregisterPlugin(EmojiSuggestionPluginKey);

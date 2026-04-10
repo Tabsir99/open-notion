@@ -2,28 +2,99 @@ import { getEmojiData } from "./data";
 import { getEmojiUrl } from "./getEmojiUrl";
 
 export const COLUMN_COUNT = 10;
-const className =
-  "bg-accent outline outline-accent-foreground scroll-mt-10 scroll-mb-2.5";
-const FOCUSED_CLASS = className.split(" ");
+const FOCUSED_CLASS =
+  "bg-accent outline outline-accent-foreground scroll-mt-10 scroll-mb-2.5".split(
+    " ",
+  );
+
+const MOVES: Record<string, [number, number]> = {
+  ArrowRight: [1, 0],
+  ArrowLeft: [-1, 0],
+  ArrowDown: [0, 1],
+  ArrowUp: [0, -1],
+};
 
 export type EmojiGridApi = ReturnType<typeof createEmojiGrid>;
 
 export function createEmojiGrid(container: HTMLElement) {
   const buttons: HTMLButtonElement[] = [];
+  const grids: { start: number; count: number }[] = [];
   let focusedIdx = -1;
+  let desiredCol = 0;
 
-  const setFocus = (next: number) => {
+  const handleMouseMove = (e: MouseEvent) => {
+    const btn = (e.target as HTMLElement).closest("button");
+    if (!btn) return;
+    const idx = btn.dataset.idx;
+    if (typeof idx === "string") setFocus(parseInt(idx));
+  };
+  container.addEventListener("mousemove", handleMouseMove, { passive: true });
+
+  const gridOf = (idx: number) =>
+    grids.findIndex((g) => idx >= g.start && idx < g.start + g.count);
+
+  const lastRowStart = (count: number) =>
+    Math.floor((count - 1) / COLUMN_COUNT) * COLUMN_COUNT;
+
+  const landAt = (gi: number, rowStart: number, col: number) => {
+    const g = grids[gi];
+    const rowLen = Math.min(COLUMN_COUNT, g.count - rowStart);
+    return g.start + rowStart + Math.min(col, rowLen - 1);
+  };
+
+  const focusAt = (next: number) => {
     if (!buttons.length) return;
     const clamped = Math.max(0, Math.min(next, buttons.length - 1));
     if (clamped === focusedIdx) return;
 
-    if (focusedIdx >= 0 && focusedIdx < buttons.length) {
-      buttons[focusedIdx].classList.remove(...FOCUSED_CLASS);
-    }
-
+    if (focusedIdx >= 0) buttons[focusedIdx].classList.remove(...FOCUSED_CLASS);
     buttons[clamped].classList.add(...FOCUSED_CLASS);
     buttons[clamped].scrollIntoView({ block: "nearest", behavior: "smooth" });
     focusedIdx = clamped;
+  };
+
+  const setFocus = (next: number) => {
+    focusAt(next);
+    const gi = gridOf(focusedIdx);
+    if (gi >= 0) desiredCol = (focusedIdx - grids[gi].start) % COLUMN_COUNT;
+  };
+
+  const move = (dx: number, dy: number) => {
+    if (focusedIdx < 0) return setFocus(0);
+    const gi = gridOf(focusedIdx);
+    if (gi < 0) return;
+
+    const g = grids[gi];
+    const local = focusedIdx - g.start;
+    const rowStart = local - (local % COLUMN_COUNT);
+
+    if (dx) {
+      const next = focusedIdx + dx;
+      if (next >= g.start && next < g.start + g.count) {
+        focusAt(next);
+        desiredCol = (next - g.start) % COLUMN_COUNT;
+      } else if (dx > 0 && gi + 1 < grids.length) {
+        const ng = grids[gi + 1];
+        focusAt(ng.start);
+        desiredCol = 0;
+      } else if (dx < 0 && gi > 0) {
+        const pg = grids[gi - 1];
+        focusAt(pg.start + pg.count - 1);
+        desiredCol = (pg.count - 1) % COLUMN_COUNT;
+      }
+      return;
+    }
+
+    const targetRow = rowStart + dy * COLUMN_COUNT;
+    if (targetRow >= 0 && targetRow < g.count) {
+      focusAt(landAt(gi, targetRow, desiredCol));
+    } else if (dy > 0 && gi + 1 < grids.length) {
+      focusAt(landAt(gi + 1, 0, desiredCol));
+    } else if (dy < 0 && gi > 0) {
+      focusAt(landAt(gi - 1, lastRowStart(grids[gi - 1].count), desiredCol));
+    } else {
+      setFocus(dy > 0 ? buttons.length - 1 : 0);
+    }
   };
 
   const addHeader = (title: string, key: string) => {
@@ -36,9 +107,10 @@ export function createEmojiGrid(container: HTMLElement) {
   };
 
   const addGrid = (emojiIds: string[]) => {
-    const emojiData = getEmojiData();
-    if (!emojiData) return;
+    const data = getEmojiData();
+    if (!data) return;
 
+    const startIdx = buttons.length;
     const grid = document.createElement("div");
     grid.style.display = "grid";
     grid.style.gridTemplateColumns = `repeat(${COLUMN_COUNT}, minmax(48px, 1fr))`;
@@ -46,7 +118,7 @@ export function createEmojiGrid(container: HTMLElement) {
     container.appendChild(grid);
 
     for (const id of emojiIds) {
-      const emoji = emojiData.emojis[id];
+      const emoji = data.emojis[id];
       if (!emoji) continue;
 
       const button = document.createElement("button");
@@ -69,8 +141,13 @@ export function createEmojiGrid(container: HTMLElement) {
 
       button.appendChild(img);
       grid.appendChild(button);
+
+      button.dataset.idx = buttons.length.toString();
       buttons.push(button);
     }
+
+    const count = buttons.length - startIdx;
+    if (count > 0) grids.push({ start: startIdx, count });
   };
 
   const addCategory = (title: string, key: string, emojiIds: string[]) => {
@@ -89,33 +166,19 @@ export function createEmojiGrid(container: HTMLElement) {
   const reset = () => {
     container.innerHTML = "";
     buttons.length = 0;
+    grids.length = 0;
     focusedIdx = -1;
+    desiredCol = 0;
+    container.removeEventListener("mousemove", handleMouseMove);
   };
 
   const handleKey = (event: KeyboardEvent): boolean => {
     if (!buttons.length) return false;
-    const total = buttons.length;
-
-    switch (event.key) {
-      case "ArrowDown":
-        event.preventDefault();
-        setFocus(focusedIdx < 0 ? 0 : focusedIdx + COLUMN_COUNT);
-        return true;
-      case "ArrowUp":
-        event.preventDefault();
-        setFocus(focusedIdx < 0 ? total - 1 : focusedIdx - COLUMN_COUNT);
-        return true;
-      case "ArrowRight":
-        event.preventDefault();
-        setFocus(focusedIdx < 0 ? 0 : focusedIdx + 1);
-        return true;
-      case "ArrowLeft":
-        event.preventDefault();
-        setFocus(focusedIdx < 0 ? total - 1 : focusedIdx - 1);
-        return true;
-      default:
-        return false;
-    }
+    const delta = MOVES[event.key];
+    if (!delta) return false;
+    event.preventDefault();
+    move(delta[0], delta[1]);
+    return true;
   };
 
   const getFocusedButton = () => (focusedIdx >= 0 ? buttons[focusedIdx] : null);
