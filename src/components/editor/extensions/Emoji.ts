@@ -13,13 +13,10 @@ import type { SuggestionOptions } from "@tiptap/suggestion";
 import { Suggestion } from "@tiptap/suggestion";
 import emojiRegex from "emoji-regex";
 
-import {
-  emojiArray,
-  getEmojiUrl,
-  type Emoji,
-} from "../blocks/EmojiPicker/data.js";
+import { type Emoji } from "../blocks/EmojiPicker/data.js";
 import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
+import { getEmojiUrl } from "../blocks/EmojiPicker/getEmojiUrl.js";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -67,7 +64,7 @@ export const EmojiNode = Node.create<EmojiOptions, EmojiStorage>({
   addOptions() {
     return {
       HTMLAttributes: {},
-      emojis: emojiArray,
+      emojis: [],
       getEmojiUrl: getEmojiUrl,
       suggestion: {
         char: ":",
@@ -162,7 +159,7 @@ export const EmojiNode = Node.create<EmojiOptions, EmojiStorage>({
           draggable: "false",
           loading: "lazy",
           alt: `${emojiItem.name} emoji`,
-          style: "width: 1.8em; height: 1.8em; display: inline;",
+          style: "width: 1em.5; height: 1.5em; display: inline;",
         },
       ],
     ];

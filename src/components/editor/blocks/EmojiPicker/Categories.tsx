@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { getEmojiUrl, type EmojiData } from "./data";
+import { type EmojiData } from "./data";
+import { getEmojiUrl } from "./getEmojiUrl";
 
 export const EmojiCateogires = ({
   categories,
@@ -36,7 +37,12 @@ export const EmojiCateogires = ({
             size="icon"
             onClick={(e) => handleCategorySelect(e, id)}
           >
-            <img src={getEmojiUrl(icon)} />
+            <img
+              src={getEmojiUrl(icon, {
+                provider: "noto-animated",
+                format: "gif",
+              })}
+            />
           </Button>
         );
       })}

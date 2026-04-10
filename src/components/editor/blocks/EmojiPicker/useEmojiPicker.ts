@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { categories, emojiData, getEmojiUrl } from "./data";
+import { categories, emojis, emojiArray, rawCategories } from "./data";
+import { getEmojiUrl } from "./getEmojiUrl";
 
 const createGrid = (
   emojiIds: string[],
@@ -22,7 +23,7 @@ const createGrid = (
             flex items-center justify-center transition-colors duration-200
             p-1 hover:bg-[#f3f4f6] text-2xl`;
 
-    const emoji = emojiData.emojis[id as keyof typeof emojiData.emojis];
+    const emoji = emojis[id];
 
     button.className = className;
 
@@ -81,10 +82,9 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
 
     const query = searchQuery.toLowerCase();
     const filtered: string[] = [];
-    const emojisArr = Object.values(emojiData.emojis);
 
-    for (let i = 0; i < emojisArr.length; i++) {
-      const emoji = emojisArr[i];
+    for (let i = 0; i < emojiArray.length; i++) {
+      const emoji = emojiArray[i];
       if (emoji.name.toLowerCase().includes(query)) {
         filtered.push(emoji.id);
       }
@@ -152,7 +152,7 @@ export default function useEmojiPicker({ onEmojiSelect }: UseEmojiPickerProps) {
       createGrid(recentEmojis, container);
     }
 
-    emojiData.categories.forEach((category, i) => {
+    rawCategories.forEach((category, i) => {
       const name = category.id.replace("-", " ");
 
       timeOutsRef.current.push(

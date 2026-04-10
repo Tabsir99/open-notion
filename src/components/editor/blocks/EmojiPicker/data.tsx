@@ -1,4 +1,4 @@
-import emojiData from "./emoji.json";
+import emojiData from "@/assets/emoji.json";
 
 export interface EmojiSkin {
   unified: string;
@@ -41,7 +41,3 @@ export const categories: { id: string; icon: string }[] = Object.entries({
   symbols: "1F531", // 🔱
   flags: "1F3C1", // 🏁
 }).map(([key, value]) => ({ id: key, icon: value }));
-
-export const getEmojiUrl = (id: string) => {
-  return `https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/${id}.svg`;
-};
