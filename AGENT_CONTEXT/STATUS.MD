@@ -13,7 +13,8 @@
 | Phase 5.1 — Image Block | ✅ Complete |
 | Phase 5.2 — Link Popover | ✅ Complete |
 | Phase 5.3 — Code Block | ✅ Complete |
-| Phase 5.4 — Callout Block + wire to menu | 🔄 In Progress |
+| Phase 5.4 — Emoji Block + wire to menu | 🔄    In Progress |
+| Phase 5.5 — Callout Block + wire to menu | ⬜ Pending |
 | Phase 6 — Polish & Animation | ⬜ Pending |
 
 ## Current Task

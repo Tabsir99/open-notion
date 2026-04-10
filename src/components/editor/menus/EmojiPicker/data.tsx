@@ -27,24 +27,6 @@ export interface EmojiData {
   categories: EmojiCategory[];
 }
 
-// blocks/EmojiPicker/data.ts
-
-export interface EmojiSkin {
-  unified: string;
-  native: string;
-  tone?: number | number[];
-}
-
-export interface Emoji {
-  id: string;
-  name: string;
-  unicode: string;
-  tags: string[];
-  skins: EmojiSkin[];
-  group: number;
-  shortcodes: string[];
-}
-
 // --- Singleton loader ---
 
 let _cache: EmojiData | null = null;

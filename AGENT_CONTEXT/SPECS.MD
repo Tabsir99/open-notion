@@ -44,43 +44,66 @@ A production-quality, Notion-style block-based editor. The result should feel in
 ## Architecture
 
 ```
-src/
-├── components/
-│   ├── editor/
-│   │   ├── Editor.tsx
-│   │   ├── EditorProvider.tsx
-│   │   ├── menus/
-│   │   │   ├── BlockSideMenu.tsx
-│   │   │   ├── BlockContextMenu.tsx
-│   │   │   ├── TurnIntoSubmenu.tsx
-│   │   │   ├── useActiveBlock.ts
-│   │   │   ├── BubbleToolbar.tsx
-│   │   │   ├── SlashMenu.tsx
-│   │   │   ├── slash-items.ts
-│   │   │   ├── LinkPopover.tsx        ← Phase 5.3
-│   │   │   └── block-side-menu.css
-│   │   ├── blocks/
-│   │   │   ├── ImageBlock.tsx
-│   │   │   ├── CodeBlock.tsx          ← Phase 5.2
-│   │   │   └── CalloutBlock.tsx       ← Phase 5.4
-│   │   └── styles/
-│   │       └── editor.css
-│   └── ui/
-│       ├── button.tsx
-│       ├── dropdown-menu.tsx
-│       ├── toggle.tsx
-│       ├── separator.tsx
-│       └── popover.tsx
-├── lib/utils.ts
-├── App.tsx
-├── main.tsx
-└── global.css
+├── editor
+│   ├── blocks
+│   │   ├── CalloutBlock
+│   │   ├── CodeBlock
+│   │   │   ├── index.tsx
+│   │   │   └── languages.tsx
+│   │   └── ImageBlock
+│   │       ├── Empty.tsx
+│   │       ├── index.tsx
+│   │       └── Toolbar.tsx
+│   ├── constants
+│   │   └── slash-items.ts
+│   ├── Editor.tsx
+│   ├── extensions
+│   │   ├── CustomCodeBlock.ts
+│   │   ├── CustomImage.ts
+│   │   ├── Emoji.ts
+│   │   └── helpers
+│   │       ├── emojiToShortcode.ts
+│   │       ├── removeDuplicates.ts
+│   │       ├── removeVariationSelector.ts
+│   │       └── shortcodeToEmoji.ts
+│   ├── menus
+│   │   ├── BlockContextMenu.tsx
+│   │   ├── BlockSideMenu.tsx
+│   │   ├── BubbleMenu
+│   │   │   ├── index.tsx
+│   │   │   └── LinkInput.tsx
+│   │   ├── EmojiPicker
+│   │   │   ├── Categories.tsx
+│   │   │   ├── data.tsx
+│   │   │   ├── emoji.json
+│   │   │   ├── getEmojiUrl.ts
+│   │   │   ├── index.tsx
+│   │   │   └── useEmojiPicker.ts
+│   │   ├── SlashMenu.tsx
+│   │   ├── TurnIntoMenu.tsx
+│   │   └── useActiveBlock.ts
+│   ├── styles
+│   │   ├── block-side-menu.css
+│   │   └── editor.css
+│   └── ui
+└── ui
+    ├── button.tsx
+    ├── dialog.tsx
+    ├── dropdown-menu.tsx
+    ├── input-group.tsx
+    ├── input.tsx
+    ├── PopoverArrow.tsx
+    ├── popover.tsx
+    ├── separator.tsx
+    ├── tabs.tsx
+    ├── textarea.tsx
+    └── toggle.tsx
+
 ```
 
 **Architecture rules:**
 - One responsibility per file.
 - Extensions config in `extensions/` or alongside the block. React UI in `menus/` or `blocks/`.
-- Editor child components access editor via `useCurrentEditor()` or prop drilling. No global state library.
 
 ---
 
@@ -102,8 +125,9 @@ Appears on text selection. Buttons: Bold, Italic, Strikethrough, Code, Underline
 - **5.1 Image block** ✅ — URL input / upload placeholder, caption, alignment
 - **5.2 Link popover** ✅ — cursor-on-link floating popover + bubble-toolbar link creation flow
 - **5.3 Code block** ✅ — `CodeBlock`, with shiki syntax highlighting, language selector, Wire to turnintomenu
-- **5.4 Callout block** ⬜ — ReactNodeView, emoji picker, colored border
-- **5.5 Wire Callout into TurnIntoSubmenu** ⬜
+- **5.4 Emoji block** ⬜ — Custom plugin, extension, emoji picker
+- **5.5 Callout block** ⬜ — ReactNodeView, emoji picker, colored border
+- **5.6 Wire Callout into TurnIntoSubmenu** ⬜
 
 ### Phase 6 — Polish & Animation
 - Drag-and-drop reorder (wire up grip button DnD)

@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useEmojiPicker from "./useEmojiPicker";
 import { EmojiCateogires } from "./Categories";
 import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
@@ -7,6 +7,8 @@ import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import { EmojiNode } from "../../extensions/Emoji";
 import { PopoverArrow } from "@/components/ui/PopoverArrow";
+import { getEmojiData } from "./data";
+import { createEmojiGrid, type EmojiGridApi } from "./createEmojiGrid";
 
 interface EmojiPickerMenuProps {
   editor: Editor;
@@ -16,7 +18,6 @@ interface PickerState {
   anchor: DOMRect | null | undefined;
   open: boolean;
   query: string;
-  focusedEmoji: string | null;
 }
 
 const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
@@ -26,13 +27,17 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
     anchor: null,
     open: false,
     query: "",
-    focusedEmoji: null,
   });
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rangeRef = useRef<{ from: number; to: number } | null>(null);
+  const gridApiRef = useRef<EmojiGridApi | null>(null);
 
   useEffect(() => {
+    if (containerRef.current) {
+      gridApiRef.current = createEmojiGrid(containerRef.current);
+    }
+
     const plugin = Suggestion({
       editor,
       char: ":",
@@ -43,19 +48,17 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
             anchor: props.clientRect?.(),
             open: true,
             query: props.query,
-            focusedEmoji: null,
           });
           rangeRef.current = props.range;
         },
+
         onExit() {
-          setPickerState((prev) => ({
-            ...prev,
-            open: false,
-            query: "",
-          }));
+          setPickerState((prev) => ({ ...prev, open: false, query: "" }));
+          gridApiRef.current?.reset();
+          rangeRef.current = null;
         },
+
         onUpdate(props) {
-          console.log("onUpdate", props.range, new Error().stack);
           setPickerState((prev) => ({
             ...prev,
             query: props.query,
@@ -63,36 +66,38 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
           }));
           rangeRef.current = props.range;
         },
-        onKeyDown({ event }) {
-          switch (event.key) {
-            case "ArrowUp":
-              event.preventDefault();
 
-              return true;
-            case "ArrowDown":
-              event.preventDefault();
-              return true;
-            case "ArrowLeft":
-              event.preventDefault();
-              return true;
-            case "ArrowRight":
-              event.preventDefault();
-              return true;
-            case "Enter":
-              event.preventDefault();
-              return true;
+        onKeyDown: ({ event }) => {
+          const api = gridApiRef.current;
+          if (!api) return false;
 
-            default:
-              return false;
+          if (event.key === "Enter") {
+            event.preventDefault();
+            const btn = api.getFocusedButton();
+            const range = rangeRef.current;
+            if (!btn || !range) return true;
+
+            const img = btn.querySelector("img");
+            const shortcode =
+              img && getEmojiData()?.emojis[img.id]?.shortcodes[0];
+            if (shortcode) {
+              editor
+                .chain()
+                .focus()
+                .deleteRange(range)
+                .setEmoji(shortcode)
+                .run();
+            }
+            return true;
           }
+
+          return api.handleKey(event) ?? false;
         },
       }),
       allow: ({ state, range }) => {
         const $from = state.doc.resolve(range.from);
         const type = state.schema.nodes[EmojiNode.name];
-        const allow = !!$from.parent.type.contentMatch.matchType(type);
-
-        return allow;
+        return !!$from.parent.type.contentMatch.matchType(type);
       },
     });
 
@@ -100,8 +105,10 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
 
     return () => {
       editor.unregisterPlugin(EmojiSuggestionPluginKey);
+      gridApiRef.current?.reset();
+      gridApiRef.current = null;
     };
-  }, []);
+  }, [editor]);
 
   const anchor = useMemo(
     () => ({
@@ -139,6 +146,7 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
             }}
             searchQuery={pickerState.query}
             containerRef={containerRef}
+            gridApiRef={gridApiRef}
           />
         </div>
 
@@ -151,9 +159,9 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
 interface EmojiPickerProps {
   onEmojiSelect: (emojiId: string) => void;
   className?: string;
-  columns?: number;
   searchQuery: string;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  gridApiRef: React.RefObject<EmojiGridApi | null>;
 }
 
 const EmojiPicker = ({
@@ -161,12 +169,24 @@ const EmojiPicker = ({
   className,
   searchQuery,
   containerRef,
+  gridApiRef,
 }: EmojiPickerProps) => {
-  const { categories } = useEmojiPicker({
+  const { recentEmojis } = useEmojiPicker({
     onEmojiSelect,
     searchQuery,
     containerRef,
+    gridApiRef,
   });
+
+  const setContainer = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    if (node) {
+      gridApiRef.current = createEmojiGrid(node);
+    } else {
+      gridApiRef.current?.reset();
+      gridApiRef.current = null;
+    }
+  }, []);
 
   return (
     <div className={`h-full flex flex-col relative ${className}`}>
@@ -177,10 +197,12 @@ const EmojiPicker = ({
           msOverflowStyle: "none",
         }}
       >
-        <div ref={containerRef} />
+        <div ref={setContainer} />
       </div>
 
-      {searchQuery ? null : <EmojiCateogires categories={categories} />}
+      {searchQuery ? null : (
+        <EmojiCateogires hasRecent={recentEmojis.length > 0} />
+      )}
     </div>
   );
 };

@@ -78,8 +78,8 @@ const build = (): void => {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(resolve(outDir, "emoji.json"), JSON.stringify(data));
 
-  console.log("shortcodecount", shortcodecount);
-  console.log(
+  console.info("shortcodecount", shortcodecount);
+  console.info(
     `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → ${DIRECTORY}/emoji.json`,
   );
 };

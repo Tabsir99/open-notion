@@ -1,14 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { type EmojiData } from "./data";
+import { useMemo, useState } from "react";
+import { getEmojiData, type EmojiCategory } from "./data";
 import { getEmojiUrl } from "./getEmojiUrl";
 
-export const EmojiCateogires = ({
-  categories,
-}: {
-  categories: EmojiData["categories"];
-}) => {
+export const EmojiCateogires = ({ hasRecent }: { hasRecent: boolean }) => {
   const [activeCategory, setActiveCategory] = useState("smileys-emotion");
+
+  const emojiCategories: EmojiCategory[] = useMemo(() => {
+    const emojiData = getEmojiData();
+    if (!emojiData) return [];
+
+    if (!hasRecent) return emojiData.categories;
+    return [
+      { id: "recent", icon: "231B", emojis: [] },
+      ...emojiData.categories,
+    ];
+  }, [hasRecent]);
 
   const handleCategorySelect = (e: React.MouseEvent, key: string) => {
     e.preventDefault();
@@ -26,7 +33,7 @@ export const EmojiCateogires = ({
       onPointerDown={(e) => e.preventDefault()}
       className={`shrink-0 border-t transition-all duration-200 overflow-hidden flex justify-between px-2 py-1`}
     >
-      {categories.map(({ id, icon }) => {
+      {emojiCategories.map(({ id, icon }) => {
         return (
           <Button
             key={id}
