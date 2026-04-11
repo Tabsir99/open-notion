@@ -5,7 +5,7 @@ import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import { EmojiNode } from "../../extensions/Emoji";
 import { PopoverArrow } from "@/components/ui/PopoverArrow";
-import { createEmojiPicker, type EmojiPickerApi } from "./createEmojiPicker";
+import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
 
 interface EmojiPickerProps {
   editor: Editor;
@@ -101,7 +101,7 @@ export const EmojiPicker = memo(({ editor }: EmojiPickerProps) => {
         className="w-lg h-120 p-0 flex flex-col gap-0 duration-200 ease-in overflow-visible shadow-2xl transition-all"
       >
         <PopoverTitle className="sr-only">Emoji Picker</PopoverTitle>
-        <div className="flex-1 min-h-0 relative" ref={setContainer} />
+        <div ref={setContainer} />
         <PopoverArrow facing="left" align="center" size={18} />
       </PopoverContent>
     </Popover>

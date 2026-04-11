@@ -10,12 +10,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getEmojiData } from "../../menus/EmojiPicker/data";
+import { getEmojiData } from "../../menus/EmojiPicker/createEmojipicker/data";
 import { CALLOUT_COLORS, type CalloutColor } from "../../extensions/Callout";
 import {
   createEmojiPicker,
   type EmojiPickerApi,
-} from "../../menus/EmojiPicker/createEmojiPicker";
+} from "../../menus/EmojiPicker/createEmojipicker";
 
 // ── Color swatch ──────────────────────────────────────────────────────────
 

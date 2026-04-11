@@ -11,7 +11,7 @@ import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import emojiRegex from "emoji-regex";
 
-import { type Emoji } from "../menus/EmojiPicker/data.js";
+import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data.js";
 import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
 import { getEmojiUrl } from "../menus/EmojiPicker/getEmojiUrl.js";

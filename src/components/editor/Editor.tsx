@@ -11,7 +11,10 @@ import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
 import "./styles/editor.css";
 import { EmojiNode } from "./extensions/Emoji";
 import { EmojiPicker } from "./menus/EmojiPicker";
-import { getEmojiArray, loadEmojiData } from "./menus/EmojiPicker/data";
+import {
+  getEmojiArray,
+  loadEmojiData,
+} from "./menus/EmojiPicker/createEmojipicker/data";
 import { Callout } from "./extensions/Callout";
 
 const dataPromise = (async () => {
