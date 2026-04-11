@@ -7,7 +7,7 @@ import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import { EmojiNode } from "../../extensions/Emoji";
 import { PopoverArrow } from "@/components/ui/PopoverArrow";
-import { getEmojiData } from "./data";
+import { getEmojiData, getFilteredEmojis } from "./data";
 import { createEmojiGrid, type EmojiGridApi } from "./createEmojiGrid";
 
 interface EmojiPickerMenuProps {
@@ -33,15 +33,30 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
   const rangeRef = useRef<{ from: number; to: number } | null>(null);
   const gridApiRef = useRef<EmojiGridApi | null>(null);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      gridApiRef.current = createEmojiGrid(containerRef.current);
-    }
+  const onEmojiSelect = useCallback(
+    (shortcode: string) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(rangeRef.current!)
+        .setEmoji(shortcode)
+        .run();
+    },
+    [editor],
+  );
 
+  const { recentEmojis, renderContent, renderFiltered } = useEmojiPicker({
+    onEmojiSelect,
+    containerRef,
+    gridApiRef,
+  });
+
+  useEffect(() => {
     const plugin = Suggestion({
       editor,
       char: ":",
       pluginKey: EmojiSuggestionPluginKey,
+      items: ({ query }) => getFilteredEmojis(query),
       render: () => ({
         onStart(props) {
           setPickerState({
@@ -49,6 +64,7 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
             open: true,
             query: props.query,
           });
+          renderFiltered(props.items);
           rangeRef.current = props.range;
         },
 
@@ -64,6 +80,7 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
             query: props.query,
             anchor: props.clientRect?.(),
           }));
+          props.query ? renderFiltered(props.items) : renderContent();
           rangeRef.current = props.range;
         },
 
@@ -108,13 +125,27 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
       gridApiRef.current?.reset();
       gridApiRef.current = null;
     };
-  }, [editor]);
+  }, [editor, renderContent, renderFiltered]);
 
   const anchor = useMemo(
     () => ({
       getBoundingClientRect: () => pickerState.anchor ?? new DOMRect(),
     }),
     [pickerState.anchor],
+  );
+
+  const setContainer = useCallback(
+    (node: HTMLDivElement | null) => {
+      containerRef.current = node;
+      if (node) {
+        gridApiRef.current = createEmojiGrid(node);
+        renderContent();
+      } else {
+        gridApiRef.current?.reset();
+        gridApiRef.current = null;
+      }
+    },
+    [renderContent],
   );
 
   return (
@@ -135,19 +166,21 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
 
         {/* EmojiPicker - takes remaining space */}
         <div className="flex-1 min-h-0 relative">
-          <EmojiPicker
-            onEmojiSelect={(shortcode) => {
-              editor
-                .chain()
-                .focus()
-                .deleteRange(rangeRef.current!)
-                .setEmoji(shortcode)
-                .run();
-            }}
-            searchQuery={pickerState.query}
-            containerRef={containerRef}
-            gridApiRef={gridApiRef}
-          />
+          <div className={`h-full flex flex-col relative`}>
+            <div
+              className="flex-1 overflow-auto min-h-0"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              <div ref={setContainer} />
+            </div>
+
+            {pickerState.query ? null : (
+              <EmojiCateogires hasRecent={recentEmojis.length > 0} />
+            )}
+          </div>
         </div>
 
         <PopoverArrow facing="left" align="center" size={18} />
@@ -155,54 +188,3 @@ export const EmojiPickerMenu = memo(({ editor }: EmojiPickerMenuProps) => {
     </Popover>
   );
 });
-
-interface EmojiPickerProps {
-  onEmojiSelect: (emojiId: string) => void;
-  className?: string;
-  searchQuery: string;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  gridApiRef: React.RefObject<EmojiGridApi | null>;
-}
-
-const EmojiPicker = ({
-  onEmojiSelect,
-  className,
-  searchQuery,
-  containerRef,
-  gridApiRef,
-}: EmojiPickerProps) => {
-  const { recentEmojis } = useEmojiPicker({
-    onEmojiSelect,
-    searchQuery,
-    containerRef,
-    gridApiRef,
-  });
-
-  const setContainer = useCallback((node: HTMLDivElement | null) => {
-    containerRef.current = node;
-    if (node) {
-      gridApiRef.current = createEmojiGrid(node);
-    } else {
-      gridApiRef.current?.reset();
-      gridApiRef.current = null;
-    }
-  }, []);
-
-  return (
-    <div className={`h-full flex flex-col relative ${className}`}>
-      <div
-        className="flex-1 overflow-auto min-h-0"
-        style={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-      >
-        <div ref={setContainer} />
-      </div>
-
-      {searchQuery ? null : (
-        <EmojiCateogires hasRecent={recentEmojis.length > 0} />
-      )}
-    </div>
-  );
-};

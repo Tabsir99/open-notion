@@ -12,6 +12,8 @@ import {
   Code,
   Minus,
   Image as ImageIcon,
+  AlertCircle,
+  Smile,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -133,6 +135,24 @@ export const slashItems: SlashItem[] = [
     group: "Advanced",
     action: (editor, range) =>
       editor.chain().focus().deleteRange(range).setHorizontalRule().run(),
+  },
+  {
+    id: "emoji",
+    title: "Emoji",
+    description: "Insert an emoji",
+    icon: Smile,
+    group: "Advanced",
+    action: (editor, range) =>
+      editor.chain().focus().deleteRange(range).insertContent(":").run(),
+  },
+  {
+    id: "callout",
+    title: "Callout",
+    description: "Highlighted info block with icon",
+    icon: AlertCircle,
+    group: "Advanced",
+    action: (editor, range) =>
+      editor.chain().focus().deleteRange(range).setCallout().run(),
   },
 ];
 

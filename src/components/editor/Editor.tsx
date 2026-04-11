@@ -12,6 +12,7 @@ import "./styles/editor.css";
 import { EmojiNode } from "./extensions/Emoji";
 import { EmojiPickerMenu } from "./menus/EmojiPicker";
 import { getEmojiArray, loadEmojiData } from "./menus/EmojiPicker/data";
+import { Callout } from "./extensions/Callout";
 
 const dataPromise = (async () => {
   await loadEmojiData();
@@ -34,6 +35,7 @@ function _Editor() {
         },
       }),
       CustomCodeBlock,
+      Callout,
       TaskList,
       TaskItem,
       Placeholder.configure({

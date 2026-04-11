@@ -13,21 +13,23 @@
 | Phase 5.1 — Image Block | ✅ Complete |
 | Phase 5.2 — Link Popover | ✅ Complete |
 | Phase 5.3 — Code Block | ✅ Complete |
-| Phase 5.4 — Emoji Block + wire to menu | 🔄    In Progress |
-| Phase 5.5 — Callout Block + wire to menu | ⬜ Pending |
+| Phase 5.4 — Emoji Block + wire to menu | ✅ Complete |
+| Phase 5.5 — Callout Block + wire to menu | 🔄    In Progress |
 | Phase 6 — Polish & Animation | ⬜ Pending |
 
 ## Current Task
 
-**Phase 5.4 — Callout Block + wire to menu**
-- Implement Callout extension + node view
+**Phase 5.5 — Callout Block + wire to menu**
+- Implement Callout extension + ReactNodeView
+- Emoji icon picker integration (reuse EmojiPicker)
+- Colored background/border variants
 - Wire Callout into TurnIntoMenu and SlashMenu
 
 ## Known Pending (Non-blocking)
 
 - Drag-and-drop reorder: grip has `draggable` but no DnD logic (Phase 6)
 - Move to / Color submenus: "Coming soon" placeholder (Phase 6)
-- Callout Turn Into: placeholder log, needs Callout extension (Phase 5.4 + 5.5)
+- Callout Turn Into: placeholder log, needs Callout extension (Phase 5.5)
 - `+` button in BlockSideMenu: sets cursor only, slash menu integration still needed
 
 ## CSS Note

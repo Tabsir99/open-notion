@@ -146,15 +146,13 @@ export const turnIntoItems: TurnIntoItem[] = [
     label: "Callout",
     icon: AlertCircle,
     isActive: (editor) => editor.isActive("callout"),
-    action: (editor, blockPos) => {
-      // Callout extension not yet implemented — log for now
-      console.log("Turn into callout — extension not yet available");
+    action: (editor, blockPos) =>
       editor
         .chain()
         .focus()
         .setTextSelection(blockPos + 1)
-        .run();
-    },
+        .setCallout()
+        .run(),
   },
 ];
 

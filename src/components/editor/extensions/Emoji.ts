@@ -8,7 +8,7 @@ import {
   PasteRule,
 } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import emojiRegex from "emoji-regex";
 
 import { type Emoji } from "../menus/EmojiPicker/data.js";
@@ -47,6 +47,29 @@ export const EmojiNode = Node.create<EmojiOptions>({
   atom: true,
 
   selectable: false,
+
+  addKeyboardShortcuts() {
+    const step = (dir: -1 | 1) => () => {
+      const { state, view } = this.editor;
+      const { $from, empty } = state.selection;
+      if (!empty) return false;
+
+      const target = $from.pos + dir;
+      if (target < 0 || target > state.doc.content.size) return false;
+
+      const nodeBefore = $from.nodeBefore;
+      const nodeAfter = $from.nodeAfter;
+      const adjacent = dir === -1 ? nodeBefore : nodeAfter;
+
+      if (!adjacent || adjacent.type.name !== this.name) return false;
+
+      const $target = state.doc.resolve(target);
+      view.dispatch(state.tr.setSelection(TextSelection.near($target, dir)));
+      return true;
+    };
+
+    return { ArrowLeft: step(-1), ArrowRight: step(1) };
+  },
 
   addOptions() {
     return {
@@ -98,7 +121,8 @@ export const EmojiNode = Node.create<EmojiOptions>({
           draggable: "false",
           loading: "lazy",
           alt: `${emojiItem.name} emoji`,
-          style: "width: 1em.5; height: 1.5em; display: inline;",
+          style:
+            "width: 1.2em; height: 1.2em; display: inline; margin-inline: 0.15em; margin-top: -0.1em;",
         },
       ],
     ];

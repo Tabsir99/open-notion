@@ -160,3 +160,13 @@
 .ProseMirror a.editor-link:hover {
   opacity: 0.8;
 }
+
+/* ── Callout ──────────────────────────────────────────────────────── */
+
+.ProseMirror div[data-type="callout"] p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--editor-text-muted);
+  pointer-events: none;
+  height: 0;
+}

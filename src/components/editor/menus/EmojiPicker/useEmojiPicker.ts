@@ -1,42 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getEmojiArray, getEmojiData } from "./data";
+import { getEmojiData } from "./data";
 import type { EmojiGridApi } from "./createEmojiGrid";
 
 interface UseEmojiPickerProps {
   onEmojiSelect: (shortcode: string) => void;
-  searchQuery: string;
   containerRef: React.RefObject<HTMLDivElement | null>;
   gridApiRef: React.RefObject<EmojiGridApi | null>;
 }
 
 export default function useEmojiPicker({
   onEmojiSelect,
-  searchQuery,
   containerRef,
   gridApiRef,
 }: UseEmojiPickerProps) {
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
   const timeOutsRef = useRef<number[]>([]);
-
-  // ─── Derived / computed ────────────────────────────────────────────────────
-
-  const getFilteredEmojis = useCallback(() => {
-    if (!searchQuery.trim()) return null;
-
-    const emojiArray = getEmojiArray();
-
-    const query = searchQuery.toLowerCase();
-    const filtered: string[] = [];
-
-    for (let i = 0; i < emojiArray.length; i++) {
-      const emoji = emojiArray[i];
-      if (emoji.name.toLowerCase().includes(query)) {
-        filtered.push(emoji.id);
-      }
-    }
-
-    return filtered;
-  }, [searchQuery]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
 
@@ -51,27 +29,26 @@ export default function useEmojiPicker({
 
   // ─── DOM rendering ────────────────────────────────────────────────────────
 
+  const renderFiltered = useCallback((emojis: string[]) => {
+    const api = gridApiRef.current;
+    if (!containerRef.current || !api) return;
+
+    timeOutsRef.current.forEach((id) => clearTimeout(id));
+    api.reset();
+
+    if (emojis.length > 0) {
+      api.addCategory(`Search Results (${emojis.length})`, "search", emojis);
+    } else {
+      api.showEmpty("No emojis found");
+    }
+  }, []);
+
   const renderContent = useCallback(() => {
     const api = gridApiRef.current;
     if (!containerRef.current || !api) return;
 
     timeOutsRef.current.forEach((id) => clearTimeout(id));
-
     api.reset();
-    const filteredEmojis = getFilteredEmojis();
-
-    if (filteredEmojis) {
-      if (filteredEmojis.length > 0) {
-        api.addCategory(
-          `Search Results (${filteredEmojis.length})`,
-          "search",
-          filteredEmojis,
-        );
-      } else {
-        api.showEmpty("No emojis found");
-      }
-      return;
-    }
 
     if (recentEmojis.length > 0) {
       api.addCategory("Recently Used", "recent", recentEmojis);
@@ -84,10 +61,10 @@ export default function useEmojiPicker({
       timeOutsRef.current.push(
         setTimeout(() => {
           api.addCategory(name, category.id, category.emojis);
-        }, i * 1000),
+        }, i * 500),
       );
     });
-  }, [recentEmojis, getFilteredEmojis]);
+  }, [recentEmojis]);
 
   // ─── Effects ──────────────────────────────────────────────────────────────
 
@@ -101,7 +78,9 @@ export default function useEmojiPicker({
     ) as string[];
 
     setRecentEmojis(saved);
+  }, []);
 
+  useEffect(() => {
     const handleClick = (e: PointerEvent) => {
       e.preventDefault();
 
@@ -131,5 +110,7 @@ export default function useEmojiPicker({
 
   return {
     recentEmojis,
+    renderContent,
+    renderFiltered,
   };
 }

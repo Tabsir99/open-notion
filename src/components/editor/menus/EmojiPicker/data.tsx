@@ -1,4 +1,4 @@
-import emojiUrl from "./emoji.json?url";
+import emojiUrl from "@/assets/emoji.json?url";
 
 export interface EmojiSkin {
   unified: string;
@@ -65,3 +65,18 @@ export function getEmojiData(): EmojiData | null {
 export function getEmojiArray(): Emoji[] {
   return _emojiArray ? _emojiArray : [];
 }
+
+export const getFilteredEmojis = (query: string) => {
+  const emojiArray = getEmojiArray();
+
+  const filtered: string[] = [];
+
+  for (let i = 0; i < emojiArray.length; i++) {
+    const emoji = emojiArray[i];
+    if (emoji.name.toLowerCase().includes(query.toLowerCase())) {
+      filtered.push(emoji.id);
+    }
+  }
+
+  return filtered;
+};
