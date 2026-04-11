@@ -22,6 +22,7 @@ import {
   Type,
 } from "lucide-react";
 import { TurnIntomenu } from "./TurnIntoMenu";
+import { ColorMenu } from "./ColorMenu";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -46,7 +47,6 @@ const topItems: MenuItem[] = [
 
 const placeholderSubmenus: PlaceholderSubmenu[] = [
   { id: "move-to", label: "Move to", icon: ArrowRightLeft },
-  { id: "color", label: "Color", icon: Palette },
 ];
 
 const bottomItems: MenuItem[] = [
@@ -65,7 +65,6 @@ interface BlockContextMenuProps {
   blockPos: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  children: React.ReactElement;
 }
 
 export function BlockContextMenu({
@@ -73,7 +72,6 @@ export function BlockContextMenu({
   blockPos,
   open,
   onOpenChange,
-  children,
 }: BlockContextMenuProps) {
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
@@ -133,17 +131,15 @@ export function BlockContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger render={children} />
-
+      <DropdownMenuTrigger
+        className="absolute inset-0 opacity-0 pointer-events-none"
+        aria-hidden
+      />
       <DropdownMenuContent
         side="right"
         align="start"
         sideOffset={8}
         className="w-[260px] max-h-[400px] overflow-y-auto"
-        finalFocus={() => {
-          editor.commands.focus();
-          return false;
-        }}
       >
         {renderItems(topItems)}
 
@@ -153,6 +149,11 @@ export function BlockContextMenu({
           <Type className="size-4" />
           <span>Turn into</span>
         </TurnIntomenu>
+
+        <ColorMenu editor={editor} isSubMenu>
+          <Palette className="size-4" />
+          <span>Color</span>
+        </ColorMenu>
 
         <DropdownMenuSeparator className="h-px my-1" />
 

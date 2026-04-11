@@ -1,25 +1,20 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import type { Editor } from "@tiptap/core";
 
-export interface ActiveBlockInfo {
+export interface ActiveBlock {
   element: HTMLElement | null;
   pos: number;
   nodeType: string;
-  isHovered: boolean;
-  translateY: number;
 }
 
-export type ActiveBlock = Omit<ActiveBlockInfo, "isHovered">;
+interface Options {
+  editor: Editor | null;
+  menuRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  open: boolean;
+}
 
-const INIT_STATE: ActiveBlockInfo = {
-  element: null,
-  pos: 0,
-  nodeType: "",
-  isHovered: false,
-  translateY: 0,
-};
-
-const computeTranslateY = (
+const computeTop = (
   blockEl: HTMLElement,
   container: HTMLElement,
   menu: HTMLElement,
@@ -27,90 +22,73 @@ const computeTranslateY = (
   const blockRect = blockEl.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
   const menuHeight = menu.offsetHeight;
-
   const style = window.getComputedStyle(blockEl);
   const lineHeight = parseFloat(style.lineHeight) || 24;
-
   const blockHeight = blockEl.offsetHeight;
   const firstLineCenter =
     blockHeight < menuHeight
       ? blockHeight / 2
       : Math.min(lineHeight, menuHeight) / 2;
-
   return blockRect.top - containerRect.top + firstLineCenter - menuHeight / 2;
 };
 
-interface UseActiveBlockOptions {
-  editor: Editor | null;
-  locked?: boolean;
-  menuRef: React.RefObject<HTMLDivElement | null>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}
-/**
- * Tracks which top-level block is "active" via cursor position or mouse hover.
- *
- * - Hover always wins over cursor position.
- * - When `locked` is true (context menu open), all tracking freezes.
- */
-export function useActiveBlock(params: UseActiveBlockOptions) {
-  const { editor, locked = false, menuRef, containerRef } = params;
-  const [activeBlock, setActiveBlock] = useState<ActiveBlockInfo>(INIT_STATE);
+export function useActiveBlock({
+  editor,
+  menuRef,
+  containerRef,
+  open,
+}: Options) {
+  const activeRef = useRef<ActiveBlock>({
+    element: null,
+    pos: 0,
+    nodeType: "",
+  });
+  const hoveredElRef = useRef<HTMLElement | null>(null);
+  const hasPositionedRef = useRef(false);
+  const debounceRef = useRef<number | null>(null);
 
-  const hoveredBlockRef = useRef<HTMLElement | null>(null);
-
-  const lockedRef = useRef(locked);
-  lockedRef.current = locked;
-
-  const clearHover = useCallback(() => {
-    hoveredBlockRef.current = null;
-    setActiveBlock((prev) => ({ ...prev, isHovered: false }));
-  }, []);
-
-  /** Walks up from `target` to find the direct child of .ProseMirror (top-level block). */
-  const getBlockFromHover = useCallback(
-    (target: HTMLElement): HTMLElement | null => {
-      if (!editor) return null;
-      const proseMirror = editor.view.dom;
+  const getBlockFromEl = useCallback(
+    (target: HTMLElement | null): HTMLElement | null => {
+      if (!editor || !target) return null;
+      const pm = editor.view.dom;
       let el: HTMLElement | null = target;
-
-      while (el && el.parentElement !== proseMirror) {
-        el = el.parentElement;
-      }
-      return el?.parentElement === proseMirror ? el : null;
+      while (el && el.parentElement !== pm) el = el.parentElement;
+      return el?.parentElement === pm ? el : null;
     },
     [editor],
   );
 
-  /** Converts a block DOM element to position info via posAtDOM → resolve. */
+  const getBlockByY = useCallback(
+    (y: number): HTMLElement | null => {
+      if (!editor) return null;
+      const pm = editor.view.dom;
+      const children = Array.from(pm.children) as HTMLElement[];
+      for (const child of children) {
+        const rect = child.getBoundingClientRect();
+        if (y >= rect.top && y <= rect.bottom) return child;
+      }
+      return null;
+    },
+    [editor],
+  );
+
   const resolveBlockInfo = useCallback(
     (blockEl: HTMLElement): ActiveBlock | null => {
-      if (!editor) throw new Error("Editor not initialized");
+      if (!editor) return null;
       try {
         const pos = editor.view.posAtDOM(blockEl, 0);
         const resolved = editor.state.doc.resolve(pos);
-
         let blockPos = pos;
         let nodeType = "";
-
         if (resolved.depth >= 1) {
           blockPos = resolved.before(1);
           nodeType = resolved.node(1).type.name;
         } else {
           const node = editor.state.doc.nodeAt(pos);
-          if (!node) throw new Error("Node not found");
+          if (!node) return null;
           nodeType = node.type.name;
         }
-
-        return {
-          element: blockEl,
-          pos: blockPos,
-          nodeType,
-          translateY: computeTranslateY(
-            blockEl,
-            containerRef.current!,
-            menuRef.current!,
-          ),
-        };
+        return { element: blockEl, pos: blockPos, nodeType };
       } catch {
         return null;
       }
@@ -118,41 +96,87 @@ export function useActiveBlock(params: UseActiveBlockOptions) {
     [editor],
   );
 
-  useEffect(() => {
-    if (!editor) return;
-    const proseMirror = editor.view.dom;
+  const applyActive = useCallback(
+    (block: ActiveBlock) => {
+      const menu = menuRef.current;
+      const container = containerRef.current;
+      if (!menu || !container || !block.element) return;
+
+      activeRef.current = block;
+      const top = computeTop(block.element, container, menu);
+
+      if (!hasPositionedRef.current) {
+        // First show: snap without transition
+        menu.style.transition = "opacity 200ms ease-out";
+        menu.style.top = `${top}px`;
+        hasPositionedRef.current = true;
+        requestAnimationFrame(() => {
+          menu.style.removeProperty("transition");
+        });
+      } else {
+        menu.style.top = `${top}px`;
+      }
+      menu.dataset.visible = "true";
+    },
+    [menuRef, containerRef],
+  );
+
+  const clearActive = useCallback(() => {
     const menu = menuRef.current;
+    if (!menu) return;
+    hoveredElRef.current = null;
+    menu.dataset.visible = "false";
+  }, [menuRef]);
 
-    const handlePointerMove = (e: MouseEvent) => {
-      if (lockedRef.current) return;
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || open || !editor) return;
 
-      requestAnimationFrame(() => {
-        const blockEl = getBlockFromHover(e.target as HTMLElement);
-        if (!blockEl || blockEl === hoveredBlockRef.current) return;
-        hoveredBlockRef.current = blockEl;
-        const info = resolveBlockInfo(blockEl);
-        if (info) setActiveBlock({ ...info, isHovered: true });
-      });
+    const processMove = (target: HTMLElement | null, clientY: number) => {
+      let blockEl = getBlockFromEl(target);
+      if (!blockEl) blockEl = getBlockByY(clientY);
+      if (!blockEl || blockEl === hoveredElRef.current) return;
+      hoveredElRef.current = blockEl;
+      const info = resolveBlockInfo(blockEl);
+      if (info) applyActive(info);
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (debounceRef.current != null) clearTimeout(debounceRef.current);
+      const target = e.target as HTMLElement;
+      const clientY = e.clientY;
+      debounceRef.current = window.setTimeout(() => {
+        processMove(target, clientY);
+      }, 0);
     };
 
     const handleMouseLeave = (e: MouseEvent) => {
-      if (lockedRef.current) return;
       if (menuRef.current?.contains(e.relatedTarget as Node)) return;
-      clearHover();
+      if (container.contains(e.relatedTarget as Node)) return;
+      clearActive();
     };
 
-    proseMirror.addEventListener("pointermove", handlePointerMove, {
+    container.addEventListener("pointermove", handlePointerMove, {
       passive: true,
     });
-    proseMirror.addEventListener("mouseleave", handleMouseLeave);
-    menu?.addEventListener("mouseleave", handleMouseLeave);
+    container.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      proseMirror.removeEventListener("pointermove", handlePointerMove);
-      proseMirror.removeEventListener("mouseleave", handleMouseLeave);
-      menu?.removeEventListener("mouseleave", handleMouseLeave);
+      container.removeEventListener("pointermove", handlePointerMove);
+      container.removeEventListener("mouseleave", handleMouseLeave);
+      if (debounceRef.current != null) clearTimeout(debounceRef.current);
     };
-  }, [editor]);
+  }, [
+    editor,
+    getBlockFromEl,
+    getBlockByY,
+    resolveBlockInfo,
+    applyActive,
+    clearActive,
+    containerRef,
+    menuRef,
+    open,
+  ]);
 
-  return { activeBlock, clearHover, setActiveBlock };
+  return { activeRef, clearActive };
 }

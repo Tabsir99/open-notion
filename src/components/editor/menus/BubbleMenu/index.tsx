@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import { useEditorState } from "@tiptap/react";
@@ -10,6 +10,7 @@ import {
   Strikethrough,
   Code,
   Link,
+  Palette,
   ChevronDown,
 } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
@@ -17,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TurnIntomenu } from "../TurnIntoMenu";
+import { ColorMenu } from "../ColorMenu";
 import { LinkInput } from "./LinkInput";
 
 // ── Data ──────────────────────────────────────────────────────────────
@@ -106,12 +108,16 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
     setTimeout(() => setLinkMode("closed"), 150);
   }, []);
 
+  const container = useRef<HTMLDivElement>(null);
+
   return (
     <TiptapBubbleMenu
+      ref={container}
       editor={editor}
       options={{
         placement: "top",
         offset: 8,
+        strategy: "absolute",
       }}
       shouldShow={({ state }) => {
         const { selection } = state;
@@ -128,6 +134,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
         return true;
       }}
+      className="transition-[inset]"
     >
       <div
         className={cn(
@@ -176,6 +183,17 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
+            {/* Color menu */}
+            <ColorMenu
+              editor={editor}
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+              container={container}
+            >
+              <Palette className="size-4" />
+            </ColorMenu>
+
+            <Separator orientation="vertical" className="mx-0.5 h-6" />
+
             <TurnIntomenu
               editor={editor}
               blockPos={() =>
@@ -184,6 +202,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
                   : 0
               }
               className={buttonVariants({ variant: "ghost" })}
+              container={container}
             >
               <span>{activeStates.label}</span>
               <ChevronDown className="size-3" />

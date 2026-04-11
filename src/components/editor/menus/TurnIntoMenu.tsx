@@ -164,6 +164,7 @@ interface TurnIntoSubmenuProps {
   children: React.ReactNode;
   isSubMenu?: boolean;
   className?: string;
+  container?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function TurnIntomenu({
@@ -172,6 +173,7 @@ export function TurnIntomenu({
   isSubMenu,
   children,
   className,
+  container,
 }: TurnIntoSubmenuProps) {
   const Menu = isSubMenu ? DropdownMenuSub : DropdownMenu;
   const MenuTrigger = isSubMenu ? DropdownMenuSubTrigger : DropdownMenuTrigger;
@@ -184,7 +186,7 @@ export function TurnIntomenu({
       >
         {children}
       </MenuTrigger>
-      <MenuContent className={cn("min-w-[180px] p-1")}>
+      <MenuContent className={cn("min-w-[180px] p-1")} container={container}>
         {turnIntoItems.map(({ label, icon: Icon, action, isActive }) => (
           <DropdownMenuItem
             key={label}

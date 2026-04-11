@@ -15,7 +15,7 @@ export function LinkInput({
   onClose,
   isExiting = false,
 }: LinkInputProps) {
-  const initialUrl = editor.getAttributes("link").href as string;
+  const initialUrl = editor.getAttributes("link").href || "";
   const [url, setUrl] = useState(initialUrl);
   const inputRef = useRef<HTMLInputElement>(null);
 
