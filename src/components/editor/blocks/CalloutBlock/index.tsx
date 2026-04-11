@@ -13,9 +13,9 @@ import {
 import { getEmojiData } from "../../menus/EmojiPicker/data";
 import { CALLOUT_COLORS, type CalloutColor } from "../../extensions/Callout";
 import {
-  createEmojiGrid,
-  type EmojiGridApi,
-} from "../../menus/EmojiPicker/createEmojiGrid";
+  createEmojiPicker,
+  type EmojiPickerApi,
+} from "../../menus/EmojiPicker/createEmojiPicker";
 
 // ── Color swatch ──────────────────────────────────────────────────────────
 
@@ -119,41 +119,16 @@ interface EmojiPopoverProps {
 
 const EmojiPopover = memo(
   ({ open, onOpenChange, currentEmoji, onSelect }: EmojiPopoverProps) => {
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const gridApiRef = useRef<EmojiGridApi | null>(null);
+    const gridApiRef = useRef<EmojiPickerApi | null>(null);
 
     const setContainer = useCallback((node: HTMLDivElement | null) => {
-      containerRef.current = node;
       if (node) {
-        gridApiRef.current = createEmojiGrid(node);
+        gridApiRef.current = createEmojiPicker(node, { onSelect });
       } else {
-        gridApiRef.current?.reset();
+        gridApiRef.current?.destroy();
         gridApiRef.current = null;
       }
     }, []);
-
-    const handleKeyDown = useCallback(
-      (e: React.KeyboardEvent) => {
-        const api = gridApiRef.current;
-        if (!api) return;
-
-        if (e.key === "Enter") {
-          e.preventDefault();
-          const btn = api.getFocusedButton();
-          const img = btn?.querySelector("img");
-          const data = getEmojiData();
-          if (img && data) {
-            const shortcode = data.emojis[img.id]?.shortcodes?.[0];
-            if (shortcode) onSelect(shortcode);
-          }
-          return;
-        }
-
-        const handled = api.handleKey(e.nativeEvent);
-        if (handled) e.preventDefault();
-      },
-      [onSelect],
-    );
 
     return (
       <Popover open={open} onOpenChange={onOpenChange}>
@@ -173,7 +148,11 @@ const EmojiPopover = memo(
           align="start"
           sideOffset={8}
           className="w-80 h-72 p-0 overflow-hidden rounded-xl shadow-xl"
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              gridApiRef.current?.handleKey(e.nativeEvent);
+            }
+          }}
         >
           <div
             ref={setContainer}

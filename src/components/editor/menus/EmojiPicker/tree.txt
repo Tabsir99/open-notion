@@ -1,0 +1,10 @@
+.
+├── Categories.tsx
+├── createEmojiGrid.ts
+├── data.tsx
+├── getEmojiUrl.ts
+├── index.tsx
+├── renderEmojis.ts
+└── tree.txt
+
+1 directory, 7 files

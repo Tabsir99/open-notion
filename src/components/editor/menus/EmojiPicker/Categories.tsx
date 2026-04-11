@@ -2,20 +2,22 @@ import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { getEmojiData, type EmojiCategory } from "./data";
 import { getEmojiUrl } from "./getEmojiUrl";
+import { loadRecentEmojis } from "./createEmojiPicker";
 
-export const EmojiCateogires = ({ hasRecent }: { hasRecent: boolean }) => {
+export const EmojiCategories = () => {
   const [activeCategory, setActiveCategory] = useState("smileys-emotion");
 
   const emojiCategories: EmojiCategory[] = useMemo(() => {
     const emojiData = getEmojiData();
     if (!emojiData) return [];
 
+    const hasRecent = loadRecentEmojis().length > 0;
     if (!hasRecent) return emojiData.categories;
     return [
       { id: "recent", icon: "231B", emojis: [] },
       ...emojiData.categories,
     ];
-  }, [hasRecent]);
+  }, []);
 
   const handleCategorySelect = (e: React.MouseEvent, key: string) => {
     e.preventDefault();

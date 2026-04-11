@@ -10,7 +10,7 @@ import { CustomImage } from "./extensions/CustomImage";
 import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
 import "./styles/editor.css";
 import { EmojiNode } from "./extensions/Emoji";
-import { EmojiPickerMenu } from "./menus/EmojiPicker";
+import { EmojiPicker } from "./menus/EmojiPicker";
 import { getEmojiArray, loadEmojiData } from "./menus/EmojiPicker/data";
 import { Callout } from "./extensions/Callout";
 
@@ -88,7 +88,7 @@ function _Editor() {
         <BlockSideMenu editor={editor} containerRef={editorWrapperRef} />
         <BubbleMenu editor={editor} />
         <SlashMenu editor={editor} />
-        <EmojiPickerMenu editor={editor} />
+        <EmojiPicker editor={editor} />
 
         <EditorContent editor={editor} />
       </div>

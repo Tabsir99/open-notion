@@ -66,17 +66,22 @@ export function getEmojiArray(): Emoji[] {
   return _emojiArray ? _emojiArray : [];
 }
 
-export const getFilteredEmojis = (query: string) => {
-  const emojiArray = getEmojiArray();
+export const getFilteredEmojisByCategory = (
+  query: string,
+): { categoryId: string; ids: string[] }[] => {
+  if (!_cache) return [];
+  const q = query.toLowerCase();
+  const result: { categoryId: string; ids: string[] }[] = [];
 
-  const filtered: string[] = [];
-
-  for (let i = 0; i < emojiArray.length; i++) {
-    const emoji = emojiArray[i];
-    if (emoji.name.toLowerCase().includes(query.toLowerCase())) {
-      filtered.push(emoji.id);
+  for (const category of _cache.categories) {
+    const matches: string[] = [];
+    for (const id of category.emojis) {
+      const emoji = _cache.emojis[id];
+      if (emoji?.name.toLowerCase().includes(q)) matches.push(id);
+    }
+    if (matches.length > 0) {
+      result.push({ categoryId: category.id, ids: matches });
     }
   }
-
-  return filtered;
+  return result;
 };
