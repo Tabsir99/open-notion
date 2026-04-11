@@ -13,13 +13,6 @@
   background: var(--editor-selected);
 }
 
-/* Light mode node selection */
-.tiptap .ProseMirror-selectednode {
-  background-color: var(--editor-selected);
-  transition: all 0.2s ease-in-out;
-  border-radius: 4px;
-}
-
 .ProseMirror > * + * {
   margin-top: 0.75em;
 }

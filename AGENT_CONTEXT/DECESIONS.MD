@@ -21,3 +21,5 @@
 | 2026-04-07 | Merged Link Popover into Phase 5 | Too small to justify standalone phase. Sub-phases 5.1–5.5 |
 | 2026-04-07 | Slash Menu: no ReactRenderer, no cmdk | Both cause ProseMirror event conflicts and React lifecycle pain. Standalone React state + Base UI Popover instead |
 | 2026-04-07 | Restructured agent memory files | `CLAUDE.md` (rules + gotchas), `SPEC.md` (product spec), `DECISIONS.md` (history), `STATUS.md` (current state). Reduces per-session token load and eliminates `PROMPT.md` overlap |
+| 2026-04-10 | Custom Emoji Picker structure | Avoids heavy components. Virtualized DOM structure wrapped in React. Connects with Tiptap `Suggestion` via `:`. |
+| 2026-04-10 | Callout Block Architecture | Uses inline `NodeViewWrapper`. Instead of standard menus, it uses `EmojiPopover` inline and inline color buttons. Stores data via `[data-color]` and `[data-emoji]`. |

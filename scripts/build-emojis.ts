@@ -8,7 +8,7 @@ import type {
   Emoji,
   EmojiSkin,
   EmojiCategory,
-} from "../src/components/editor/menus/EmojiPicker/data";
+} from "../src/components/editor/menus/EmojiPicker/createEmojipicker/data";
 
 const _categories = {
   "smileys-emotion": "1F604", // 😄
@@ -22,7 +22,7 @@ const _categories = {
   flags: "1F6A9", // 🚩
 };
 
-const DIRECTORY = "src/components/editor/menus/EmojiPicker";
+const DIRECTORY = "src/assets";
 
 const build = (): void => {
   const emojis: Record<string, Emoji> = {};

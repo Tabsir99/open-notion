@@ -107,6 +107,8 @@ All color values defined exactly **once** in `global.css` under `:root` and `.da
 | Underline | `@tiptap/extension-underline` | ✅ | Toggled via BubbleToolbar |
 | Slash | `@tiptap/suggestion` (custom) | ✅ | Phase 4. Standalone React state + Base UI Popover. No ReactRenderer or cmdk |
 | CodeBlock (custom) | `@tiptap/extension-code-block` | ✅ | Phase 5.3. Shiki decorations, ReactNodeView `CodeBlock/index.tsx`. Language selector, copy button |
+| Emoji (custom) | — | ✅ | Phase 5.4. Custom input rules, shortcode parser, custom emoji picker UI |
+| Callout (custom) | — | ✅ | Phase 5.5. ReactNodeView. Custom color styles, embedded emoji selector |
 
 ---
 
@@ -132,7 +134,12 @@ All color values defined exactly **once** in `global.css` under `:root` and `.da
 | `src/components/editor/blocks/ImageBlock/index.tsx` | Image ReactNodeView — URL/upload popover, alignment toolbar |
 | `src/components/editor/blocks/CodeBlock/index.tsx` | Code block ReactNodeView — language selector, copy button |
 | `src/components/editor/blocks/CodeBlock/languages.ts` | Language data + preload list for shiki |
+| `src/components/editor/blocks/CalloutBlock/index.tsx` | Callout ReactNodeView with inline emoji/color picker |
 | `src/components/editor/extensions/CustomCodeBlock.ts` | CodeBlock extension + shiki decoration plugin |
+| `src/components/editor/extensions/Callout.ts` | Callout extension wrapper |
+| `src/components/editor/extensions/Emoji.ts` | Custom Emoji extension with shortcode replacement |
+| `src/components/editor/menus/EmojiPicker/index.tsx` | Main popup for `:emoji` suggestions |
+| `src/components/editor/menus/EmojiPicker/createEmojipicker/*` | Custom virtualized emoji picker vanilla logic |
 | `src/components/ui/button.tsx` | shadcn Button (Base UI) |
 | `src/components/ui/dropdown-menu.tsx` | shadcn DropdownMenu (Base UI) |
 | `src/components/ui/toggle.tsx` | shadcn Toggle (Base UI) |

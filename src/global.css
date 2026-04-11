@@ -72,6 +72,7 @@
   --color-editor-text-secondary: var(--editor-text-secondary);
   --color-editor-text-muted: var(--editor-text-muted);
   --color-editor-accent: var(--editor-accent);
+  --color-editor-selected: var(--editor-selected);
 
   /* Radii */
   --radius-sm: calc(var(--radius) * 0.6);

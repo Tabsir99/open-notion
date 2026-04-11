@@ -1,21 +1,15 @@
-import { use, useRef } from "react";
+import "./styles/editor.css";
+import { Suspense, use, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { TaskList, TaskItem } from "@tiptap/extension-list";
-import { Placeholder } from "@tiptap/extensions/placeholder";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleMenu } from "./menus/BubbleMenu";
 import { SlashMenu } from "./menus/SlashMenu";
-import { CustomImage } from "./extensions/CustomImage";
-import { CustomCodeBlock } from "./extensions/CustomCodeBlock";
-import "./styles/editor.css";
-import { EmojiNode } from "./extensions/Emoji";
 import { EmojiPicker } from "./menus/EmojiPicker";
 import {
   getEmojiArray,
   loadEmojiData,
 } from "./menus/EmojiPicker/createEmojipicker/data";
-import { Callout } from "./extensions/Callout";
+import { getExtensions } from "./extensions";
 
 const dataPromise = (async () => {
   await loadEmojiData();
@@ -26,35 +20,7 @@ function _Editor() {
   const emojis = use(dataPromise);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        codeBlock: false,
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: "editor-link",
-          },
-          enableClickSelection: true,
-        },
-      }),
-      CustomCodeBlock,
-      Callout,
-      TaskList,
-      TaskItem,
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === "heading") {
-            return `Heading ${node.attrs.level}`;
-          }
-          if (node.type.name === "paragraph") {
-            return "Type '/' for commands...";
-          }
-          return "";
-        },
-      }),
-      CustomImage,
-      EmojiNode.configure({ emojis }),
-    ],
+    extensions: getExtensions({ emojis }),
     content: "",
     immediatelyRender: false,
 
@@ -100,5 +66,9 @@ function _Editor() {
 }
 
 export const Editor = () => {
-  return <_Editor />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <_Editor />
+    </Suspense>
+  );
 };

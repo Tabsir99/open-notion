@@ -13,23 +13,25 @@
 | Phase 5.1 — Image Block | ✅ Complete |
 | Phase 5.2 — Link Popover | ✅ Complete |
 | Phase 5.3 — Code Block | ✅ Complete |
-| Phase 5.4 — Emoji Block + wire to menu | ✅ Complete |
-| Phase 5.5 — Callout Block + wire to menu | 🔄    In Progress |
-| Phase 6 — Polish & Animation | ⬜ Pending |
+| Phase 5.4 — Emoji Extension + Picker | ✅ Complete |
+| Phase 5.5 — Callout Block | ✅ Complete |
+| Phase 5.6 — Table Block | ⬜ Pending |
+
+| Phase 6 — Text Color & Highlight | ⬜ Pending |
+| Phase 7 — Polish & Animation | ⬜ Pending |
 
 ## Current Task
 
-**Phase 5.5 — Callout Block + wire to menu**
-- Implement Callout extension + ReactNodeView
-- Emoji icon picker integration (reuse EmojiPicker)
-- Colored background/border variants
-- Wire Callout into TurnIntoMenu and SlashMenu
+**Phase 6 — Text Color & Highlight**
+- Implement Text Color extension (`@tiptap/extension` already in package.json)
+- Implement Highlight extension (`@tiptap/extension-highlight` already in package.json)
+- Wire Text Color & Highlight into SlashMenu and TurnIntoMenu
+- Text Color & Highlight controls (add/remove row/col, merge cells, header row toggle)
 
-## Known Pending (Non-blocking)
+## Known Backlog
 
-- Drag-and-drop reorder: grip has `draggable` but no DnD logic (Phase 6)
+- Drag-and-drop reorder: grip has `draggable` but no DnD logic (Phase 7)
 - Move to / Color submenus: "Coming soon" placeholder (Phase 6)
-- Callout Turn Into: placeholder log, needs Callout extension (Phase 5.5)
 - `+` button in BlockSideMenu: sets cursor only, slash menu integration still needed
 
 ## CSS Note

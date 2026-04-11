@@ -125,9 +125,9 @@ Appears on text selection. Buttons: Bold, Italic, Strikethrough, Code, Underline
 - **5.1 Image block** ✅ — URL input / upload placeholder, caption, alignment
 - **5.2 Link popover** ✅ — cursor-on-link floating popover + bubble-toolbar link creation flow
 - **5.3 Code block** ✅ — `CodeBlock`, with shiki syntax highlighting, language selector, Wire to turnintomenu
-- **5.4 Emoji block** ⬜ — Custom plugin, extension, emoji picker
-- **5.5 Callout block** ⬜ — ReactNodeView, emoji picker, colored border
-- **5.6 Wire Callout into TurnIntoSubmenu** ⬜
+- **5.4 Emoji block** ✅ — Custom plugin, extension, shortcode parsing, custom emoji picker
+- **5.5 Callout block** ✅ — ReactNodeView, emoji picker inline, colored border. Wired into TurnIntoMenu.
+- **5.6 Table block** ⬜ — Add `@tiptap/extension-table`, wire to slash/turn into menus, add cell tools.
 
 ### Phase 6 — Polish & Animation
 - Drag-and-drop reorder (wire up grip button DnD)
