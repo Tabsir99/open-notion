@@ -20,9 +20,13 @@ import {
   Palette,
   MessageSquare,
   Type,
+  ALargeSmall,
+  CaseSensitive,
 } from "lucide-react";
 import { TurnIntomenu } from "./TurnIntoMenu";
 import { ColorMenu } from "./ColorMenu";
+import { FontSizeMenu } from "./FontSizeMenu";
+import { FontFamilyMenu } from "./FontFamilyMenu";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -154,6 +158,16 @@ export function BlockContextMenu({
           <Palette className="size-4" />
           <span>Color</span>
         </ColorMenu>
+
+        <FontSizeMenu editor={editor} blockPos={blockPos} isSubMenu>
+          <ALargeSmall className="size-4" />
+          <span>Font size</span>
+        </FontSizeMenu>
+
+        <FontFamilyMenu editor={editor} blockPos={blockPos} isSubMenu>
+          <CaseSensitive className="size-4" />
+          <span>Font family</span>
+        </FontFamilyMenu>
 
         <DropdownMenuSeparator className="h-px my-1" />
 

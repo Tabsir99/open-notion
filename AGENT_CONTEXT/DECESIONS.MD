@@ -23,3 +23,6 @@
 | 2026-04-07 | Restructured agent memory files | `CLAUDE.md` (rules + gotchas), `SPEC.md` (product spec), `DECISIONS.md` (history), `STATUS.md` (current state). Reduces per-session token load and eliminates `PROMPT.md` overlap |
 | 2026-04-10 | Custom Emoji Picker structure | Avoids heavy components. Virtualized DOM structure wrapped in React. Connects with Tiptap `Suggestion` via `:`. |
 | 2026-04-10 | Callout Block Architecture | Uses inline `NodeViewWrapper`. Instead of standard menus, it uses `EmojiPopover` inline and inline color buttons. Stores data via `[data-color]` and `[data-emoji]`. |
+| 2026-04-12 | BlockStyles extension for block-level styling | Single extension with `addGlobalAttributes` + `addCommands` for backgroundColor, textColor, fontSize, fontFamily. Applied to paragraph/heading/blockquote/listItem. |
+| 2026-04-12 | FontSizeMenu + FontFamilyMenu as dropdown submenus | Same pattern as ColorMenu — data file + component. FontSizeMenu includes a custom size input. FontFamilyMenu renders each option in its own font. Both wired into BlockContextMenu. |
+| 2026-04-12 | Block style carry-over on Enter — pending fix | ProseMirror `splitBlock` copies all node attrs via `node.copy()`. Fix: `appendTransaction` plugin in BlockStyles that strips style attrs from newly split nodes. |

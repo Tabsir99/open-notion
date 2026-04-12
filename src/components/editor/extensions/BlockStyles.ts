@@ -4,13 +4,10 @@ import type { Node as PMNode } from "@tiptap/pm/model";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     blockStyles: {
-      toggleBlockBackground: (color: string | null, pos?: number) => ReturnType;
-      toggleBlockTextColor: (color: string | null, pos?: number) => ReturnType;
-      toggleBlockFontSize: (size: string | null, pos?: number) => ReturnType;
-      toggleBlockFontFamily: (
-        family: string | null,
-        pos?: number,
-      ) => ReturnType;
+      toggleBlockBackground: (color: string, pos?: number) => ReturnType;
+      toggleBlockTextColor: (color: string, pos?: number) => ReturnType;
+      toggleBlockFontSize: (size: string, pos?: number) => ReturnType;
+      toggleBlockFontFamily: (family: string, pos?: number) => ReturnType;
     };
   }
 }
@@ -20,7 +17,7 @@ export const BlockStyles = Extension.create<{ types: string[] }>({
 
   addOptions() {
     return {
-      types: ["paragraph", "heading", "blockquote", "listItem"],
+      types: ["paragraph", "heading", "blockquote"],
     };
   },
 
@@ -79,13 +76,13 @@ export const BlockStyles = Extension.create<{ types: string[] }>({
 
     const toggleBlockAttr =
       (attrKey: string) =>
-      (value: string | null, pos?: number) =>
+      (value: string, pos?: number) =>
       ({ tr, dispatch, state }: any) => {
         const target = resolveTargetBlock(state, pos);
         if (!target) return false;
         const current = target.node.attrs[attrKey];
 
-        if (current === null && value === null) return false;
+        if (!current && !value) return false;
 
         const next = current === value ? null : value;
         if (dispatch) {
@@ -102,6 +99,28 @@ export const BlockStyles = Extension.create<{ types: string[] }>({
       toggleBlockTextColor: toggleBlockAttr("textColor"),
       toggleBlockFontSize: toggleBlockAttr("fontSize"),
       toggleBlockFontFamily: toggleBlockAttr("fontFamily"),
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Enter: ({ editor }) => {
+        const { $from } = editor.state.selection;
+        const node = $from.node();
+
+        if (!this.options.types.includes(node.type.name)) return false;
+
+        return editor
+          .chain()
+          .splitBlock({ keepMarks: false })
+          .updateAttributes(node.type, {
+            backgroundColor: null,
+            textColor: null,
+            fontSize: null,
+            fontFamily: null,
+          })
+          .run();
+      },
     };
   },
 });

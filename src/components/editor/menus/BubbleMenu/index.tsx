@@ -134,13 +134,13 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
         return true;
       }}
-      className="transition-[inset]"
+      className="transition-[inset] shadow-xl"
     >
       <div
         className={cn(
           "flex items-center gap-0.5 rounded-[10px] p-1",
           "bg-popover text-popover-foreground",
-          "shadow-lg ring-1 ring-foreground/10",
+          "ring-1 ring-foreground/10",
           "animate-in fade-in-0 zoom-in-95 duration-150",
         )}
       >
@@ -184,11 +184,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
             {/* Color menu */}
-            <ColorMenu
-              editor={editor}
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-              container={container}
-            >
+            <ColorMenu editor={editor} container={container}>
               <Palette className="size-4" />
             </ColorMenu>
 

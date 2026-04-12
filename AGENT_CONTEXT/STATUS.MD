@@ -17,21 +17,24 @@
 | Phase 5.5 — Callout Block | ✅ Complete |
 | Phase 5.6 — Table Block | ⬜ Pending |
 
-| Phase 6 — Text Color & Highlight | ⬜ Pending |
+| Phase 6 — Block Styling (Color, Font, Size) | 🔄 In Progress |
 | Phase 7 — Polish & Animation | ⬜ Pending |
 
 ## Current Task
 
-**Phase 6 — Text Color & Highlight**
-- Implement Text Color extension (`@tiptap/extension` already in package.json)
-- Implement Highlight extension (`@tiptap/extension-highlight` already in package.json)
-- Wire Text Color & Highlight into SlashMenu and TurnIntoMenu
-- Text Color & Highlight controls (add/remove row/col, merge cells, header row toggle)
+**Phase 6 — Block Styling (Color, Font, Size)**
+- ✅ BlockStyles extension (backgroundColor, textColor, fontSize, fontFamily attrs on paragraph/heading/blockquote/listItem)
+- ✅ ColorMenu (text + background color submenus)
+- ✅ FontSizeMenu (preset sizes + custom size input)
+- ✅ FontFamilyMenu (7 distinctive families with live preview)
+- ✅ All wired into BlockContextMenu
+- ⬜ Fix: style carry-over on Enter (splitBlock copies attrs — need appendTransaction cleanup plugin in BlockStyles)
 
 ## Known Backlog
 
 - Drag-and-drop reorder: grip has `draggable` but no DnD logic (Phase 7)
-- Move to / Color submenus: "Coming soon" placeholder (Phase 6)
+- Move to submenu: "Coming soon" placeholder (Phase 6)
+- FontSize / FontFamily menus: ✅ wired into BlockContextMenu
 - `+` button in BlockSideMenu: sets cursor only, slash menu integration still needed
 
 ## CSS Note

@@ -14,7 +14,7 @@ export const textColors = [
   {
     id: "default",
     label: "Default",
-    value: "var(--editor-text)",
+    value: "",
   },
   { id: "gray", label: "Gray", value: "#9b9a97" },
   { id: "brown", label: "Brown", value: "#64473a" },
@@ -33,7 +33,7 @@ export const bgColors = [
   {
     id: "bg-default",
     label: "Default",
-    value: "transparent",
+    value: "",
     swatch: "var(--editor-surface)",
   },
   { id: "bg-gray", label: "Gray", value: "#ebeced" },

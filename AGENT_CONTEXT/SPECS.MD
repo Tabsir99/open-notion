@@ -60,6 +60,8 @@ A production-quality, Notion-style block-based editor. The result should feel in
 │   ├── extensions
 │   │   ├── CustomCodeBlock.ts
 │   │   ├── CustomImage.ts
+│   │   ├── BlockStyles.ts
+│   │   ├── Callout.ts
 │   │   ├── Emoji.ts
 │   │   └── helpers
 │   │       ├── emojiToShortcode.ts
@@ -72,6 +74,15 @@ A production-quality, Notion-style block-based editor. The result should feel in
 │   │   ├── BubbleMenu
 │   │   │   ├── index.tsx
 │   │   │   └── LinkInput.tsx
+│   │   ├── ColorMenu
+│   │   │   ├── colors.ts
+│   │   │   └── index.tsx
+│   │   ├── FontSizeMenu
+│   │   │   ├── sizes.ts
+│   │   │   └── index.tsx
+│   │   ├── FontFamilyMenu
+│   │   │   ├── families.ts
+│   │   │   └── index.tsx
 │   │   ├── EmojiPicker
 │   │   │   ├── Categories.tsx
 │   │   │   ├── data.tsx
