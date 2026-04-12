@@ -150,7 +150,7 @@ export function BlockContextMenu({
           <span>Turn into</span>
         </TurnIntomenu>
 
-        <ColorMenu editor={editor} isSubMenu>
+        <ColorMenu editor={editor} blockPos={blockPos} isSubMenu>
           <Palette className="size-4" />
           <span>Color</span>
         </ColorMenu>

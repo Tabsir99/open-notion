@@ -37,6 +37,7 @@ import { EmojiNode } from "./Emoji";
 import { Callout } from "./Callout";
 import { CustomImage } from "./CustomImage";
 import { CustomCodeBlock } from "./CustomCodeBlock";
+import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
 
@@ -65,6 +66,7 @@ export const getExtensions = (props: GetExtensionsProps) =>
       enableClickSelection: true,
     }),
     TextStyleKit,
+    BlockStyles,
 
     // Nodes
     Heading,

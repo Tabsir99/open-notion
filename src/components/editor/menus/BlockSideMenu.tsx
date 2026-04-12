@@ -84,7 +84,14 @@ export function BlockSideMenu({ editor, containerRef }: Props) {
           aria-label="Block options"
           className="cursor-grab"
           draggable
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setOpen(true);
+            editor
+              .chain()
+              .focus()
+              .setNodeSelection(activeRef.current.pos)
+              .run();
+          }}
           onDragStart={handleDragStart}
           onDragEnd={() => {
             editor.view.dragging = null;
@@ -99,7 +106,9 @@ export function BlockSideMenu({ editor, containerRef }: Props) {
           open={open}
           onOpenChange={(o) => {
             setOpen(o);
-            clearActive();
+            if (!o) {
+              clearActive();
+            }
           }}
         />
       </div>

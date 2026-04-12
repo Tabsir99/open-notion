@@ -13,6 +13,12 @@
   background: var(--editor-selected);
 }
 
+.ProseMirror-selectednode {
+  background-color: rgba(35, 131, 226, 0.14);
+  border-radius: 4px;
+  outline: none;
+}
+
 .ProseMirror > * + * {
   margin-top: 0.75em;
 }
