@@ -9,125 +9,91 @@ export interface DragState {
   toIdx: number;
   tablePos: number;
   tableDom: HTMLElement;
+  startX: number;
+  startY: number;
   isDragging: boolean;
 }
 
 const DRAG_THRESHOLD = 4;
-const ANIM_MS = 250;
+const CELL_MIN_WIDTH = 75;
 
-// ── DOM measurement ──────────────────────────────────────────────────
-
-function getRows(tableEl: HTMLElement): HTMLTableRowElement[] {
-  return Array.from(
-    tableEl.querySelectorAll<HTMLTableRowElement>(":scope > tr, tbody > tr"),
-  );
+function getColMidpoints(tableDom: HTMLElement): number[] {
+  const firstRow = tableDom.querySelector("tr");
+  if (!firstRow) return [];
+  return Array.from(firstRow.children).map((c) => {
+    const r = (c as HTMLElement).getBoundingClientRect();
+    return r.left + r.width / 2;
+  });
 }
 
-function getMidpoints(tableEl: HTMLElement, axis: "col" | "row"): number[] {
-  if (axis === "col") {
-    const firstRow = tableEl.querySelector("tr");
-    if (!firstRow) return [];
-    return Array.from(firstRow.children).map((c) => {
-      const r = (c as HTMLElement).getBoundingClientRect();
-      return r.left + r.width / 2;
-    });
-  }
-  return getRows(tableEl).map((r) => {
-    const rect = r.getBoundingClientRect();
-    return rect.top + rect.height / 2;
-  });
+function getRowMidpoints(tableDom: HTMLElement): number[] {
+  return Array.from(tableDom.querySelectorAll(":scope > tr, tbody > tr")).map(
+    (r) => {
+      const rect = (r as HTMLElement).getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    },
+  );
 }
 
 function nearestIdx(mids: number[], v: number): number {
-  let best = 0;
-  let bestDist = Infinity;
-  for (let i = 0; i < mids.length; i++) {
-    const d = Math.abs(mids[i] - v);
-    if (d < bestDist) {
-      bestDist = d;
-      best = i;
-    }
-  }
-  return best;
-}
-
-function resolveTableEl(tablePos: number): HTMLElement | null {
-  const { editor } = editorStore.get();
-  if (!editor) return null;
-  const nodeDom = editor.view.nodeDOM(tablePos) as HTMLElement | null;
-  if (!nodeDom) return null;
-  return nodeDom.tagName === "TABLE"
-    ? nodeDom
-    : (nodeDom.querySelector("table") as HTMLElement | null);
-}
-
-// ── FLIP animation ───────────────────────────────────────────────────
-
-// Splice semantics: remove at `from`, insert at `to` in the shortened array.
-function oldIdxOf(newIdx: number, from: number, to: number): number {
-  if (newIdx === to) return from;
-  if (from < to && newIdx >= from && newIdx < to) return newIdx + 1;
-  if (from > to && newIdx > to && newIdx <= from) return newIdx - 1;
-  return newIdx;
-}
-
-function getMovableGroups(
-  tableEl: HTMLElement,
-  axis: "col" | "row",
-): HTMLElement[][] {
-  const rows = getRows(tableEl);
-  return axis === "row"
-    ? rows.map((r) => [r])
-    : rows.map((r) => Array.from(r.children) as HTMLElement[]);
-}
-
-function flipReorder(
-  tableEl: HTMLElement,
-  axis: "col" | "row",
-  from: number,
-  to: number,
-  mutate: () => void,
-) {
-  const before = getMovableGroups(tableEl, axis).map((group) =>
-    group.map((el) => el.getBoundingClientRect()),
+  return mids.reduce(
+    (best, m, i) => (Math.abs(m - v) < Math.abs(mids[best] - v) ? i : best),
+    0,
   );
+}
 
-  mutate();
+function syncColWidths(tablePos: number) {
+  const { editor } = editorStore.get();
+  if (!editor) return;
+  const table = editor.state.doc.nodeAt(tablePos);
+  if (!table) return;
+  const nodeDom = editor.view.nodeDOM(tablePos) as HTMLElement | null;
+  if (!nodeDom) return;
+  const tableEl =
+    nodeDom.tagName === "TABLE"
+      ? nodeDom
+      : (nodeDom.querySelector("table") as HTMLElement | null);
+  if (!tableEl) return;
 
-  getMovableGroups(tableEl, axis).forEach((group, rowIdx) => {
-    group.forEach((el, cellIdx) => {
-      const oldRow = axis === "row" ? oldIdxOf(rowIdx, from, to) : rowIdx;
-      const oldCell = axis === "col" ? oldIdxOf(cellIdx, from, to) : cellIdx;
-      const oldRect = before[oldRow]?.[oldCell];
-      if (!oldRect) return;
-      const newRect = el.getBoundingClientRect();
-      const dx = oldRect.left - newRect.left;
-      const dy = oldRect.top - newRect.top;
-      if (!dx && !dy) return;
-      el.animate(
-        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }],
-        { duration: ANIM_MS, easing: "ease-out" },
-      );
-    });
+  const firstRow = table.child(0);
+  const widths: number[] = [];
+  for (let i = 0; i < firstRow.childCount; i++) {
+    widths.push(firstRow.child(i).attrs.colwidth?.[0] ?? 0);
+  }
+
+  const apply = (el: HTMLElement, w: number) => {
+    if (w) {
+      el.style.width = `${w}px`;
+      el.style.minWidth = `${CELL_MIN_WIDTH}px`;
+    } else {
+      el.style.removeProperty("width");
+      el.style.removeProperty("min-width");
+    }
+  };
+
+  tableEl
+    .querySelectorAll<HTMLElement>("col")
+    .forEach((col, i) => apply(col, widths[i] ?? 0));
+
+  Array.from(
+    tableEl.querySelectorAll<HTMLTableRowElement>(":scope > tr, tbody > tr"),
+  ).forEach((row) => {
+    Array.from(row.children).forEach((cell, i) =>
+      apply(cell as HTMLElement, widths[i] ?? 0),
+    );
   });
 }
-
-// ── Hook ─────────────────────────────────────────────────────────────
 
 export function useTableDrag() {
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
-  const cleanupRef = useRef<(() => void) | null>(null);
+  const dragCleanupRef = useRef<(() => void) | null>(null);
   const didDragRef = useRef(false);
-  const isAnimatingRef = useRef(false);
-  const pendingCursorRef = useRef<{ x: number; y: number } | null>(null);
-  const animTimerRef = useRef<number | null>(null);
 
-  // Cleanup on unmount
   useEffect(
     () => () => {
-      cleanupRef.current?.();
-      if (animTimerRef.current) window.clearTimeout(animTimerRef.current);
+      dragRef.current = null;
+      dragCleanupRef.current?.();
     },
     [],
   );
@@ -142,97 +108,56 @@ export function useTableDrag() {
       e.preventDefault();
       e.stopPropagation();
 
-      const startX = e.clientX;
-      const startY = e.clientY;
-
-      dragRef.current = {
+      const state: DragState = {
         axis,
         fromIdx,
         toIdx: fromIdx,
         tablePos: h.tablePos,
-        tableDom: h.tableContainer,
+        tableDom: h.tableWrapper,
+        startX: e.clientX,
+        startY: e.clientY,
         isDragging: false,
       };
-
-      const evaluate = (clientX: number, clientY: number) => {
-        const d = dragRef.current;
-        if (!d) return;
-
-        const tableEl = resolveTableEl(d.tablePos);
-        if (!tableEl) return;
-
-        const mids = getMidpoints(tableEl, d.axis);
-        const cursor = d.axis === "col" ? clientX : clientY;
-        const toIdx = nearestIdx(mids, cursor);
-
-        if (toIdx === d.fromIdx) {
-          // No reorder, but still mark dragging + sync tableDom
-          const next = { ...d, isDragging: true, toIdx, tableDom: tableEl };
-          dragRef.current = next;
-          setDrag(next);
-          return;
-        }
-
-        isAnimatingRef.current = true;
-        flipReorder(tableEl, d.axis, d.fromIdx, toIdx, () => {
-          if (d.axis === "col") moveColumn(d.tablePos, d.fromIdx, toIdx);
-          else moveRow(d.tablePos, d.fromIdx, toIdx);
-        });
-
-        const next = {
-          ...d,
-          isDragging: true,
-          toIdx,
-          fromIdx: toIdx,
-          tableDom: tableEl,
-        };
-        dragRef.current = next;
-        setDrag(next);
-
-        animTimerRef.current = window.setTimeout(() => {
-          animTimerRef.current = null;
-          isAnimatingRef.current = false;
-          const pending = pendingCursorRef.current;
-          pendingCursorRef.current = null;
-          if (pending && dragRef.current) evaluate(pending.x, pending.y);
-        }, ANIM_MS);
-      };
+      dragRef.current = state;
 
       const onMove = (ev: MouseEvent) => {
         const d = dragRef.current;
         if (!d) return;
-
-        if (!d.isDragging) {
-          const delta =
-            d.axis === "col" ? ev.clientX - startX : ev.clientY - startY;
-          if (Math.abs(delta) < DRAG_THRESHOLD) return;
-        }
-
-        if (isAnimatingRef.current) {
-          pendingCursorRef.current = { x: ev.clientX, y: ev.clientY };
-          return;
-        }
-
-        evaluate(ev.clientX, ev.clientY);
+        const delta =
+          d.axis === "col" ? ev.clientX - d.startX : ev.clientY - d.startY;
+        if (!d.isDragging && Math.abs(delta) < DRAG_THRESHOLD) return;
+        const toIdx =
+          d.axis === "col"
+            ? nearestIdx(getColMidpoints(d.tableDom), ev.clientX)
+            : nearestIdx(getRowMidpoints(d.tableDom), ev.clientY);
+        dragRef.current = { ...d, isDragging: true, toIdx };
+        setDrag({ ...d, isDragging: true, toIdx });
       };
 
       const onUp = () => {
-        if (dragRef.current?.isDragging) {
+        const d = dragRef.current;
+        if (d?.isDragging) {
           didDragRef.current = true;
           requestAnimationFrame(() => {
             didDragRef.current = false;
           });
+          if (d.axis === "col") {
+            moveColumn(d.tablePos, d.fromIdx, d.toIdx);
+            syncColWidths(d.tablePos);
+          } else {
+            moveRow(d.tablePos, d.fromIdx, d.toIdx);
+          }
         }
         dragRef.current = null;
-        pendingCursorRef.current = null;
-        cleanupRef.current?.();
-        cleanupRef.current = null;
+        dragCleanupRef.current = null;
         setDrag(null);
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
       };
 
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
-      cleanupRef.current = () => {
+      dragCleanupRef.current = () => {
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("mouseup", onUp);
       };

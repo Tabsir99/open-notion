@@ -19,7 +19,6 @@ export function getRowIndex(cellDom: HTMLElement): number {
 
 // ── ProseMirror Position Helpers ───────────────────────────────────────
 
-/** Walk up from a ProseMirror position to find the enclosing table's position. */
 export function getTablePos(cellDomPos: number): number | null {
   try {
     const { editor } = editorStore.get();
@@ -37,7 +36,6 @@ export function getTablePos(cellDomPos: number): number | null {
 
 // ── Table Node Rebuild Helpers ─────────────────────────────────────────
 
-/** Rebuild a table by mapping each row's cells through a transform. */
 function rebuildTable(
   tableNode: PMNode,
   mapRow: (cells: PMNode[], rowIdx: number) => PMNode[],
@@ -66,7 +64,6 @@ function applyTableReplace(tablePos: number, newTable: PMNode): void {
 
 export function moveColumn(tablePos: number, from: number, to: number): void {
   const { editor } = editorStore.get();
-
   if (from === to || !editor) return;
   const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
@@ -82,7 +79,6 @@ export function moveColumn(tablePos: number, from: number, to: number): void {
 
 export function duplicateColumn(tablePos: number, colIdx: number): void {
   const { editor } = editorStore.get();
-
   const tableNode = editor?.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
@@ -99,7 +95,6 @@ function clearCells(
   shouldClear: (rowIdx: number, colIdx: number) => boolean,
 ): void {
   const { editor } = editorStore.get();
-
   const tableNode = editor?.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
@@ -122,7 +117,6 @@ export function clearColumn(tablePos: number, colIdx: number): void {
 
 export function moveRow(tablePos: number, from: number, to: number): void {
   const { editor } = editorStore.get();
-
   if (from === to || !editor) return;
 
   const tableNode = editor.state.doc.nodeAt(tablePos);
@@ -146,14 +140,12 @@ export function clearRow(tablePos: number, rowIdx: number): void {
 
 // ── Background Color Operations ────────────────────────────────────────
 
-/** Walk all cells in a table and set backgroundColor on those matching the predicate. */
 function setCellBgs(
   tablePos: number,
   shouldColor: (rowIdx: number, colIdx: number) => boolean,
   color: string | null,
 ): void {
   const { editor } = editorStore.get();
-
   const tableNode = editor?.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 

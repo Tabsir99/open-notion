@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTableFocus } from "./useTableFocus";
-import { useTableDrag } from "./useTableDrag";
+import { useTableDrag, type DragState } from "./useTableDrag";
 import { ColMenu, RowMenu, CellMenu } from "./TableMenus";
 import { createPortal } from "react-dom";
 import { TableEdgeAddons } from "./TableExtendBtn";
@@ -37,6 +37,37 @@ function makeOnOpenChange(
   };
 }
 
+function DragIndicator({ drag }: { drag: DragState }) {
+  if (!drag.isDragging) return null;
+  const tableRect = drag.tableDom.getBoundingClientRect();
+
+  if (drag.axis === "col") {
+    const firstRow = drag.tableDom.querySelector("tr");
+    const cell = firstRow?.children[drag.toIdx] as HTMLElement | undefined;
+    const x = cell ? cell.getBoundingClientRect().left : tableRect.right;
+    return (
+      <div
+        className="fixed pointer-events-none z-100 w-0.5 bg-primary"
+        style={{ left: x, top: tableRect.top, height: tableRect.height }}
+      />
+    );
+  }
+
+  const rows = drag.tableDom.querySelectorAll(
+    ":scope > tr, tbody > tr",
+  ) as NodeListOf<HTMLElement>;
+  const y =
+    drag.toIdx < rows.length
+      ? rows[drag.toIdx].getBoundingClientRect().top
+      : tableRect.bottom;
+  return (
+    <div
+      className="fixed pointer-events-none z-100 h-0.5 bg-primary"
+      style={{ top: y, left: tableRect.left, width: tableRect.width }}
+    />
+  );
+}
+
 export function TableControls() {
   const focused = useTableFocus();
   const { drag, didDragRef, startDrag } = useTableDrag();
@@ -56,6 +87,7 @@ export function TableControls() {
     <>
       {createPortal(
         <>
+          {drag && <DragIndicator drag={drag} />}
           {focused && (
             <div
               className="absolute pointer-events-none rounded-[2px] ring-2 ring-editor-accent/50
@@ -88,6 +120,7 @@ export function TableControls() {
                 }}
                 onMouseDown={(e) => startDrag(e, "col", colIndex, focused)}
                 onClick={() => setColOpen((p) => !p)}
+                draggable
               >
                 <GripHorizontal className="size-4" />
               </DropdownMenuTrigger>

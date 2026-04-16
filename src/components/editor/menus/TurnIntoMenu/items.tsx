@@ -11,6 +11,7 @@ import {
   Quote,
   Code,
   Table,
+  AlertCircle,
 } from "lucide-react";
 import type { ChainedCommands } from "@tiptap/core";
 import { TextSelection } from "@tiptap/pm/state";
@@ -135,6 +136,13 @@ export const getTurnIntoItems = (editor: TypedEditor): TurnIntoItem[] => [
     isActive: () => editor.isActive("codeBlock"),
     applyChain: (c) => c.setCodeBlock(),
     buildNode: (s) => s.nodes.codeBlock.create(),
+  },
+  {
+    label: "Callout",
+    icon: AlertCircle,
+    isActive: () => editor.isActive("callout"),
+    applyChain: (c) => c.setCallout(),
+    buildNode: (s) => s.nodes.callout.create(),
   },
   {
     label: "Table",
