@@ -4,12 +4,8 @@ import { PluginKey } from "@tiptap/pm/state";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  filterSlashItems,
-  groupItems,
-  type SlashItem,
-} from "../constants/slash-items";
-import { editorStore } from "../store";
+import { filterSlashItems, groupItems, type SlashItem } from "./slash-items";
+import { editorStore } from "../../store";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 

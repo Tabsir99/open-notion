@@ -24,6 +24,7 @@ import {
   TableKit,
   TableView,
 } from "@tiptap/extension-table";
+import { Callout } from "./Callout";
 
 const bgAttr = {
   backgroundColor: {
@@ -158,4 +159,5 @@ export const getExtensions = (props: GetExtensionsProps) =>
     }),
     CustomImage,
     CustomCodeBlock,
+    Callout,
   ] as Extensions;

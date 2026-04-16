@@ -22,6 +22,7 @@ export const NODE_NAMES = [
   "tableRow",
   "tableCell",
   "tableHeader",
+  "callout",
 ] as const;
 
 export const MARK_NAMES = [

@@ -14,8 +14,9 @@ import {
   Image as ImageIcon,
   Smile,
   Table,
+  AlertCircle,
 } from "lucide-react";
-import type { TypedEditor } from "../types";
+import type { TypedEditor } from "../../types";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -145,6 +146,15 @@ export const slashItems: SlashItem[] = [
     group: "Advanced",
     action: (editor, range) =>
       editor.chain().focus().deleteRange(range).insertContent(":").run(),
+  },
+  {
+    id: "callout",
+    title: "Callout",
+    description: "Block with an icon",
+    icon: AlertCircle,
+    group: "Advanced",
+    action: (editor, range) =>
+      editor.chain().focus().deleteRange(range).setCallout().run(),
   },
   {
     id: "table",

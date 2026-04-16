@@ -1,5 +1,6 @@
 import { Extension } from "@tiptap/core";
 import type { Node as PMNode } from "@tiptap/pm/model";
+import type { NodeName } from "../types";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -17,7 +18,12 @@ export const BlockStyles = Extension.create<{ types: string[] }>({
 
   addOptions() {
     return {
-      types: ["paragraph", "heading", "blockquote"],
+      types: [
+        "paragraph",
+        "heading",
+        "blockquote",
+        "callout",
+      ] satisfies NodeName[],
     };
   },
 
