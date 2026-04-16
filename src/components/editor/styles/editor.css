@@ -173,12 +173,17 @@
 /* ── Table ─────────────────────────────────────────────────────────── */
 
 .ProseMirror .tableWrapper {
-  margin: 1.2em 0;
+  position: relative;
+  margin-top: 1.2em;
+  margin-bottom: 2em;
+}
+
+.ProseMirror .table-container {
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   position: relative;
-  padding: 6px 20px 20px 6px; /* top right bottom left */
+  padding: 6px 6px 2px 6px; /* top right bottom left */
 }
 
 .ProseMirror table {

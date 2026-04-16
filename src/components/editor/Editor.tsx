@@ -12,6 +12,7 @@ import {
 } from "./menus/EmojiPicker/createEmojipicker/data";
 import { getExtensions } from "./extensions";
 import { editorStore } from "./store";
+import type { TypedEditor } from "./types";
 
 const dataPromise = (async () => {
   await loadEmojiData();
@@ -20,6 +21,7 @@ const dataPromise = (async () => {
 
 function _Editor() {
   const emojis = use(dataPromise);
+
   const editor = useEditor({
     extensions: getExtensions({ emojis }),
     content: "",
@@ -27,18 +29,21 @@ function _Editor() {
 
     onSelectionUpdate(props) {
       const { from } = props.editor.state.selection;
+      localStorage.setItem("editorCursor", String(from));
+    },
 
+    onUpdate(props) {
       localStorage.setItem(
         "editorContent",
         JSON.stringify(props.editor.getJSON()),
       );
-      localStorage.setItem("editorCursor", String(from));
     },
 
     autofocus: true,
 
     async onCreate(props) {
       props.editor.commands.focus();
+
       const savedContent = localStorage.getItem("editorContent");
       const savedCursor = localStorage.getItem("editorCursor");
 
@@ -50,7 +55,7 @@ function _Editor() {
         }
       }
     },
-  });
+  }) as TypedEditor | null;
 
   if (!editor) {
     return null;
@@ -71,7 +76,7 @@ function _Editor() {
         <EmojiPicker />
         <TableControls />
 
-        <EditorContent editor={editor} />
+        <EditorContent editor={editor as any} />
       </div>
     </div>
   );

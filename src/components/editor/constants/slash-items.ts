@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { Editor, Range } from "@tiptap/core";
+import type { Range } from "@tiptap/core";
 import {
   Type,
   Heading1,
@@ -12,10 +12,10 @@ import {
   Code,
   Minus,
   Image as ImageIcon,
-  AlertCircle,
   Smile,
   Table,
 } from "lucide-react";
+import type { TypedEditor } from "../types";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ export interface SlashItem {
   description: string;
   icon: LucideIcon;
   group: string;
-  action: (editor: Editor, range: Range) => void;
+  action: (editor: TypedEditor, range: Range) => void;
 }
 
 // ── Items ─────────────────────────────────────────────────────────────
@@ -145,15 +145,6 @@ export const slashItems: SlashItem[] = [
     group: "Advanced",
     action: (editor, range) =>
       editor.chain().focus().deleteRange(range).insertContent(":").run(),
-  },
-  {
-    id: "callout",
-    title: "Callout",
-    description: "Highlighted info block with icon",
-    icon: AlertCircle,
-    group: "Advanced",
-    action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setCallout().run(),
   },
   {
     id: "table",

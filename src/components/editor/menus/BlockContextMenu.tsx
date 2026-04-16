@@ -72,10 +72,10 @@ export const BlockContextMenu = memo(
   ({ trigger, ...props }: BlockContextMenuProps) => {
     const handleSelect = useCallback(
       (id: string) => {
-        const { editor, activeBlock } = editorStore.get();
-        if (!editor || !activeBlock) return;
+        const { editor, hoveredBlock } = editorStore.get();
+        if (!editor || !hoveredBlock) return;
 
-        const { pos } = activeBlock;
+        const { pos } = hoveredBlock;
         const node = editor.state.doc.nodeAt(pos);
 
         switch (id) {
@@ -111,7 +111,7 @@ export const BlockContextMenu = memo(
       [close],
     );
 
-    const blockpos = useEditorStore((s) => s.activeBlock?.pos);
+    const blockpos = useEditorStore((s) => s.hoveredBlock?.pos);
 
     const renderItems = (items: MenuItem[]) =>
       items.map(({ id, label, icon: Icon, shortcut }) => (

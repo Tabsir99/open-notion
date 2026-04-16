@@ -23,15 +23,16 @@ import {
   setCellBgsForColumn,
   setCellBgsForRow,
 } from "./tableActions";
-import type { FocusedCell } from "./useTableHover";
+import type { FocusedCell } from "./useTableFocus";
 import { editorStore } from "../../store";
-import type { Editor } from "@tiptap/core";
+import type {} from "@tiptap/core";
+import type { TypedEditor } from "../../types";
 
 const ITEM = "flex items-center gap-2 h-8 px-2";
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
-function act(fn: (ed: Editor) => void, onClose: () => void) {
+function act(fn: (ed: TypedEditor) => void, onClose: () => void) {
   const { editor } = editorStore.get();
   if (!editor) return;
   fn(editor);
@@ -79,8 +80,8 @@ interface MenuProps {
 }
 
 export function ColMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: Editor) => void) => act(fn, onClose);
-  const chain = (ed: Editor) =>
+  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
+  const chain = (ed: TypedEditor) =>
     ed.chain().focus().setTextSelection(focused.cellPosInDoc);
 
   return (
@@ -139,8 +140,8 @@ export function ColMenu({ focused, onClose }: MenuProps) {
 }
 
 export function RowMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: Editor) => void) => act(fn, onClose);
-  const chain = (ed: Editor) =>
+  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
+  const chain = (ed: TypedEditor) =>
     ed.chain().focus().setTextSelection(focused.cellPosInDoc);
 
   return (
@@ -194,7 +195,7 @@ export function RowMenu({ focused, onClose }: MenuProps) {
 }
 
 export function CellMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: Editor) => void) => act(fn, onClose);
+  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
 
   return (
     <DropdownMenuContent

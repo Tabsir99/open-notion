@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Editor } from "@tiptap/core";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CornerDownLeft, ExternalLink, Unlink, X } from "lucide-react";
+import type { TypedEditor } from "../../types";
 
 interface LinkInputProps {
-  editor: Editor;
+  editor: TypedEditor;
   onClose: () => void;
   isExiting?: boolean;
 }

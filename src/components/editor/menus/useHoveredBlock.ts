@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { editorStore, type ActiveBlock } from "../store";
+import { editorStore, type NodeBlock } from "../store";
 
 interface Options {
   menuRef: React.RefObject<HTMLDivElement | null>;
@@ -24,7 +24,7 @@ const computeTop = (blockEl: HTMLElement, menu: HTMLElement): number => {
   return blockRect.top - containerRect.top + firstLineCenter - menuHeight / 2;
 };
 
-export function useActiveBlock({ menuRef, open }: Options) {
+export function useHoveredBlock({ menuRef, open }: Options) {
   const hasPositionedRef = useRef(false);
 
   const getBlockFromEl = useCallback(
@@ -40,7 +40,7 @@ export function useActiveBlock({ menuRef, open }: Options) {
   );
 
   const resolveBlockInfo = useCallback(
-    (blockEl: HTMLElement): ActiveBlock | null => {
+    (blockEl: HTMLElement): NodeBlock | null => {
       const { editor } = editorStore.get();
       if (!editor) return null;
 
@@ -66,11 +66,11 @@ export function useActiveBlock({ menuRef, open }: Options) {
   );
 
   const applyActive = useCallback(
-    (block: ActiveBlock) => {
+    (block: NodeBlock) => {
       const menu = menuRef.current;
       if (!menu || !block.element) return;
 
-      editorStore.set({ activeBlock: block });
+      editorStore.set({ hoveredBlock: block });
       const top = computeTop(block.element, menu);
 
       if (!hasPositionedRef.current) {
@@ -96,12 +96,12 @@ export function useActiveBlock({ menuRef, open }: Options) {
     const hoveringMenu = menu.matches(":hover");
     const hoveringBlock = editorStore
       .get()
-      .activeBlock?.element.matches(":hover");
+      .hoveredBlock?.element.matches(":hover");
 
     if (hoveringMenu || hoveringBlock) return;
 
     menu.dataset.visible = "false";
-    editorStore.set({ activeBlock: null });
+    editorStore.set({ hoveredBlock: null });
   }, [menuRef]);
 
   useEffect(() => {

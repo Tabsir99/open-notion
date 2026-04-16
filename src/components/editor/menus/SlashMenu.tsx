@@ -47,7 +47,7 @@ export function SlashMenu() {
     if (!editor) return;
 
     const plugin = Suggestion<SlashItem, SlashItem>({
-      editor,
+      editor: editor as any,
       char: "/",
       pluginKey: PLUGIN_KEY,
       shouldResetDismissed: () => false,

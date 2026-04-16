@@ -1,24 +1,26 @@
 // editor-store.ts
 import { useSyncExternalStore } from "react";
-import type { Editor } from "@tiptap/core";
+import type { TypedEditor } from "./types";
 
-export interface ActiveBlock {
+export interface NodeBlock {
   element: HTMLElement;
   pos: number;
   nodeType: string;
 }
 
 interface EditorStoreState {
-  editor: Editor | null;
+  editor: TypedEditor | null;
   editorContainer: HTMLElement | null;
-  activeBlock: ActiveBlock | null;
+  hoveredBlock: NodeBlock | null;
+  focusedBlock: NodeBlock | null;
 }
 
 function createEditorStore() {
   let state: EditorStoreState = {
     editor: null,
-    activeBlock: null,
+    hoveredBlock: null,
     editorContainer: null,
+    focusedBlock: null,
   };
   const listeners = new Set<() => void>();
   const notify = () => listeners.forEach((l) => l());
@@ -51,4 +53,3 @@ export function useEditorStore<T>(selector: (s: EditorStoreState) => T): T {
 }
 
 export const useEditor = () => useEditorStore((s) => s.editor);
-export const useActiveBlock = () => useEditorStore((s) => s.activeBlock);

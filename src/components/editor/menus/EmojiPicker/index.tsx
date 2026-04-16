@@ -45,7 +45,7 @@ export const EmojiPicker = memo(() => {
     if (!editor) return;
 
     const plugin = Suggestion({
-      editor,
+      editor: editor as any,
       char: ":",
       pluginKey: EmojiSuggestionPluginKey,
       render: () => ({

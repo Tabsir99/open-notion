@@ -18,7 +18,12 @@ import Heading from "@tiptap/extension-heading";
 import Blockquote from "@tiptap/extension-blockquote";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { BulletList, OrderedList, ListItem } from "@tiptap/extension-list";
-import { TableCell, TableHeader, TableKit } from "@tiptap/extension-table";
+import {
+  TableCell,
+  TableHeader,
+  TableKit,
+  TableView,
+} from "@tiptap/extension-table";
 
 const bgAttr = {
   backgroundColor: {
@@ -43,6 +48,21 @@ const TableHeaderWithBg = TableHeader.extend({
   },
 });
 
+class CustomTableView extends TableView {
+  constructor(node: any, cellMinWidth: number) {
+    super(node, cellMinWidth);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "table-container";
+
+    this.dom.classList.add("group/table");
+
+    wrapper.appendChild(this.table);
+
+    this.dom.appendChild(wrapper);
+  }
+}
+
 // --- Functionality ---
 import TextAlign from "@tiptap/extension-text-align";
 import {
@@ -57,13 +77,11 @@ import {
 
 // --- Custom ---
 import { EmojiNode } from "./Emoji";
-import { Callout } from "./Callout";
 import { CustomImage } from "./CustomImage";
 import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
-// import type { Node } from "@tiptap/pm/model";
 
 interface GetExtensionsProps {
   emojis: typeof EmojiNode.options.emojis;
@@ -104,6 +122,7 @@ export const getExtensions = (props: GetExtensionsProps) =>
         resizable: true,
         handleWidth: 10,
         cellMinWidth: 75,
+        View: CustomTableView,
       },
       tableCell: false,
       tableHeader: false,
@@ -137,7 +156,6 @@ export const getExtensions = (props: GetExtensionsProps) =>
     EmojiNode.configure({
       emojis: props.emojis,
     }),
-    Callout,
     CustomImage,
     CustomCodeBlock,
   ] as Extensions;

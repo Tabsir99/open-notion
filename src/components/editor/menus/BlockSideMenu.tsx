@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback } from "react";
 import { GripVertical, Plus } from "lucide-react";
-import { useActiveBlock } from "./useActiveBlock";
+import { useHoveredBlock } from "./useHoveredBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,13 @@ export function BlockSideMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
-  const { clearActive } = useActiveBlock({ menuRef, open });
+  const { clearActive } = useHoveredBlock({ menuRef, open });
 
   const handlePlusClick = useCallback(() => {
-    const { editor, activeBlock } = editorStore.get();
-    if (!editor || !activeBlock) return;
+    const { editor, hoveredBlock } = editorStore.get();
+    if (!editor || !hoveredBlock) return;
 
-    const pos = activeBlock.pos;
+    const pos = hoveredBlock.pos;
     const $pos = editor.state.doc.resolve(pos);
     if (!$pos.nodeAfter) return;
     const endOfBlock = $pos.pos + $pos.nodeAfter.nodeSize;
@@ -32,10 +32,10 @@ export function BlockSideMenu() {
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
-      const { editor, activeBlock } = editorStore.get();
-      if (!editor || !activeBlock) return;
+      const { editor, hoveredBlock } = editorStore.get();
+      if (!editor || !hoveredBlock) return;
 
-      const { pos, element } = activeBlock;
+      const { pos, element } = hoveredBlock;
 
       editor.commands.setNodeSelection(pos);
       editor.view.dragging = {
@@ -97,11 +97,11 @@ export function BlockSideMenu() {
               className="cursor-grab"
               draggable
               onClick={() => {
-                const { editor, activeBlock } = editorStore.get();
-                if (!editor || !activeBlock) return;
+                const { editor, hoveredBlock } = editorStore.get();
+                if (!editor || !hoveredBlock) return;
 
                 setOpen((p) => !p);
-                editor.chain().focus().setNodeSelection(activeBlock.pos).run();
+                editor.chain().focus().setNodeSelection(hoveredBlock.pos).run();
               }}
               onDragStart={handleDragStart}
               onDragEnd={() => {

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import type { Editor } from "@tiptap/core";
+import type {} from "@tiptap/core";
 import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import { useEditorState } from "@tiptap/react";
 import type { LucideIcon } from "lucide-react";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { TurnIntomenu } from "../TurnIntoMenu";
 import { ColorMenu } from "../ColorMenu";
 import { LinkInput } from "./LinkInput";
+import type { TypedEditor } from "../../types";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -28,7 +29,7 @@ interface MarkItem {
   label: string;
   icon: LucideIcon;
   markName: string;
-  command: (editor: Editor) => void;
+  command: (editor: TypedEditor) => void;
 }
 
 const markItems: MarkItem[] = [
@@ -72,7 +73,7 @@ const markItems: MarkItem[] = [
 // ── Helpers ───────────────────────────────────────────────────────────
 
 /** Returns a human-readable label for the current block type */
-function getActiveBlockLabel(editor: Editor): string {
+function getActiveBlockLabel(editor: TypedEditor): string {
   if (editor.isActive("heading", { level: 1 })) return "Heading 1";
   if (editor.isActive("heading", { level: 2 })) return "Heading 2";
   if (editor.isActive("heading", { level: 3 })) return "Heading 3";
@@ -82,7 +83,7 @@ function getActiveBlockLabel(editor: Editor): string {
 // ── Component ─────────────────────────────────────────────────────────
 
 interface BubbleToolbarProps {
-  editor: Editor;
+  editor: TypedEditor;
 }
 
 type LinkMode = "closed" | "open" | "closing";
@@ -91,16 +92,19 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
   const [linkMode, setLinkMode] = useState<LinkMode>("closed");
 
   const activeStates = useEditorState({
-    editor,
-    selector: (ctx) => ({
-      bold: ctx.editor.isActive("bold"),
-      italic: ctx.editor.isActive("italic"),
-      underline: ctx.editor.isActive("underline"),
-      strike: ctx.editor.isActive("strike"),
-      code: ctx.editor.isActive("code"),
-      link: ctx.editor.isActive("link"),
-      label: getActiveBlockLabel(ctx.editor),
-    }),
+    editor: editor as any,
+    selector: (ctx) => {
+      const ed = ctx.editor as TypedEditor;
+      return {
+        bold: ed.isActive("bold"),
+        italic: ed.isActive("italic"),
+        underline: ed.isActive("underline"),
+        strike: ed.isActive("strike"),
+        code: ed.isActive("code"),
+        link: ed.isActive("link"),
+        label: getActiveBlockLabel(ed),
+      };
+    },
   });
 
   const handleLinkInputClose = useCallback(() => {
@@ -113,7 +117,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
   return (
     <TiptapBubbleMenu
       ref={container}
-      editor={editor}
+      editor={editor as any}
       options={{
         placement: "top",
         offset: 8,
