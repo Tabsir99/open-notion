@@ -1,38 +1,37 @@
 import { useState, useRef, useEffect } from "react";
-import type { Editor } from "@tiptap/core";
 import { Check } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { fontSizes } from "./sizes";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { cn } from "@/lib/utils";
+import { editorStore } from "../../store";
 
-function applyFontSize(editor: Editor, size: string, pos?: number) {
+function applyFontSize(size: string, pos?: number) {
+  const { editor } = editorStore.get();
+  if (!editor) return;
+
   const cmd = editor.chain().focus();
   if (pos !== undefined) {
     cmd.toggleBlockFontSize(size, pos).run();
   } else {
-    const active = getBlockAttr(editor, "fontSize") === size;
+    const active = getBlockAttr("fontSize") === size;
     (active ? cmd.unsetFontSize() : cmd.setFontSize(size)).run();
   }
 }
 
 interface FontSizeMenuProps {
-  editor: Editor;
   children: React.ReactNode;
   isSubMenu?: boolean;
-  container?: React.RefObject<HTMLDivElement | null>;
   blockPos?: number;
 }
 
 export function FontSizeMenu({
-  editor,
   isSubMenu,
   children,
-  container,
   blockPos,
 }: FontSizeMenuProps) {
-  const active = getBlockAttr(editor, "fontSize", blockPos);
+  const active = getBlockAttr("fontSize", blockPos);
 
   const [customValue, setCustomValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,11 +50,11 @@ export function FontSizeMenu({
     const val = customValue.trim();
     if (!val) return;
     const px = val.endsWith("px") ? val : `${val}px`;
-    applyFontSize(editor, px, blockPos);
+    applyFontSize(px, blockPos);
   };
 
   return (
-    <AttributeMenu trigger={children} isSub={isSubMenu} container={container}>
+    <AttributeMenu trigger={children} isSub={isSubMenu}>
       <AttributeHeader title="Font size" />
 
       {fontSizes.map((item) => {
@@ -64,7 +63,7 @@ export function FontSizeMenu({
         return (
           <DropdownMenuItem
             key={item.id}
-            onClick={() => applyFontSize(editor, item.value, blockPos)}
+            onClick={() => applyFontSize(item.value, blockPos)}
             className={cn(
               "group flex items-center gap-3 px-2.5 py-2 rounded-md cursor-pointer",
               "focus:bg-accent/60 data-highlighted:bg-accent/60",

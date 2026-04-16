@@ -1,30 +1,23 @@
 import { useRef, useState, useCallback } from "react";
-import type { Editor } from "@tiptap/core";
 import { GripVertical, Plus } from "lucide-react";
 import { useActiveBlock } from "./useActiveBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import "../styles/block-side-menu.css";
+import { editorStore } from "../store";
 
-interface Props {
-  editor: Editor;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}
-
-export function BlockSideMenu({ editor, containerRef }: Props) {
+export function BlockSideMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
-  const { activeRef, clearActive } = useActiveBlock({
-    editor,
-    menuRef,
-    containerRef,
-    open,
-  });
+  const { clearActive } = useActiveBlock({ menuRef, open });
 
   const handlePlusClick = useCallback(() => {
-    const pos = activeRef.current.pos;
+    const { editor, activeBlock } = editorStore.get();
+    if (!editor || !activeBlock) return;
+
+    const pos = activeBlock.pos;
     const $pos = editor.state.doc.resolve(pos);
     if (!$pos.nodeAfter) return;
     const endOfBlock = $pos.pos + $pos.nodeAfter.nodeSize;
@@ -35,12 +28,15 @@ export function BlockSideMenu({ editor, containerRef }: Props) {
       .setTextSelection(endOfBlock + 1)
       .insertContent("/")
       .run();
-  }, [editor, activeRef]);
+  }, []);
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
-      const { pos, element } = activeRef.current;
-      if (!element) return;
+      const { editor, activeBlock } = editorStore.get();
+      if (!editor || !activeBlock) return;
+
+      const { pos, element } = activeBlock;
+
       editor.commands.setNodeSelection(pos);
       editor.view.dragging = {
         slice: editor.view.state.selection.content(),
@@ -53,7 +49,7 @@ export function BlockSideMenu({ editor, containerRef }: Props) {
         e.clientY - rect.top,
       );
     },
-    [editor, activeRef],
+    [],
   );
 
   return (
@@ -78,38 +74,46 @@ export function BlockSideMenu({ editor, containerRef }: Props) {
       </Button>
 
       <div className="relative">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Block options"
-          className="cursor-grab"
-          draggable
-          onClick={() => {
-            setOpen(true);
-            editor
-              .chain()
-              .focus()
-              .setNodeSelection(activeRef.current.pos)
-              .run();
-          }}
-          onDragStart={handleDragStart}
-          onDragEnd={() => {
-            editor.view.dragging = null;
-          }}
-        >
-          <GripVertical className="size-4" />
-        </Button>
-
         <BlockContextMenu
-          editor={editor}
-          blockPos={activeRef.current.pos}
           open={open}
-          onOpenChange={(o) => {
-            setOpen(o);
+          onOpenChange={(o, e) => {
+            if (
+              e.reason === "trigger-hover" ||
+              e.reason === "focus-out" ||
+              e.reason === "trigger-press"
+            )
+              return;
+
             if (!o) {
+              setOpen(o);
               clearActive();
             }
           }}
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Block options"
+              className="cursor-grab"
+              draggable
+              onClick={() => {
+                const { editor, activeBlock } = editorStore.get();
+                if (!editor || !activeBlock) return;
+
+                setOpen((p) => !p);
+                editor.chain().focus().setNodeSelection(activeBlock.pos).run();
+              }}
+              onDragStart={handleDragStart}
+              onDragEnd={() => {
+                const { editor } = editorStore.get();
+                if (!editor) return;
+
+                editor.view.dragging = null;
+              }}
+            >
+              <GripVertical className="size-4" />
+            </Button>
+          }
         />
       </div>
     </div>

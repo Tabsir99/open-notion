@@ -1,4 +1,3 @@
-import type { Editor } from "@tiptap/core";
 import { Check } from "lucide-react";
 import {
   DropdownMenuItem,
@@ -6,59 +5,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { textColors, bgColors, type ColorOption } from "./colors";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
-
-function applyTextColor(editor: Editor, color: string, pos?: number) {
-  const cmd = editor.chain().focus();
-  if (pos !== undefined) {
-    cmd.toggleBlockTextColor(color, pos).run();
-  } else {
-    const active = getBlockAttr(editor, "textColor") === color;
-    (active ? cmd.unsetColor() : cmd.setColor(color)).run();
-  }
-}
-
-function applyBgColor(editor: Editor, color: string, pos?: number) {
-  const cmd = editor.chain().focus();
-  if (pos !== undefined) {
-    cmd.toggleBlockBackground(color, pos).run();
-  } else {
-    const active = getBlockAttr(editor, "backgroundColor") === color;
-    (active ? cmd.unsetBackgroundColor() : cmd.setBackgroundColor(color)).run();
-  }
-}
+import { editorStore } from "../../store";
 
 interface ColorMenuProps {
-  editor: Editor;
   children: React.ReactNode;
   isSubMenu?: boolean;
-  container?: React.RefObject<HTMLDivElement | null>;
-  blockPos?: number;
+
+  onSelectText?: (color: string | null) => void;
+  onSelectBg?: (color: string | null) => void;
+
+  activeText?: string | null;
+  activeBg?: string | null;
+
+  container?: React.RefObject<HTMLElement | null>;
 }
 
 export function ColorMenu({
-  editor,
-  isSubMenu,
   children,
-  container,
-  blockPos,
-}: ColorMenuProps) {
-  const activeText = getBlockAttr(editor, "textColor", blockPos);
-  const activeBg = getBlockAttr(editor, "backgroundColor", blockPos);
+  isSubMenu,
 
+  onSelectText,
+  onSelectBg,
+
+  activeText,
+  activeBg,
+
+  container,
+}: ColorMenuProps) {
   const renderItem = (item: ColorOption, kind: "text" | "bg") => {
     const displayColor = item.swatch ?? item.value;
     const active =
       kind === "text" ? activeText === item.value : activeBg === item.value;
+    const handler = kind === "text" ? onSelectText : onSelectBg;
 
     return (
       <DropdownMenuItem
         key={item.id}
         className="flex items-center gap-2 p-2"
-        onClick={() =>
-          kind === "text"
-            ? applyTextColor(editor, item.value, blockPos)
-            : applyBgColor(editor, item.value, blockPos)
-        }
+        onClick={() => handler?.(item.value || null)}
       >
         {kind === "text" ? (
           <span
@@ -85,13 +69,62 @@ export function ColorMenu({
 
   return (
     <AttributeMenu trigger={children} isSub={isSubMenu} container={container}>
-      <AttributeHeader title="Text color" />
-      {textColors.map((item) => renderItem(item, "text"))}
-
-      <DropdownMenuSeparator className="my-1" />
-
-      <AttributeHeader title="Background color" />
-      {bgColors.map((item) => renderItem(item, "bg"))}
+      {onSelectText && (
+        <>
+          <AttributeHeader title="Text color" />
+          {textColors.map((item) => renderItem(item, "text"))}
+        </>
+      )}
+      {onSelectText && onSelectBg && <DropdownMenuSeparator className="my-1" />}
+      {onSelectBg && (
+        <>
+          <AttributeHeader title="Background color" />
+          {bgColors.map((item) => renderItem(item, "bg"))}
+        </>
+      )}
     </AttributeMenu>
+  );
+}
+
+interface Props {
+  children: React.ReactNode;
+  isSubMenu?: boolean;
+  blockPos?: number;
+}
+
+export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {
+  const handle =
+    (kind: "textColor" | "backgroundColor") => (color: string | null) => {
+      const { editor } = editorStore.get();
+      if (!editor || !color) return;
+      const cmd = editor.chain().focus();
+
+      if (blockPos !== undefined) {
+        kind === "textColor"
+          ? cmd.toggleBlockTextColor(color, blockPos).run()
+          : cmd.toggleBlockBackground(color, blockPos).run();
+      } else {
+        const active = getBlockAttr(kind) === color;
+        if (kind === "textColor") {
+          (active ? cmd.unsetColor() : cmd.setColor(color)).run();
+        } else {
+          (active
+            ? cmd.unsetBackgroundColor()
+            : cmd.setBackgroundColor(color)
+          ).run();
+        }
+      }
+    };
+
+  return (
+    <ColorMenu
+      isSubMenu={isSubMenu}
+      activeText={getBlockAttr("textColor", blockPos)}
+      activeBg={getBlockAttr("backgroundColor", blockPos)}
+      onSelectText={handle("textColor")}
+      onSelectBg={handle("backgroundColor")}
+    >
+      {children}
+    </ColorMenu>
   );
 }

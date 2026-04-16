@@ -1,39 +1,38 @@
-import type { Editor } from "@tiptap/core";
 import { Check } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { fontFamilies } from "./families";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { cn } from "@/lib/utils";
+import { editorStore } from "../../store";
 
-function applyFontFamily(editor: Editor, family: string, pos?: number) {
+function applyFontFamily(family: string, pos?: number) {
+  const { editor } = editorStore.get();
+  if (!editor) return;
+
   const cmd = editor.chain().focus();
   if (pos !== undefined) {
     cmd.toggleBlockFontFamily(family, pos).run();
   } else {
-    const active = getBlockAttr(editor, "fontFamily") === family;
+    const active = getBlockAttr("fontFamily") === family;
     (active ? cmd.unsetFontFamily() : cmd.setFontFamily(family)).run();
   }
 }
 
 interface FontFamilyMenuProps {
-  editor: Editor;
   children: React.ReactNode;
   isSubMenu?: boolean;
-  container?: React.RefObject<HTMLDivElement | null>;
   blockPos?: number;
 }
 
 export function FontFamilyMenu({
-  editor,
   children,
   isSubMenu,
-  container,
   blockPos,
 }: FontFamilyMenuProps) {
-  const active = getBlockAttr(editor, "fontFamily", blockPos);
+  const active = getBlockAttr("fontFamily", blockPos);
 
   return (
-    <AttributeMenu trigger={children} isSub={isSubMenu} container={container}>
+    <AttributeMenu trigger={children} isSub={isSubMenu}>
       <AttributeHeader title="Font family" />
 
       {fontFamilies.map((item) => {
@@ -42,7 +41,7 @@ export function FontFamilyMenu({
         return (
           <DropdownMenuItem
             key={item.id}
-            onClick={() => applyFontFamily(editor, item.value, blockPos)}
+            onClick={() => applyFontFamily(item.value, blockPos)}
             className={cn(
               "group flex items-center gap-3 px-2.5 py-2 rounded-md cursor-pointer",
               "focus:bg-accent/60 data-highlighted:bg-accent/60",

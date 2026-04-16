@@ -18,7 +18,30 @@ import Heading from "@tiptap/extension-heading";
 import Blockquote from "@tiptap/extension-blockquote";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import { BulletList, OrderedList, ListItem } from "@tiptap/extension-list";
-import { TableKit } from "@tiptap/extension-table/kit";
+import { TableCell, TableHeader, TableKit } from "@tiptap/extension-table";
+
+const bgAttr = {
+  backgroundColor: {
+    default: null,
+    parseHTML: (el: HTMLElement) => el.style.backgroundColor || null,
+    renderHTML: (attrs: Record<string, unknown>) =>
+      attrs.backgroundColor
+        ? { style: `background-color: ${attrs.backgroundColor}` }
+        : {},
+  },
+};
+
+const TableCellWithBg = TableCell.extend({
+  addAttributes() {
+    return { ...this.parent?.(), ...bgAttr };
+  },
+});
+
+const TableHeaderWithBg = TableHeader.extend({
+  addAttributes() {
+    return { ...this.parent?.(), ...bgAttr };
+  },
+});
 
 // --- Functionality ---
 import TextAlign from "@tiptap/extension-text-align";
@@ -40,6 +63,7 @@ import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
+// import type { Node } from "@tiptap/pm/model";
 
 interface GetExtensionsProps {
   emojis: typeof EmojiNode.options.emojis;
@@ -75,7 +99,17 @@ export const getExtensions = (props: GetExtensionsProps) =>
     BulletList,
     OrderedList,
     ListItem,
-    TableKit,
+    TableKit.configure({
+      table: {
+        resizable: true,
+        handleWidth: 10,
+        cellMinWidth: 75,
+      },
+      tableCell: false,
+      tableHeader: false,
+    }),
+    TableCellWithBg,
+    TableHeaderWithBg,
 
     // Functionality
     TextAlign,

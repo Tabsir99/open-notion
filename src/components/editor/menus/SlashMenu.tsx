@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Suggestion } from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
-import type { Editor } from "@tiptap/core";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -10,6 +9,7 @@ import {
   groupItems,
   type SlashItem,
 } from "../constants/slash-items";
+import { editorStore } from "../store";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 
@@ -35,15 +35,17 @@ function useLatest<T>(value: T) {
   return ref;
 }
 
-export function SlashMenu({ editor }: { editor: Editor }) {
+export function SlashMenu() {
   const [state, setState] = useState<State>(INITIAL);
   const latest = useLatest(state);
-  const editorDomRef = useRef<HTMLElement>(editor.view.dom);
   const listRef = useRef<HTMLDivElement>(null);
 
   const close = () => setState((s) => ({ ...s, open: false }));
 
   useEffect(() => {
+    const { editor } = editorStore.get();
+    if (!editor) return;
+
     const plugin = Suggestion<SlashItem, SlashItem>({
       editor,
       char: "/",
@@ -113,7 +115,7 @@ export function SlashMenu({ editor }: { editor: Editor }) {
     return () => {
       editor.unregisterPlugin(PLUGIN_KEY);
     };
-  }, [editor]);
+  }, []);
 
   useLayoutEffect(() => {
     listRef.current
@@ -144,8 +146,8 @@ export function SlashMenu({ editor }: { editor: Editor }) {
     >
       <PopoverContent
         anchor={anchor}
-        initialFocus={editorDomRef}
-        finalFocus={editorDomRef}
+        initialFocus={false}
+        finalFocus={false}
         side="bottom"
         align="start"
         sideOffset={6}
@@ -170,7 +172,11 @@ export function SlashMenu({ editor }: { editor: Editor }) {
                       selected && "bg-accent",
                     )}
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => item.action(editor, latest.current.range!)}
+                    onClick={() => {
+                      const { editor } = editorStore.get();
+                      if (!editor) return;
+                      item.action(editor, latest.current.range!);
+                    }}
                     onPointerMove={(e) => {
                       if (e.movementX === 0 && e.movementY === 0) return;
                       const idx = indexById.get(item.id);

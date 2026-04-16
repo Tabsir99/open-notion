@@ -7,16 +7,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
-import type { Editor } from "@tiptap/core";
 import { buttonVariants } from "@/components/ui/button";
+import { editorStore, useEditorStore } from "../store";
 
-export const getBlockAttr = (
-  editor: Editor,
-  key: string,
-  pos?: number,
-): string | null => {
+export const getBlockAttr = (key: string, pos?: number): string | null => {
   if (pos === undefined) return "";
-  const node = editor.state.doc.nodeAt(pos);
+  const node = editorStore.get().editor?.state.doc.nodeAt(pos);
   return (node?.attrs[key] as string) ?? "";
 };
 
@@ -24,18 +20,20 @@ interface AttributeMenuProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
   isSub?: boolean;
-  container?: React.RefObject<HTMLDivElement | null>;
+  container?: React.RefObject<HTMLElement | null>;
 }
 
 export function AttributeMenu({
   children,
-  container,
   trigger,
   isSub,
+  container,
 }: AttributeMenuProps) {
   const Root = isSub ? DropdownMenuSub : DropdownMenu;
   const Trigger = isSub ? DropdownMenuSubTrigger : DropdownMenuTrigger;
   const Content = isSub ? DropdownMenuSubContent : DropdownMenuContent;
+
+  const editorContainer = useEditorStore((s) => s.editorContainer);
 
   return (
     <Root>
@@ -48,7 +46,7 @@ export function AttributeMenu({
         {trigger}
       </Trigger>
       <Content
-        container={container}
+        container={container ?? editorContainer}
         className={cn(
           "w-[220px] max-h-[400px] overflow-y-auto no-scrollbar border py-0",
         )}

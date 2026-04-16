@@ -1,5 +1,4 @@
-import { useCallback } from "react";
-import type { Editor } from "@tiptap/core";
+import { memo, useCallback } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,9 +23,10 @@ import {
   CaseSensitive,
 } from "lucide-react";
 import { TurnIntomenu } from "./TurnIntoMenu";
-import { ColorMenu } from "./ColorMenu";
+import { BlockColorMenu } from "./ColorMenu";
 import { FontSizeMenu } from "./FontSizeMenu";
 import { FontFamilyMenu } from "./FontFamilyMenu";
+import { editorStore, useEditorStore } from "../store";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -64,134 +64,133 @@ const bottomItems: MenuItem[] = [
 
 // ── Component ─────────────────────────────────────────────────────────
 
-interface BlockContextMenuProps {
-  editor: Editor;
-  blockPos: number;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+type Dropdownprops = Omit<Parameters<typeof DropdownMenu>[0], "children">;
+interface BlockContextMenuProps extends Dropdownprops {
+  trigger: Parameters<typeof DropdownMenuTrigger>[0]["render"];
 }
+export const BlockContextMenu = memo(
+  ({ trigger, ...props }: BlockContextMenuProps) => {
+    const handleSelect = useCallback(
+      (id: string) => {
+        const { editor, activeBlock } = editorStore.get();
+        if (!editor || !activeBlock) return;
 
-export function BlockContextMenu({
-  editor,
-  blockPos,
-  open,
-  onOpenChange,
-}: BlockContextMenuProps) {
-  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+        const { pos } = activeBlock;
+        const node = editor.state.doc.nodeAt(pos);
 
-  const handleSelect = useCallback(
-    (id: string) => {
-      const node = editor.state.doc.nodeAt(blockPos);
-
-      switch (id) {
-        case "delete":
-          if (node) {
-            editor
-              .chain()
-              .focus()
-              .deleteRange({ from: blockPos, to: blockPos + node.nodeSize })
-              .run();
+        switch (id) {
+          case "delete":
+            if (node) {
+              editor
+                .chain()
+                .focus()
+                .deleteRange({ from: pos, to: pos + node.nodeSize })
+                .run();
+            }
+            break;
+          case "duplicate":
+            if (node) {
+              editor
+                .chain()
+                .focus()
+                .insertContentAt(pos + node.nodeSize, node.toJSON())
+                .run();
+            }
+            break;
+          case "copy-link": {
+            const url = `${window.location.href}#block-${pos}`;
+            navigator.clipboard.writeText(url).catch(() => {
+              console.warn("Failed to copy link to clipboard");
+            });
+            break;
           }
-          break;
-        case "duplicate":
-          if (node) {
-            editor
-              .chain()
-              .focus()
-              .insertContentAt(blockPos + node.nodeSize, node.toJSON())
-              .run();
-          }
-          break;
-        case "copy-link": {
-          const url = `${window.location.href}#block-${blockPos}`;
-          navigator.clipboard.writeText(url).catch(() => {
-            console.warn("Failed to copy link to clipboard");
-          });
-          break;
         }
-      }
 
-      close();
-    },
-    [editor, blockPos, close],
-  );
+        close();
+      },
+      [close],
+    );
 
-  const renderItems = (items: MenuItem[]) =>
-    items.map(({ id, label, icon: Icon, shortcut }) => (
-      <DropdownMenuItem
-        key={id}
-        className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
-        onClick={() => handleSelect(id)}
-      >
-        <Icon className="size-4" />
-        <span>{label}</span>
-        {shortcut && (
-          <DropdownMenuShortcut className="ml-auto">
-            {shortcut}
-          </DropdownMenuShortcut>
-        )}
-      </DropdownMenuItem>
-    ));
+    const blockpos = useEditorStore((s) => s.activeBlock?.pos);
 
-  return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger
-        className="absolute inset-0 opacity-0 pointer-events-none"
-        aria-hidden
-      />
-      <DropdownMenuContent
-        side="right"
-        align="start"
-        sideOffset={8}
-        className="w-[260px] max-h-[400px] overflow-y-auto"
-      >
-        {renderItems(topItems)}
+    const renderItems = (items: MenuItem[]) =>
+      items.map(({ id, label, icon: Icon, shortcut }) => (
+        <DropdownMenuItem
+          key={id}
+          className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
+          onClick={() => handleSelect(id)}
+        >
+          <Icon className="size-4" />
+          <span>{label}</span>
+          {shortcut && (
+            <DropdownMenuShortcut className="ml-auto">
+              {shortcut}
+            </DropdownMenuShortcut>
+          )}
+        </DropdownMenuItem>
+      ));
 
-        <DropdownMenuSeparator className="h-px my-1" />
+    return (
+      <DropdownMenu {...props}>
+        <DropdownMenuTrigger render={trigger} />
+        <DropdownMenuContent
+          side="right"
+          align="start"
+          sideOffset={8}
+          className="w-[260px] max-h-[400px] overflow-y-auto ease-in duration-200"
+        >
+          {renderItems(topItems)}
 
-        <TurnIntomenu editor={editor} blockPos={blockPos} isSubMenu>
-          <Type className="size-4" />
-          <span>Turn into</span>
-        </TurnIntomenu>
+          <DropdownMenuSeparator className="h-px my-1" />
 
-        <ColorMenu editor={editor} blockPos={blockPos} isSubMenu>
-          <Palette className="size-4" />
-          <span>Color</span>
-        </ColorMenu>
+          <TurnIntomenu blockPos={blockpos!} isSubMenu>
+            <Type className="size-4" />
+            <span>Turn into</span>
+          </TurnIntomenu>
 
-        <FontSizeMenu editor={editor} blockPos={blockPos} isSubMenu>
-          <ALargeSmall className="size-4" />
-          <span>Font size</span>
-        </FontSizeMenu>
+          <BlockColorMenu blockPos={blockpos} isSubMenu>
+            <Palette className="size-4" />
+            <span>Color</span>
+          </BlockColorMenu>
 
-        <FontFamilyMenu editor={editor} blockPos={blockPos} isSubMenu>
-          <CaseSensitive className="size-4" />
-          <span>Font family</span>
-        </FontFamilyMenu>
+          <FontSizeMenu blockPos={blockpos} isSubMenu>
+            <ALargeSmall className="size-4" />
+            <span>Font size</span>
+          </FontSizeMenu>
 
-        <DropdownMenuSeparator className="h-px my-1" />
+          <FontFamilyMenu blockPos={blockpos} isSubMenu>
+            <CaseSensitive className="size-4" />
+            <span>Font family</span>
+          </FontFamilyMenu>
 
-        {placeholderSubmenus.map(({ id, label, icon: Icon }) => (
-          <DropdownMenuSub key={id}>
-            <DropdownMenuSubTrigger className="flex items-center gap-2 h-8 px-2 py-1 rounded-md">
-              <Icon className="size-4" />
-              <span>{label}</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="min-w-[180px] p-1 rounded-[10px]">
-              <DropdownMenuItem
-                disabled
-                className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
-              >
-                <span>Coming soon...</span>
-              </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-        ))}
+          <DropdownMenuSeparator className="h-px my-1" />
 
-        <DropdownMenuSeparator className="h-px my-1" />
+          {placeholderSubmenus.map(({ id, label, icon: Icon }) => (
+            <DropdownMenuSub key={id}>
+              <DropdownMenuSubTrigger className="flex items-center gap-2 h-8 px-2 py-1 rounded-md">
+                <Icon className="size-4" />
+                <span>{label}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-[180px] p-1 rounded-[10px]">
+                <DropdownMenuItem
+                  disabled
+                  className="flex items-center gap-2 h-8 px-2 py-1 rounded-md"
+                >
+                  <span>Coming soon...</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          ))}
 
-        {renderItems(bottomItems)}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+          <DropdownMenuSeparator className="h-px my-1" />
+
+          {renderItems(bottomItems)}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+  (p, n) =>
+    p.open === n.open &&
+    p.trigger === n.trigger &&
+    p.onOpenChange === n.onOpenChange,
+);

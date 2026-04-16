@@ -1,37 +1,31 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
-import type { Editor } from "@tiptap/core";
 import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import { EmojiNode } from "../../extensions/Emoji";
 import { PopoverArrow } from "@/components/ui/PopoverArrow";
 import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
-
-interface EmojiPickerProps {
-  editor: Editor;
-}
+import { editorStore } from "../../store";
 
 const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
 
-export const EmojiPicker = memo(({ editor }: EmojiPickerProps) => {
+export const EmojiPicker = memo(() => {
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const [open, setOpen] = useState(false);
 
   const apiRef = useRef<EmojiPickerApi | null>(null);
   const rangeRef = useRef<{ from: number; to: number } | null>(null);
 
-  const insertEmoji = useCallback(
-    (shortcode: string) => {
-      if (!rangeRef.current) return;
-      editor
-        .chain()
-        .focus()
-        .deleteRange(rangeRef.current)
-        .setEmoji(shortcode)
-        .run();
-    },
-    [editor],
-  );
+  const insertEmoji = useCallback((shortcode: string) => {
+    if (!rangeRef.current) return;
+    editorStore
+      .get()
+      .editor?.chain()
+      .focus()
+      .deleteRange(rangeRef.current)
+      .setEmoji(shortcode)
+      .run();
+  }, []);
 
   const setContainer = useCallback(
     (node: HTMLDivElement | null) => {
@@ -47,6 +41,9 @@ export const EmojiPicker = memo(({ editor }: EmojiPickerProps) => {
   );
 
   useEffect(() => {
+    const { editor } = editorStore.get();
+    if (!editor) return;
+
     const plugin = Suggestion({
       editor,
       char: ":",
@@ -82,7 +79,7 @@ export const EmojiPicker = memo(({ editor }: EmojiPickerProps) => {
     return () => {
       editor.unregisterPlugin(EmojiSuggestionPluginKey);
     };
-  }, [editor]);
+  }, []);
 
   const virtualAnchor = useMemo(
     () => ({ getBoundingClientRect: () => anchor ?? new DOMRect() }),

@@ -14,6 +14,7 @@ import {
   Image as ImageIcon,
   AlertCircle,
   Smile,
+  Table,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -153,6 +154,20 @@ export const slashItems: SlashItem[] = [
     group: "Advanced",
     action: (editor, range) =>
       editor.chain().focus().deleteRange(range).setCallout().run(),
+  },
+  {
+    id: "table",
+    title: "Table",
+    description: "Insert a structured table",
+    icon: Table,
+    group: "Advanced",
+    action: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+        .run(),
   },
 ];
 

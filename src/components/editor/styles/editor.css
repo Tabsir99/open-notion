@@ -169,3 +169,62 @@
   pointer-events: none;
   height: 0;
 }
+
+/* ── Table ─────────────────────────────────────────────────────────── */
+
+.ProseMirror .tableWrapper {
+  margin: 1.2em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  position: relative;
+  padding: 6px 20px 20px 6px; /* top right bottom left */
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid var(--editor-border);
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.ProseMirror table th {
+  background: var(--editor-surface);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* prosemirror-tables adds .selectedCell on the active cell */
+.ProseMirror table .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--editor-selected);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--editor-accent);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}

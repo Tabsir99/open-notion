@@ -184,14 +184,29 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
             {/* Color menu */}
-            <ColorMenu editor={editor} container={container}>
+            <ColorMenu
+              container={container}
+              onSelectText={(c) =>
+                editor
+                  .chain()
+                  .focus()
+                  .setColor(c ?? "")
+                  .run()
+              }
+              onSelectBg={(c) =>
+                editor
+                  .chain()
+                  .focus()
+                  .setBackgroundColor(c ?? "")
+                  .run()
+              }
+            >
               <Palette className="size-4" />
             </ColorMenu>
 
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
             <TurnIntomenu
-              editor={editor}
               blockPos={() =>
                 editor.state.selection.$from.depth > 0
                   ? editor.state.selection.$from.before(1)
