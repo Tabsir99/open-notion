@@ -83,9 +83,11 @@ import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
+import type { PlaceholderConfig } from "../config";
 
 export const defaultExtensions = (
   emojis: typeof EmojiNode.options.emojis,
+  placeholder?: PlaceholderConfig,
 ): Extensions =>
   [
     // Core
@@ -133,15 +135,18 @@ export const defaultExtensions = (
     // Functionality
     TextAlign,
     Placeholder.configure({
-      placeholder: ({ node }) => {
-        if (node.type.name === "heading") {
-          return `Heading ${node.attrs.level}`;
-        }
-        if (node.type.name === "paragraph") {
-          return "Type '/' for commands...";
-        }
-        return "";
-      },
+      placeholder:
+        typeof placeholder === "function"
+          ? ({ node }) => placeholder(node)
+          : placeholder
+            ? () => placeholder as string
+            : ({ node }) => {
+                if (node.type.name === "heading")
+                  return `Heading ${node.attrs.level}`;
+                if (node.type.name === "paragraph")
+                  return "Type '/' for commands...";
+                return "";
+              },
     }),
     Dropcursor,
     Gapcursor,

@@ -1,9 +1,9 @@
-import { Editor } from "./components/editor/Editor";
+import { OpenNotion } from "./components/editor/Editor";
 
 function App() {
   return (
     <main className="min-h-screen bg-background text-text-primary">
-      <Editor />
+      <OpenNotion />
     </main>
   );
 }

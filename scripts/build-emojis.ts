@@ -22,7 +22,7 @@ const _categories = {
   flags: "1F6A9", // 🚩
 };
 
-const DIRECTORY = "src/assets";
+const DIRECTORY = "public";
 
 const build = (): void => {
   const emojis: Record<string, Emoji> = {};
@@ -76,11 +76,11 @@ const build = (): void => {
 
   const outDir = resolve(process.cwd(), DIRECTORY);
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(resolve(outDir, "emoji.json"), JSON.stringify(data));
+  writeFileSync(resolve(outDir, "emojis.json"), JSON.stringify(data));
 
   console.info("shortcodecount", shortcodecount);
   console.info(
-    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → ${DIRECTORY}/emoji.json`,
+    `✓ ${Object.keys(emojis).length} emojis across ${categories.length} categories → ${DIRECTORY}/emojis.json`,
   );
 };
 

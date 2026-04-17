@@ -14,8 +14,7 @@ import emojiRegex from "emoji-regex";
 import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data.js";
 import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
-import { getEmojiUrl } from "../menus/EmojiPicker/getEmojiUrl.js";
-import type { GetEmojiUrl } from "../config.js";
+import { getEditorConfig } from "../config";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -30,7 +29,6 @@ declare module "@tiptap/core" {
 
 export type EmojiOptions = {
   HTMLAttributes: Record<string, any>;
-  getEmojiUrl: GetEmojiUrl;
   emojis: Emoji[];
 };
 
@@ -73,7 +71,10 @@ export const EmojiNode = Node.create<EmojiOptions>({
   },
 
   addOptions() {
-    return { HTMLAttributes: {}, getEmojiUrl, emojis: [] };
+    return {
+      HTMLAttributes: {},
+      emojis: [],
+    };
   },
 
   addAttributes() {
@@ -114,7 +115,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
       [
         "img",
         {
-          src: this.options.getEmojiUrl(emojiItem.id, "inline"),
+          src: getEditorConfig().getEmojiUrl(emojiItem.id, "inline"),
           draggable: "false",
           loading: "lazy",
           alt: `${emojiItem.name} emoji`,
@@ -209,7 +210,6 @@ export const EmojiNode = Node.create<EmojiOptions>({
       new PasteRule({
         find: pasteRegex,
         handler: ({ range, match, chain }) => {
-          // match[1] is the optional prefix (start or whitespace), match[2] is the shortcode name
           const prefix = match[1] || "";
           const name = match[2];
 
@@ -217,7 +217,6 @@ export const EmojiNode = Node.create<EmojiOptions>({
             return;
           }
 
-          // Replace only the shortcode portion (preserve the prefix)
           const shortcodeFrom = range.from + prefix.length;
           const shortcodeTo = range.to;
 
@@ -251,8 +250,6 @@ export const EmojiNode = Node.create<EmojiOptions>({
       new Plugin({
         key: new PluginKey("emoji"),
         props: {
-          // double click to select emoji doesn’t work by default
-          // that’s why we simulate this behavior
           handleDoubleClickOn: (_view, pos, node) => {
             if (node.type !== this.type) {
               return false;
@@ -270,9 +267,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
           },
         },
 
-        // replace text emojis with emoji node on any change
         appendTransaction: (transactions, oldState, newState) => {
-          // Skip processing during IME composition
           if (this.editor.view.composing) {
             return;
           }
@@ -292,12 +287,6 @@ export const EmojiNode = Node.create<EmojiOptions>({
           const changes = getChangedRanges(transform);
 
           changes.forEach(({ newRange }) => {
-            // We don’t want to add emoji inline nodes within code blocks.
-            // Because this would split the code block.
-
-            // This only works if the range of changes is within a code node.
-            // For all other cases (e.g. the whole document is set/pasted and the parent of the range is `doc`)
-            // it doesn't and we have to double check later.
             if (newState.doc.resolve(newRange.from).parent.type.spec.code) {
               return;
             }
@@ -329,7 +318,6 @@ export const EmojiNode = Node.create<EmojiOptions>({
 
                 const from = tr.mapping.map(pos + match.index);
 
-                // Double check parent node is not a code block.
                 if (newState.doc.resolve(from).parent.type.spec.code) {
                   return;
                 }
