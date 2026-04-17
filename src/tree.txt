@@ -1,0 +1,104 @@
+.
+├── App.tsx
+├── assets
+│   ├── emoji.json
+│   ├── hero.png
+│   ├── react.svg
+│   └── vite.svg
+├── components
+│   ├── editor
+│   │   ├── blocks
+│   │   │   ├── Callout
+│   │   │   │   └── index.tsx
+│   │   │   ├── CodeBlock
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── languages.tsx
+│   │   │   └── ImageBlock
+│   │   │       ├── Empty.tsx
+│   │   │       ├── index.tsx
+│   │   │       └── Toolbar.tsx
+│   │   ├── Editor.tsx
+│   │   ├── extensions
+│   │   │   ├── BlockStyles.ts
+│   │   │   ├── Callout.ts
+│   │   │   ├── CustomCodeBlock.ts
+│   │   │   ├── CustomImage.ts
+│   │   │   ├── Emoji.ts
+│   │   │   ├── helpers
+│   │   │   │   ├── emojiToShortcode.ts
+│   │   │   │   ├── removeDuplicates.ts
+│   │   │   │   ├── removeVariationSelector.ts
+│   │   │   │   └── shortcodeToEmoji.ts
+│   │   │   └── index.ts
+│   │   ├── index.ts
+│   │   ├── menus
+│   │   │   ├── AttributeMenu.tsx
+│   │   │   ├── BlockContextMenu.tsx
+│   │   │   ├── BlockSideMenu.tsx
+│   │   │   ├── BubbleMenu
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── LinkInput.tsx
+│   │   │   ├── ColorMenu
+│   │   │   │   ├── colors.ts
+│   │   │   │   └── index.tsx
+│   │   │   ├── EmojiPicker
+│   │   │   │   ├── createEmojipicker
+│   │   │   │   │   ├── category.ts
+│   │   │   │   │   ├── data.ts
+│   │   │   │   │   ├── dom.ts
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── navigation.ts
+│   │   │   │   │   └── utils.ts
+│   │   │   │   ├── getEmojiUrl.ts
+│   │   │   │   └── index.tsx
+│   │   │   ├── FontFamilyMenu
+│   │   │   │   ├── families.ts
+│   │   │   │   └── index.tsx
+│   │   │   ├── FontSizeMenu
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── sizes.ts
+│   │   │   ├── SlashMenu
+│   │   │   │   ├── index.tsx
+│   │   │   │   └── slash-items.ts
+│   │   │   ├── TableControls
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── tableActions.ts
+│   │   │   │   ├── TableExtendBtn.tsx
+│   │   │   │   ├── TableMenus.tsx
+│   │   │   │   ├── useTableDrag.ts
+│   │   │   │   └── useTableFocus.ts
+│   │   │   ├── TurnIntoMenu
+│   │   │   │   └── items.tsx
+│   │   │   ├── TurnIntoMenu.tsx
+│   │   │   └── useHoveredBlock.ts
+│   │   ├── store.ts
+│   │   ├── styles
+│   │   │   ├── block-side-menu.css
+│   │   │   ├── callout.css
+│   │   │   └── editor.css
+│   │   └── types.ts
+│   └── ui
+│       ├── button.tsx
+│       ├── dropdown-menu.tsx
+│       ├── input.tsx
+│       ├── PopoverArrow.tsx
+│       ├── popover.tsx
+│       ├── separator.tsx
+│       ├── tabs.tsx
+│       ├── textarea.tsx
+│       └── toggle.tsx
+├── global.css
+├── lib
+│   └── utils.ts
+├── main.tsx
+├── temp
+│   ├── createEmojiPicker.ts
+│   ├── notion-color-menu.png
+│   ├── notion-slash1.png
+│   ├── Notion-slash2.png
+│   ├── notion-slash3.png
+│   ├── notion-slash4.png
+│   └── prompt.md
+└── tree.txt
+
+24 directories, 78 files

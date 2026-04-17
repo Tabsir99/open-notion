@@ -1,4 +1,4 @@
-import "./styles.css";
+import "../../styles/callout.css";
 import { useCallback, useRef, useState } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
