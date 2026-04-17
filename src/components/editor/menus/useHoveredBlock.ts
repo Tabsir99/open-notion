@@ -105,26 +105,29 @@ export function useHoveredBlock({ menuRef, open }: Options) {
   }, [menuRef]);
 
   useEffect(() => {
-    const { editorContainer } = editorStore.get();
-    if (!editorContainer || open) return;
+    const editorDom = editorStore.get().editor?.view.dom;
+    if (!editorDom || open) return;
 
     const handlePointerOver = (e: PointerEvent) => {
       setTimeout(() => {
         const blockEl = getBlockFromEl(e.target as HTMLElement);
         if (!blockEl) return;
+
         const info = resolveBlockInfo(blockEl);
         if (info) applyActive(info);
       }, 0);
     };
 
-    editorContainer.addEventListener("pointerover", handlePointerOver, {
+    editorDom.addEventListener("pointerover", handlePointerOver, {
       passive: true,
     });
-    editorContainer.addEventListener("pointerleave", clearActive);
+    editorDom.addEventListener("mouseleave", clearActive);
+    menuRef.current?.addEventListener("mouseleave", clearActive);
 
     return () => {
-      editorContainer.removeEventListener("pointerover", handlePointerOver);
-      editorContainer.removeEventListener("pointerleave", clearActive);
+      editorDom.removeEventListener("pointerover", handlePointerOver);
+      editorDom.removeEventListener("mouseleave", clearActive);
+      menuRef.current?.removeEventListener("mouseleave", clearActive);
     };
   }, [
     getBlockFromEl,

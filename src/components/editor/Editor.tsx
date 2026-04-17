@@ -151,48 +151,57 @@ export function useOpenNotion({
     autofocus,
     immediatelyRender: false,
 
-    onSelectionUpdate(props) {
-      const ed = props.editor;
-      const key = getEditorConfig().storageKey;
-      if (key) {
-        const { from } = ed.state.selection;
-        localStorage.setItem(`${key}-cursor`, String(from));
-      }
-      onSelectionChange?.(ed);
-    },
-
-    onUpdate(props) {
-      const ed = props.editor;
-      const json = ed.getJSON();
-      const key = getEditorConfig().storageKey;
-      if (key) {
-        localStorage.setItem(`${key}-content`, JSON.stringify(json));
-      }
-      onChange?.(json);
-    },
-
-    onCreate(props) {
-      const ed = props.editor;
-      const key = getEditorConfig().storageKey;
-
-      if (key && content === undefined) {
-        const savedContent = localStorage.getItem(`${key}-content`);
-        const savedCursor = localStorage.getItem(`${key}-cursor`);
-        if (savedContent) {
-          try {
-            ed.commands.setContent(JSON.parse(savedContent));
-            if (savedCursor) {
-              ed.commands.setTextSelection(Number(savedCursor));
+    onSelectionUpdate:
+      storageKey || onselectionchange
+        ? (props) => {
+            const ed = props.editor;
+            const key = getEditorConfig().storageKey;
+            if (key) {
+              const { from } = ed.state.selection;
+              localStorage.setItem(`${key}-cursor`, String(from));
             }
-          } catch {
-            // Ignore malformed saved content
+            onSelectionChange?.(ed);
           }
-        }
-      }
+        : undefined,
 
-      if (autofocus) ed.commands.focus();
-      onReady?.(ed);
-    },
+    onUpdate:
+      onChange || storageKey
+        ? (props) => {
+            const ed = props.editor;
+            const json = ed.getJSON();
+            const key = getEditorConfig().storageKey;
+            if (key) {
+              localStorage.setItem(`${key}-content`, JSON.stringify(json));
+            }
+            onChange?.(json);
+          }
+        : undefined,
+
+    onCreate:
+      content || onReady || storageKey
+        ? (props) => {
+            const ed = props.editor;
+            const key = getEditorConfig().storageKey;
+
+            if (key && content === undefined) {
+              const savedContent = localStorage.getItem(`${key}-content`);
+              const savedCursor = localStorage.getItem(`${key}-cursor`);
+              if (savedContent) {
+                try {
+                  ed.commands.setContent(JSON.parse(savedContent));
+                  if (savedCursor) {
+                    ed.commands.setTextSelection(Number(savedCursor));
+                  }
+                } catch {
+                  // Ignore malformed saved content
+                }
+              }
+            }
+
+            if (autofocus) ed.commands.focus();
+            onReady?.(ed);
+          }
+        : undefined,
   }) as TypedEditor | null;
 
   return editor;
@@ -200,7 +209,10 @@ export function useOpenNotion({
 
 // ── The view: renders the editor UI ──────────────────────────────────
 
-export function OpenNotionView({ editor, className }: OpenNotionViewProps) {
+export function OpenNotionView({
+  editor,
+  className = "pl-20 pr-10 py-16",
+}: OpenNotionViewProps) {
   if (!editor) return null;
 
   return (
@@ -208,7 +220,12 @@ export function OpenNotionView({ editor, className }: OpenNotionViewProps) {
       ref={(el) => {
         editorStore.set({ editor, editorContainer: el });
       }}
-      className={cn("relative w-full cursor-text", className)}
+      className={cn(
+        "relative w-full cursor-text",
+        "max-w-4xl min-h-svh cursor-text bg-background border border-border",
+        className,
+      )}
+      onClick={() => editor.chain().focus().run()}
     >
       <BlockSideMenu />
       <BubbleMenu editor={editor} />
@@ -238,7 +255,11 @@ export interface OpenNotionProps extends OpenNotionOptions {
  */
 export function OpenNotion({
   className,
-  fallback = <div>Loading...</div>,
+  fallback = (
+    <div className="w-dvw h-dvh flex justify-center items-center text-4xl">
+      Loading...
+    </div>
+  ),
   ...options
 }: OpenNotionProps) {
   return (

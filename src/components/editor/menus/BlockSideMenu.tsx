@@ -57,12 +57,12 @@ export function BlockSideMenu() {
       ref={menuRef}
       data-visible="false"
       className={cn(
-        "absolute top-0 left-[10px] z-10 flex items-center",
+        "absolute top-0 flex items-center left-2",
         "opacity-0 pointer-events-none",
         "data-[visible=true]:opacity-100 data-[visible=true]:pointer-events-auto",
-        "after:absolute after:top-0 after:-right-4 after:h-full after:w-4 after:content-['']",
+        "after:absolute after:top-0 after:-right-full after:h-full after:w-full after:content-['']",
+        "transition-[top,opacity] duration-200 ease-out will-change-[top]",
       )}
-      id="block-side-menu"
     >
       <Button
         variant="ghost"

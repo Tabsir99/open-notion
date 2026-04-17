@@ -25,7 +25,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && pnpm build:emojis && vite build",
+    "build": "tsc -b && pnpm build:emojis && pnpm build:registry && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "build:emojis": "tsx ./scripts/build-emojis.ts",
