@@ -38,7 +38,7 @@ export function createEmojiGrid(scroll: HTMLDivElement) {
         "w-12 h-12 border-none rounded-md cursor-pointer flex items-center justify-center transition-colors duration-200 p-2 hover:bg-[#f3f4f6] text-2xl";
 
       const img = document.createElement("img");
-      img.src = getEmojiUrl(emoji.id);
+      img.src = getEmojiUrl(emoji.id, "picker-grid");
       img.loading = "lazy";
       img.className = "block select-none";
       img.draggable = false;

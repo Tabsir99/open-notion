@@ -11,7 +11,8 @@ import {
 import { Check } from "lucide-react";
 import { useEditor } from "../store";
 import { memo } from "react";
-import { getTurnIntoItems, runTurnInto } from "./TurnIntoMenu/items";
+import { runTurnInto } from "./TurnIntoMenu/items";
+import { getEditorConfig } from "../config";
 
 // ── Component ─────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export const TurnIntomenu = memo(
           {children}
         </MenuTrigger>
         <MenuContent className={cn("min-w-[180px] p-1")} container={container}>
-          {getTurnIntoItems(editor).map((item) => (
+          {getEditorConfig().turnIntoItems.map((item) => (
             <DropdownMenuItem
               key={item.label}
               className={cn("flex items-center gap-2 h-8 px-2 py-1")}
@@ -63,7 +64,7 @@ export const TurnIntomenu = memo(
             >
               <item.icon className="size-4" />
               <span className="flex-1">{item.label}</span>
-              {item.isActive() && (
+              {item.isActive(editor) && (
                 <Check className="size-4 text-muted-foreground" />
               )}
             </DropdownMenuItem>

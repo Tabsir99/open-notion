@@ -1,5 +1,5 @@
+import { getEditorConfig } from "@/components/editor/config";
 import { getEmojiData } from "./data";
-import { getEmojiUrl } from "../getEmojiUrl";
 
 export const categoryId = (id: string) => `emoji-category-${id}`;
 export function createCategoryBar(
@@ -40,10 +40,7 @@ export function createCategoryBar(
       };
 
       const img = document.createElement("img");
-      img.src = getEmojiUrl(icon, {
-        provider: "noto-animated",
-        format: "webp",
-      });
+      img.src = getEditorConfig().getEmojiUrl(icon, "category-bar");
       img.className = "size-6 select-none";
       img.draggable = false;
       btn.appendChild(img);

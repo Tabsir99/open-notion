@@ -12,7 +12,6 @@ interface EditorStoreState {
   editor: TypedEditor | null;
   editorContainer: HTMLElement | null;
   hoveredBlock: NodeBlock | null;
-  focusedBlock: NodeBlock | null;
 }
 
 function createEditorStore() {
@@ -20,7 +19,6 @@ function createEditorStore() {
     editor: null,
     hoveredBlock: null,
     editorContainer: null,
-    focusedBlock: null,
   };
   const listeners = new Set<() => void>();
   const notify = () => listeners.forEach((l) => l());

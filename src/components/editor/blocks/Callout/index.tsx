@@ -58,7 +58,7 @@ export function CalloutView({ node, updateAttributes, editor }: NodeViewProps) {
         onClick={() => setPickerOpen((p) => !p)}
       >
         <img
-          src={getEmojiUrl(emoji?.id!)}
+          src={getEmojiUrl(emoji?.id!, "callout-icon")}
           draggable="false"
           loading="lazy"
           alt={`${emoji?.name} emoji`}

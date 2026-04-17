@@ -15,6 +15,7 @@ import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data.js";
 import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
 import { getEmojiUrl } from "../menus/EmojiPicker/getEmojiUrl.js";
+import type { GetEmojiUrl } from "../config.js";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -29,7 +30,7 @@ declare module "@tiptap/core" {
 
 export type EmojiOptions = {
   HTMLAttributes: Record<string, any>;
-  getEmojiUrl?: (hexcode: string) => string;
+  getEmojiUrl: GetEmojiUrl;
   emojis: Emoji[];
 };
 
@@ -72,11 +73,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
   },
 
   addOptions() {
-    return {
-      HTMLAttributes: {},
-      getEmojiUrl: getEmojiUrl,
-      emojis: [],
-    };
+    return { HTMLAttributes: {}, getEmojiUrl, emojis: [] };
   },
 
   addAttributes() {
@@ -117,7 +114,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
       [
         "img",
         {
-          src: this.options.getEmojiUrl?.(emojiItem.id),
+          src: this.options.getEmojiUrl(emojiItem.id, "inline"),
           draggable: "false",
           loading: "lazy",
           alt: `${emojiItem.name} emoji`,

@@ -84,10 +84,9 @@ import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
 
-interface GetExtensionsProps {
-  emojis: typeof EmojiNode.options.emojis;
-}
-export const getExtensions = (props: GetExtensionsProps) =>
+export const defaultExtensions = (
+  emojis: typeof EmojiNode.options.emojis,
+): Extensions =>
   [
     // Core
     Document,
@@ -154,9 +153,7 @@ export const getExtensions = (props: GetExtensionsProps) =>
     }),
 
     // Custom
-    EmojiNode.configure({
-      emojis: props.emojis,
-    }),
+    EmojiNode.configure({ emojis }),
     CustomImage,
     CustomCodeBlock,
     Callout,

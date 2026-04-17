@@ -1,5 +1,3 @@
-import emojiUrl from "@/assets/emoji.json?url";
-
 export interface EmojiSkin {
   unified: string;
   native: string;
@@ -38,7 +36,7 @@ let _inflight: Promise<EmojiData> | null = null;
  * Defaults to /emoji.json (public folder in Next.js / Vite).
  */
 
-export async function loadEmojiData(url = emojiUrl): Promise<EmojiData> {
+export async function loadEmojiData(url: string): Promise<EmojiData> {
   if (_cache) return _cache;
   if (!_inflight) {
     _inflight = fetch(url)

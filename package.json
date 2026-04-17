@@ -30,7 +30,7 @@
     "preview": "vite preview",
     "build:emojis": "tsx ./scripts/build-emojis.ts",
     "build:registry": "shadcn build",
-    "typecheck": "tsc && rm -rf dist"
+    "typecheck": "tsc -b && rm -rf dist"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

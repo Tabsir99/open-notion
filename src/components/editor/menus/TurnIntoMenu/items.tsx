@@ -1,5 +1,3 @@
-import { Node as PMNode, Schema } from "@tiptap/pm/model";
-import type { LucideIcon } from "lucide-react";
 import {
   Type,
   Heading1,
@@ -13,10 +11,14 @@ import {
   Table,
   AlertCircle,
 } from "lucide-react";
-import type { ChainedCommands } from "@tiptap/core";
 import { TextSelection } from "@tiptap/pm/state";
 import { editorStore } from "../../store";
-import type { TypedEditor } from "../../types";
+import type { TurnIntoItem } from "../../config";
+
+// Re-export the type for convenience
+export type { TurnIntoItem };
+
+// ── Runner ────────────────────────────────────────────────────────────
 
 export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
   const editor = editorStore.get().editor;
@@ -52,47 +54,46 @@ export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
     .run();
 };
 
-interface TurnIntoItem {
-  label: string;
-  icon: LucideIcon;
-  isActive: () => boolean;
-  applyChain: (chain: ChainedCommands) => ChainedCommands;
-  buildNode: (schema: Schema) => PMNode;
-}
+// ── Default items ─────────────────────────────────────────────────────
 
-export const getTurnIntoItems = (editor: TypedEditor): TurnIntoItem[] => [
+export const defaultTurnIntoItems: TurnIntoItem[] = [
   {
+    id: "text",
     label: "Text",
     icon: Type,
-    isActive: () => editor.isActive("paragraph"),
+    isActive: (editor) => editor.isActive("paragraph"),
     applyChain: (c) => c.setParagraph(),
     buildNode: (s) => s.nodes.paragraph.create(),
   },
   {
+    id: "heading-1",
     label: "Heading 1",
     icon: Heading1,
-    isActive: () => editor.isActive("heading", { level: 1 }),
+    isActive: (editor) => editor.isActive("heading", { level: 1 }),
     applyChain: (c) => c.setHeading({ level: 1 }),
     buildNode: (s) => s.nodes.heading.create({ level: 1 }),
   },
   {
+    id: "heading-2",
     label: "Heading 2",
     icon: Heading2,
-    isActive: () => editor.isActive("heading", { level: 2 }),
+    isActive: (editor) => editor.isActive("heading", { level: 2 }),
     applyChain: (c) => c.setHeading({ level: 2 }),
     buildNode: (s) => s.nodes.heading.create({ level: 2 }),
   },
   {
+    id: "heading-3",
     label: "Heading 3",
     icon: Heading3,
-    isActive: () => editor.isActive("heading", { level: 3 }),
+    isActive: (editor) => editor.isActive("heading", { level: 3 }),
     applyChain: (c) => c.setHeading({ level: 3 }),
     buildNode: (s) => s.nodes.heading.create({ level: 3 }),
   },
   {
+    id: "bullet-list",
     label: "Bullet List",
     icon: List,
-    isActive: () => editor.isActive("bulletList"),
+    isActive: (editor) => editor.isActive("bulletList"),
     applyChain: (c) => c.toggleBulletList(),
     buildNode: (s) =>
       s.nodes.bulletList.create(
@@ -101,9 +102,10 @@ export const getTurnIntoItems = (editor: TypedEditor): TurnIntoItem[] => [
       ),
   },
   {
+    id: "numbered-list",
     label: "Numbered List",
     icon: ListOrdered,
-    isActive: () => editor.isActive("orderedList"),
+    isActive: (editor) => editor.isActive("orderedList"),
     applyChain: (c) => c.toggleOrderedList(),
     buildNode: (s) =>
       s.nodes.orderedList.create(
@@ -112,9 +114,10 @@ export const getTurnIntoItems = (editor: TypedEditor): TurnIntoItem[] => [
       ),
   },
   {
+    id: "task-list",
     label: "Task List",
     icon: ListChecks,
-    isActive: () => editor.isActive("taskList"),
+    isActive: (editor) => editor.isActive("taskList"),
     applyChain: (c) => c.toggleTaskList(),
     buildNode: (s) =>
       s.nodes.taskList.create(
@@ -123,31 +126,35 @@ export const getTurnIntoItems = (editor: TypedEditor): TurnIntoItem[] => [
       ),
   },
   {
+    id: "quote",
     label: "Quote",
     icon: Quote,
-    isActive: () => editor.isActive("blockquote"),
+    isActive: (editor) => editor.isActive("blockquote"),
     applyChain: (c) => c.setBlockquote(),
     buildNode: (s) =>
       s.nodes.blockquote.create(null, s.nodes.paragraph.create()),
   },
   {
+    id: "code-block",
     label: "Code Block",
     icon: Code,
-    isActive: () => editor.isActive("codeBlock"),
+    isActive: (editor) => editor.isActive("codeBlock"),
     applyChain: (c) => c.setCodeBlock(),
     buildNode: (s) => s.nodes.codeBlock.create(),
   },
   {
+    id: "callout",
     label: "Callout",
     icon: AlertCircle,
-    isActive: () => editor.isActive("callout"),
+    isActive: (editor) => editor.isActive("callout"),
     applyChain: (c) => c.setCallout(),
     buildNode: (s) => s.nodes.callout.create(),
   },
   {
+    id: "table",
     label: "Table",
     icon: Table,
-    isActive: () => editor.isActive("table"),
+    isActive: (editor) => editor.isActive("table"),
     applyChain: (c) =>
       c.insertTable({ cols: 3, rows: 3, withHeaderRow: false }),
     buildNode: (s) => s.nodes.table.create(),

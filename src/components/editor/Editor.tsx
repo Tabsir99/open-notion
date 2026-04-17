@@ -10,12 +10,12 @@ import {
   getEmojiArray,
   loadEmojiData,
 } from "./menus/EmojiPicker/createEmojipicker/data";
-import { getExtensions } from "./extensions";
+import { defaultExtensions } from "./extensions";
 import { editorStore } from "./store";
 import type { TypedEditor } from "./types";
 
 const dataPromise = (async () => {
-  await loadEmojiData();
+  await loadEmojiData("/emoji.json");
   return getEmojiArray();
 })();
 
@@ -23,7 +23,7 @@ function _Editor() {
   const emojis = use(dataPromise);
 
   const editor = useEditor({
-    extensions: getExtensions({ emojis }),
+    extensions: defaultExtensions(emojis),
     content: "",
     immediatelyRender: false,
 

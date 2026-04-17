@@ -1,5 +1,3 @@
-import type { LucideIcon } from "lucide-react";
-import type { Range } from "@tiptap/core";
 import {
   Type,
   Heading1,
@@ -16,22 +14,14 @@ import {
   Table,
   AlertCircle,
 } from "lucide-react";
-import type { TypedEditor } from "../../types";
+import { getEditorConfig, type SlashItem } from "../../config";
 
-// ── Types ─────────────────────────────────────────────────────────────
+// Re-export the type for convenience
+export type { SlashItem };
 
-export interface SlashItem {
-  id: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  group: string;
-  action: (editor: TypedEditor, range: Range) => void;
-}
+// ── Default items ─────────────────────────────────────────────────────
 
-// ── Items ─────────────────────────────────────────────────────────────
-
-export const slashItems: SlashItem[] = [
+export const defaultSlashItems: SlashItem[] = [
   // ── Basic ─────────────────────────────────────
   {
     id: "text",
@@ -174,10 +164,12 @@ export const slashItems: SlashItem[] = [
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-/** Filter items by query, matching title or description */
+/** Filter items by query, matching title */
 export function filterSlashItems(query: string): SlashItem[] {
   const q = query.toLowerCase();
-  return slashItems.filter((item) => item.title.toLowerCase().includes(q));
+  return getEditorConfig().slashItems.filter((item) =>
+    item.title.toLowerCase().includes(q),
+  );
 }
 
 /** Group a flat item list by `group` field, preserving insertion order */
