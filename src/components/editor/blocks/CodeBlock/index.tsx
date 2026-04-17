@@ -4,17 +4,17 @@ import {
   NodeViewContent,
   type NodeViewProps,
 } from "@tiptap/react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/editor/ui/dropdown-menu";
 import { languages, getLanguage } from "./languages";
 import { shikiPluginKey } from "../../extensions/CustomCodeBlock";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/editor/ui/button";
 
 export const CodeBlockView: React.FC<NodeViewProps> = ({
   node,

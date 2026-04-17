@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Check } from "lucide-react";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { DropdownMenuItem } from "@/components/editor/ui/dropdown-menu";
+import { Input } from "@/components/editor/ui/input";
 import { fontSizes } from "./sizes";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import { editorStore } from "../../store";
 
 function applyFontSize(size: string, pos?: number) {

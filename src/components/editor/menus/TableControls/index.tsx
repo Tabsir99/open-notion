@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { GripHorizontal, MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/editor/ui/dropdown-menu";
 import { useTableFocus } from "./useTableFocus";
 import { useTableDrag, type DragState } from "./useTableDrag";
 import { ColMenu, RowMenu, CellMenu } from "./TableMenus";

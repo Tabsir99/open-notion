@@ -7,9 +7,9 @@ import {
   RefreshCcw,
   AlignRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/editor/ui/button";
+import { Separator } from "@/components/editor/ui/separator";
+import { Toggle } from "@/components/editor/ui/toggle";
 
 type Align = "left" | "center" | "full" | "right";
 

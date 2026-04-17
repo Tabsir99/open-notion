@@ -2,8 +2,8 @@ import { useRef, useState, useCallback } from "react";
 import { GripVertical, Plus } from "lucide-react";
 import { useHoveredBlock } from "./useHoveredBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/components/editor/lib/utils";
+import { Button } from "@/components/editor/ui/button";
 import "../styles/block-side-menu.css";
 import { editorStore } from "../store";
 

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
@@ -7,7 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/editor/ui/dropdown-menu";
 import { Check } from "lucide-react";
 import { useEditor } from "../store";
 import { memo } from "react";

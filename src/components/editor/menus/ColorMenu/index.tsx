@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/editor/ui/dropdown-menu";
 import { textColors, bgColors, type ColorOption } from "./colors";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { editorStore } from "../../store";

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -6,8 +6,8 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
-import { buttonVariants } from "@/components/ui/button";
+} from "@/components/editor/ui/dropdown-menu";
+import { buttonVariants } from "@/components/editor/ui/button";
 import { editorStore, useEditorStore } from "../store";
 
 export const getBlockAttr = (key: string, pos?: number): string | null => {

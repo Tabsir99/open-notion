@@ -13,10 +13,10 @@ import {
   Palette,
   ChevronDown,
 } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
-import { Separator } from "@/components/ui/separator";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Toggle } from "@/components/editor/ui/toggle";
+import { Separator } from "@/components/editor/ui/separator";
+import { buttonVariants } from "@/components/editor/ui/button";
+import { cn } from "@/components/editor/lib/utils";
 import { TurnIntomenu } from "../TurnIntoMenu";
 import { ColorMenu } from "../ColorMenu";
 import { LinkInput } from "./LinkInput";

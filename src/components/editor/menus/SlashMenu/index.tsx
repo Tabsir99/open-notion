@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Suggestion } from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { Popover, PopoverContent } from "@/components/editor/ui/popover";
+import { Separator } from "@/components/editor/ui/separator";
+import { cn } from "@/components/editor/lib/utils";
 import { filterSlashItems, groupItems, type SlashItem } from "./slash-items";
 import { editorStore } from "../../store";
 

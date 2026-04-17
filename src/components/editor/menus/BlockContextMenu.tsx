@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuShortcut,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/editor/ui/dropdown-menu";
 import {
   Trash2,
   Copy,

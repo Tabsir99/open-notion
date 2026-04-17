@@ -1,9 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTitle,
+} from "@/components/editor/ui/popover";
 import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
 import { EmojiNode } from "../../extensions/Emoji";
-import { PopoverArrow } from "@/components/ui/PopoverArrow";
+import { PopoverArrow } from "@/components/editor/ui/PopoverArrow";
 import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
 import { editorStore } from "../../store";
 

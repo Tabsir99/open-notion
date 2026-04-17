@@ -1,0 +1,165 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "open-notion",
+  "homepage": "https://github.com/tabsircg/open-notion",
+  "items": [
+    {
+      "name": "editor",
+      "type": "registry:block",
+      "title": "Open Notion Editor",
+      "description": "A production-grade Notion-style block editor built on Tiptap v3, Base UI, and shadcn. Fully self-contained — ships its own UI primitives to avoid collisions with your existing shadcn components.",
+      "dependencies": [
+        "@base-ui/react@^1.3.0",
+        "@devicon/react@^0.0.3",
+        "@floating-ui/dom@^1.7.6",
+        "@shikijs/core@^4.0.2",
+        "@shikijs/engine-javascript@^4.0.2",
+        "@shikijs/langs@^4.0.2",
+        "@shikijs/themes@^4.0.2",
+        "@tiptap/core@^3.22.3",
+        "@tiptap/extension-blockquote@^3.22.3",
+        "@tiptap/extension-bold@^3.22.3",
+        "@tiptap/extension-code@^3.22.3",
+        "@tiptap/extension-code-block@^3.22.3",
+        "@tiptap/extension-document@^3.22.3",
+        "@tiptap/extension-hard-break@^3.22.3",
+        "@tiptap/extension-heading@^3.22.3",
+        "@tiptap/extension-horizontal-rule@^3.22.3",
+        "@tiptap/extension-image@^3.22.3",
+        "@tiptap/extension-italic@^3.22.3",
+        "@tiptap/extension-link@^3.22.3",
+        "@tiptap/extension-list@^3.22.3",
+        "@tiptap/extension-paragraph@^3.22.3",
+        "@tiptap/extension-strike@^3.22.3",
+        "@tiptap/extension-table@^3.22.3",
+        "@tiptap/extension-text@^3.22.3",
+        "@tiptap/extension-text-align@^3.22.3",
+        "@tiptap/extension-text-style@^3.22.3",
+        "@tiptap/extension-underline@^3.22.3",
+        "@tiptap/extensions@^3.22.3",
+        "@tiptap/pm@^3.22.3",
+        "@tiptap/react@^3.22.3",
+        "@tiptap/suggestion@^3.22.3",
+        "class-variance-authority@^0.7.1",
+        "clsx@^2.1.1",
+        "emoji-regex@^10.3.0",
+        "lucide-react@^1.7.0",
+        "tailwind-merge@^3.5.0",
+        "tw-animate-css@^1.4.0"
+      ],
+      "registryDependencies": [],
+      "cssVars": {
+        "theme": {
+          "--color-surface": "var(--editor-surface)",
+          "--color-surface-hover": "var(--editor-surface-hover)",
+          "--color-editor-border": "var(--editor-border)",
+          "--color-editor-text": "var(--editor-text)",
+          "--color-editor-text-secondary": "var(--editor-text-secondary)",
+          "--color-editor-text-muted": "var(--editor-text-muted)",
+          "--color-editor-accent": "var(--editor-accent)",
+          "--color-editor-selected": "var(--editor-selected)"
+        },
+        "light": {
+          "--editor-surface": "#f4f4f5",
+          "--editor-surface-hover": "#e4e4e7",
+          "--editor-border": "#d4d4d8",
+          "--editor-text": "#09090b",
+          "--editor-text-secondary": "#52525b",
+          "--editor-text-muted": "#a1a1aa",
+          "--editor-accent": "#3b82f6",
+          "--editor-selected": "#21bab225"
+        },
+        "dark": {
+          "--editor-surface": "#18181b",
+          "--editor-surface-hover": "#27272a",
+          "--editor-border": "#27272a",
+          "--editor-text": "#fafafa",
+          "--editor-text-secondary": "#a1a1aa",
+          "--editor-text-muted": "#52525b",
+          "--editor-accent": "#3b82f6",
+          "--editor-selected": "#21bab225"
+        }
+      },
+      "files": [
+        { "path": "src/components/editor/Editor.tsx",                                                "type": "registry:component", "target": "components/editor/Editor.tsx" },
+        { "path": "src/components/editor/index.ts",                                                  "type": "registry:lib",       "target": "components/editor/index.ts" },
+        { "path": "src/components/editor/store.ts",                                                  "type": "registry:lib",       "target": "components/editor/store.ts" },
+        { "path": "src/components/editor/types.ts",                                                  "type": "registry:lib",       "target": "components/editor/types.ts" },
+
+        { "path": "src/components/editor/lib/utils.ts",                                              "type": "registry:lib",       "target": "components/editor/lib/utils.ts" },
+
+        { "path": "src/components/editor/ui/button.tsx",                                             "type": "registry:component", "target": "components/editor/ui/button.tsx" },
+        { "path": "src/components/editor/ui/dropdown-menu.tsx",                                      "type": "registry:component", "target": "components/editor/ui/dropdown-menu.tsx" },
+        { "path": "src/components/editor/ui/input.tsx",                                              "type": "registry:component", "target": "components/editor/ui/input.tsx" },
+        { "path": "src/components/editor/ui/popover.tsx",                                            "type": "registry:component", "target": "components/editor/ui/popover.tsx" },
+        { "path": "src/components/editor/ui/PopoverArrow.tsx",                                       "type": "registry:component", "target": "components/editor/ui/PopoverArrow.tsx" },
+        { "path": "src/components/editor/ui/separator.tsx",                                          "type": "registry:component", "target": "components/editor/ui/separator.tsx" },
+        { "path": "src/components/editor/ui/tabs.tsx",                                               "type": "registry:component", "target": "components/editor/ui/tabs.tsx" },
+        { "path": "src/components/editor/ui/toggle.tsx",                                             "type": "registry:component", "target": "components/editor/ui/toggle.tsx" },
+
+        { "path": "src/components/editor/blocks/Callout/index.tsx",                                  "type": "registry:component", "target": "components/editor/blocks/Callout/index.tsx" },
+        { "path": "src/components/editor/blocks/CodeBlock/index.tsx",                                "type": "registry:component", "target": "components/editor/blocks/CodeBlock/index.tsx" },
+        { "path": "src/components/editor/blocks/CodeBlock/languages.tsx",                            "type": "registry:component", "target": "components/editor/blocks/CodeBlock/languages.tsx" },
+        { "path": "src/components/editor/blocks/ImageBlock/index.tsx",                               "type": "registry:component", "target": "components/editor/blocks/ImageBlock/index.tsx" },
+        { "path": "src/components/editor/blocks/ImageBlock/Empty.tsx",                               "type": "registry:component", "target": "components/editor/blocks/ImageBlock/Empty.tsx" },
+        { "path": "src/components/editor/blocks/ImageBlock/Toolbar.tsx",                             "type": "registry:component", "target": "components/editor/blocks/ImageBlock/Toolbar.tsx" },
+
+        { "path": "src/components/editor/extensions/index.ts",                                       "type": "registry:lib",       "target": "components/editor/extensions/index.ts" },
+        { "path": "src/components/editor/extensions/BlockStyles.ts",                                 "type": "registry:lib",       "target": "components/editor/extensions/BlockStyles.ts" },
+        { "path": "src/components/editor/extensions/Callout.ts",                                     "type": "registry:lib",       "target": "components/editor/extensions/Callout.ts" },
+        { "path": "src/components/editor/extensions/CustomCodeBlock.ts",                             "type": "registry:lib",       "target": "components/editor/extensions/CustomCodeBlock.ts" },
+        { "path": "src/components/editor/extensions/CustomImage.ts",                                 "type": "registry:lib",       "target": "components/editor/extensions/CustomImage.ts" },
+        { "path": "src/components/editor/extensions/Emoji.ts",                                       "type": "registry:lib",       "target": "components/editor/extensions/Emoji.ts" },
+        { "path": "src/components/editor/extensions/helpers/emojiToShortcode.ts",                    "type": "registry:lib",       "target": "components/editor/extensions/helpers/emojiToShortcode.ts" },
+        { "path": "src/components/editor/extensions/helpers/removeDuplicates.ts",                    "type": "registry:lib",       "target": "components/editor/extensions/helpers/removeDuplicates.ts" },
+        { "path": "src/components/editor/extensions/helpers/removeVariationSelector.ts",             "type": "registry:lib",       "target": "components/editor/extensions/helpers/removeVariationSelector.ts" },
+        { "path": "src/components/editor/extensions/helpers/shortcodeToEmoji.ts",                    "type": "registry:lib",       "target": "components/editor/extensions/helpers/shortcodeToEmoji.ts" },
+
+        { "path": "src/components/editor/menus/AttributeMenu.tsx",                                   "type": "registry:component", "target": "components/editor/menus/AttributeMenu.tsx" },
+        { "path": "src/components/editor/menus/BlockContextMenu.tsx",                                "type": "registry:component", "target": "components/editor/menus/BlockContextMenu.tsx" },
+        { "path": "src/components/editor/menus/BlockSideMenu.tsx",                                   "type": "registry:component", "target": "components/editor/menus/BlockSideMenu.tsx" },
+        { "path": "src/components/editor/menus/TurnIntoMenu.tsx",                                    "type": "registry:component", "target": "components/editor/menus/TurnIntoMenu.tsx" },
+        { "path": "src/components/editor/menus/useHoveredBlock.ts",                                  "type": "registry:hook",      "target": "components/editor/menus/useHoveredBlock.ts" },
+
+        { "path": "src/components/editor/menus/BubbleMenu/index.tsx",                                "type": "registry:component", "target": "components/editor/menus/BubbleMenu/index.tsx" },
+        { "path": "src/components/editor/menus/BubbleMenu/LinkInput.tsx",                            "type": "registry:component", "target": "components/editor/menus/BubbleMenu/LinkInput.tsx" },
+
+        { "path": "src/components/editor/menus/ColorMenu/index.tsx",                                 "type": "registry:component", "target": "components/editor/menus/ColorMenu/index.tsx" },
+        { "path": "src/components/editor/menus/ColorMenu/colors.ts",                                 "type": "registry:lib",       "target": "components/editor/menus/ColorMenu/colors.ts" },
+
+        { "path": "src/components/editor/menus/EmojiPicker/index.tsx",                               "type": "registry:component", "target": "components/editor/menus/EmojiPicker/index.tsx" },
+        { "path": "src/components/editor/menus/EmojiPicker/getEmojiUrl.ts",                          "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/getEmojiUrl.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/index.ts",              "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/index.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/category.ts",           "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/category.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/data.ts",               "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/data.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/dom.ts",                "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/dom.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/navigation.ts",         "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/navigation.ts" },
+        { "path": "src/components/editor/menus/EmojiPicker/createEmojipicker/utils.ts",              "type": "registry:lib",       "target": "components/editor/menus/EmojiPicker/createEmojipicker/utils.ts" },
+
+        { "path": "src/components/editor/menus/FontFamilyMenu/index.tsx",                            "type": "registry:component", "target": "components/editor/menus/FontFamilyMenu/index.tsx" },
+        { "path": "src/components/editor/menus/FontFamilyMenu/families.ts",                          "type": "registry:lib",       "target": "components/editor/menus/FontFamilyMenu/families.ts" },
+
+        { "path": "src/components/editor/menus/FontSizeMenu/index.tsx",                              "type": "registry:component", "target": "components/editor/menus/FontSizeMenu/index.tsx" },
+        { "path": "src/components/editor/menus/FontSizeMenu/sizes.ts",                               "type": "registry:lib",       "target": "components/editor/menus/FontSizeMenu/sizes.ts" },
+
+        { "path": "src/components/editor/menus/SlashMenu/index.tsx",                                 "type": "registry:component", "target": "components/editor/menus/SlashMenu/index.tsx" },
+        { "path": "src/components/editor/menus/SlashMenu/slash-items.ts",                            "type": "registry:lib",       "target": "components/editor/menus/SlashMenu/slash-items.ts" },
+
+        { "path": "src/components/editor/menus/TableControls/index.tsx",                             "type": "registry:component", "target": "components/editor/menus/TableControls/index.tsx" },
+        { "path": "src/components/editor/menus/TableControls/TableExtendBtn.tsx",                    "type": "registry:component", "target": "components/editor/menus/TableControls/TableExtendBtn.tsx" },
+        { "path": "src/components/editor/menus/TableControls/TableMenus.tsx",                        "type": "registry:component", "target": "components/editor/menus/TableControls/TableMenus.tsx" },
+        { "path": "src/components/editor/menus/TableControls/tableActions.ts",                       "type": "registry:lib",       "target": "components/editor/menus/TableControls/tableActions.ts" },
+        { "path": "src/components/editor/menus/TableControls/useTableDrag.ts",                       "type": "registry:hook",      "target": "components/editor/menus/TableControls/useTableDrag.ts" },
+        { "path": "src/components/editor/menus/TableControls/useTableFocus.ts",                      "type": "registry:hook",      "target": "components/editor/menus/TableControls/useTableFocus.ts" },
+
+        { "path": "src/components/editor/menus/TurnIntoMenu/items.tsx",                              "type": "registry:component", "target": "components/editor/menus/TurnIntoMenu/items.tsx" },
+
+        { "path": "src/components/editor/styles/editor.css",                                         "type": "registry:file",      "target": "components/editor/styles/editor.css" },
+        { "path": "src/components/editor/styles/block-side-menu.css",                                "type": "registry:file",      "target": "components/editor/styles/block-side-menu.css" },
+        { "path": "src/components/editor/styles/callout.css",                                        "type": "registry:file",      "target": "components/editor/styles/callout.css" },
+
+        { "path": "src/assets/emoji.json",                                                           "type": "registry:file",      "target": "public/emoji.json" }
+      ]
+    }
+  ]
+}

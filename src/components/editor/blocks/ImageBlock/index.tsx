@@ -1,7 +1,7 @@
 import * as React from "react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/editor/ui/input";
+import { cn } from "@/components/editor/lib/utils";
 import { ImageEmptyState } from "./Empty";
 import { ImageToolbar } from "./Toolbar";
 

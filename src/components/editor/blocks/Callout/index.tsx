@@ -2,9 +2,13 @@ import "../../styles/callout.css";
 import { useCallback, useRef, useState } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import type { NodeViewProps } from "@tiptap/react";
-import { Popover, PopoverContent, PopoverTitle } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTitle,
+} from "@/components/editor/ui/popover";
 import { createEmojiPicker } from "../../menus/EmojiPicker/createEmojipicker"; // adjust import path
-import { PopoverArrow } from "@/components/ui/PopoverArrow";
+import { PopoverArrow } from "@/components/editor/ui/PopoverArrow";
 import { getEmojiUrl } from "../../menus/EmojiPicker/getEmojiUrl";
 import { shortcodeToEmoji } from "../../extensions/helpers/shortcodeToEmoji";
 import { getEmojiArray } from "../../menus/EmojiPicker/createEmojipicker/data";

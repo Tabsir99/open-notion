@@ -4,11 +4,16 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+} from "@/components/editor/ui/popover";
+import { Button } from "@/components/editor/ui/button";
+import { Input } from "@/components/editor/ui/input";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/editor/ui/tabs";
+import { cn } from "@/components/editor/lib/utils";
 
 interface ImageEmptyStateProps {
   onSrcChange: (src: string) => void;

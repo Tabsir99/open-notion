@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import { editorStore } from "../../store";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/editor/ui/button";
 import { memo } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 
 function addRowAtEnd(tablePos: number) {
   const { editor } = editorStore.get();

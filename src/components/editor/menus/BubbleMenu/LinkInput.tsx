@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/editor/ui/input";
+import { cn } from "@/components/editor/lib/utils";
 import { CornerDownLeft, ExternalLink, Unlink, X } from "lucide-react";
 import type { TypedEditor } from "../../types";
 

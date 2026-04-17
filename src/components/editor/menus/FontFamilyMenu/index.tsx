@@ -1,8 +1,8 @@
 import { Check } from "lucide-react";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenuItem } from "@/components/editor/ui/dropdown-menu";
 import { fontFamilies } from "./families";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/editor/lib/utils";
 import { editorStore } from "../../store";
 
 function applyFontFamily(family: string, pos?: number) {
