@@ -158,7 +158,7 @@
         { "path": "src/components/editor/styles/block-side-menu.css",                                "type": "registry:file",      "target": "components/editor/styles/block-side-menu.css" },
         { "path": "src/components/editor/styles/callout.css",                                        "type": "registry:file",      "target": "components/editor/styles/callout.css" },
 
-        { "path": "public/emojis.json",                                                           "type": "registry:file",      "target": "public/emojis.json" }
+        { "path": "public/emojis.json",                                                           "type": "registry:file",      "target": "~/public/emojis.json" }
       ]
     }
   ]
