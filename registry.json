@@ -85,6 +85,7 @@
         { "path": "src/components/editor/index.ts",                                                  "type": "registry:lib",       "target": "components/editor/index.ts" },
         { "path": "src/components/editor/store.ts",                                                  "type": "registry:lib",       "target": "components/editor/store.ts" },
         { "path": "src/components/editor/types.ts",                                                  "type": "registry:lib",       "target": "components/editor/types.ts" },
+        { "path": "src/components/editor/config.ts",                                                 "type": "registry:lib",       "target": "components/editor/config.ts" },
 
         { "path": "src/components/editor/lib/utils.ts",                                              "type": "registry:lib",       "target": "components/editor/lib/utils.ts" },
 
@@ -96,6 +97,8 @@
         { "path": "src/components/editor/ui/separator.tsx",                                          "type": "registry:component", "target": "components/editor/ui/separator.tsx" },
         { "path": "src/components/editor/ui/tabs.tsx",                                               "type": "registry:component", "target": "components/editor/ui/tabs.tsx" },
         { "path": "src/components/editor/ui/toggle.tsx",                                             "type": "registry:component", "target": "components/editor/ui/toggle.tsx" },
+        { "path": "src/components/editor/ui/textarea.tsx",                                           "type": "registry:component", "target": "components/editor/ui/textarea.tsx" },
+
 
         { "path": "src/components/editor/blocks/Callout/index.tsx",                                  "type": "registry:component", "target": "components/editor/blocks/Callout/index.tsx" },
         { "path": "src/components/editor/blocks/CodeBlock/index.tsx",                                "type": "registry:component", "target": "components/editor/blocks/CodeBlock/index.tsx" },
