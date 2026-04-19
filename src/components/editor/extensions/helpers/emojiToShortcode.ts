@@ -1,5 +1,5 @@
-import type { Emoji } from "../../menus/EmojiPicker/createEmojipicker/data.js";
-import { removeVariationSelector } from "./removeVariationSelector.js";
+import type { Emoji } from "../../menus/EmojiPicker/createEmojipicker/data";
+import { removeVariationSelector } from "./removeVariationSelector";
 
 export function emojiToShortcode(
   emoji: string,

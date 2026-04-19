@@ -11,9 +11,9 @@ import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import emojiRegex from "emoji-regex";
 
-import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data.js";
-import { emojiToShortcode } from "./helpers/emojiToShortcode.js";
-import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji.js";
+import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
+import { emojiToShortcode } from "./helpers/emojiToShortcode";
+import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji";
 import { getEditorConfig } from "../config";
 
 declare module "@tiptap/core" {
