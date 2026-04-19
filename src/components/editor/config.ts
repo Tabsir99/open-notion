@@ -55,13 +55,13 @@ export type PlaceholderConfig = string | ((node: PMNode) => string);
 export interface EditorConfig {
   slashItems: SlashItem[];
   turnIntoItems: TurnIntoItem[];
-  extensionsFn?: (defaults: Extensions) => Extensions;
+  extensionsFn?: ((defaults: Extensions) => Extensions) | undefined;
   emojiDataUrl: string;
   getEmojiUrl: GetEmojiUrl;
   storageKey: string | false;
-  placeholder?: PlaceholderConfig;
-  initialContent?: JSONContent;
-  onChange?: (json: JSONContent) => void;
+  placeholder?: PlaceholderConfig | undefined;
+  initialContent?: JSONContent | undefined;
+  onChange?: ((json: JSONContent) => void) | undefined;
 }
 
 // ── Module-level singleton ────────────────────────────────────────────

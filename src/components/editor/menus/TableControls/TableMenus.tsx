@@ -44,7 +44,7 @@ interface ItemDef {
   icon: LucideIcon;
   label: string;
   onClick: () => void;
-  variant?: "destructive";
+  variant?: "destructive" | undefined;
 }
 
 function Items({ items }: { items: (ItemDef | "sep")[] }) {
@@ -54,7 +54,7 @@ function Items({ items }: { items: (ItemDef | "sep")[] }) {
     ) : (
       <DropdownMenuItem
         key={i}
-        variant={item.variant}
+        variant={item.variant || "default"}
         className={ITEM}
         onClick={item.onClick}
       >

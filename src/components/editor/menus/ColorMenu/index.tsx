@@ -9,7 +9,7 @@ import { editorStore } from "../../store";
 
 interface ColorMenuProps {
   children: React.ReactNode;
-  isSubMenu?: boolean;
+  isSubMenu?: boolean | undefined;
 
   onSelectText?: (color: string | null) => void;
   onSelectBg?: (color: string | null) => void;
@@ -88,8 +88,8 @@ export function ColorMenu({
 
 interface Props {
   children: React.ReactNode;
-  isSubMenu?: boolean;
-  blockPos?: number;
+  isSubMenu?: boolean | undefined;
+  blockPos?: number | undefined;
 }
 
 export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {

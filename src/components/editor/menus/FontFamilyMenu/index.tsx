@@ -20,8 +20,8 @@ function applyFontFamily(family: string, pos?: number) {
 
 interface FontFamilyMenuProps {
   children: React.ReactNode;
-  isSubMenu?: boolean;
-  blockPos?: number;
+  isSubMenu?: boolean | undefined;
+  blockPos?: number | undefined;
 }
 
 export function FontFamilyMenu({

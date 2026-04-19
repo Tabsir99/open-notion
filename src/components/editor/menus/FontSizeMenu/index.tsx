@@ -22,8 +22,8 @@ function applyFontSize(size: string, pos?: number) {
 
 interface FontSizeMenuProps {
   children: React.ReactNode;
-  isSubMenu?: boolean;
-  blockPos?: number;
+  isSubMenu?: boolean | undefined;
+  blockPos?: number | undefined;
 }
 
 export function FontSizeMenu({

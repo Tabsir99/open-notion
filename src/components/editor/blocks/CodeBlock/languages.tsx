@@ -25,7 +25,7 @@ import Dockerfile from "@devicon/react/docker/original";
 export interface Language {
   id: string;
   name: string;
-  icon: typeof Javascript;
+  icon: React.FC<any>;
 }
 
 /** Pre-loaded at init for instant highlighting — keep this list small */

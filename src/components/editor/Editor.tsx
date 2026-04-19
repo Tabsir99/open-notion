@@ -78,7 +78,7 @@ export interface OpenNotionViewProps {
   editor: TypedEditor | null;
 
   /** Class applied to the container. */
-  className?: string;
+  className?: string | undefined;
 }
 
 // ── Emoji data loader (Suspense boundary) ─────────────────────────────
@@ -151,9 +151,9 @@ export function useOpenNotion({
     autofocus,
     immediatelyRender: false,
 
-    onSelectionUpdate:
-      storageKey || onselectionchange
-        ? (props) => {
+    ...(storageKey || onselectionchange
+      ? {
+          onSelectionUpdate: (props) => {
             const ed = props.editor;
             const key = getEditorConfig().storageKey;
             if (key) {
@@ -161,12 +161,13 @@ export function useOpenNotion({
               localStorage.setItem(`${key}-cursor`, String(from));
             }
             onSelectionChange?.(ed);
-          }
-        : undefined,
+          },
+        }
+      : {}),
 
-    onUpdate:
-      onChange || storageKey
-        ? (props) => {
+    ...(onChange || storageKey
+      ? {
+          onUpdate: (props) => {
             const ed = props.editor;
             const json = ed.getJSON();
             const key = getEditorConfig().storageKey;
@@ -174,15 +175,15 @@ export function useOpenNotion({
               localStorage.setItem(`${key}-content`, JSON.stringify(json));
             }
             onChange?.(json);
-          }
-        : undefined,
+          },
+        }
+      : {}),
 
-    onCreate:
-      content || onReady || storageKey
-        ? (props) => {
+    ...(content || onReady || storageKey
+      ? {
+          onCreate: (props) => {
             const ed = props.editor;
             const key = getEditorConfig().storageKey;
-
             if (key && content === undefined) {
               const savedContent = localStorage.getItem(`${key}-content`);
               const savedCursor = localStorage.getItem(`${key}-cursor`);
@@ -197,11 +198,11 @@ export function useOpenNotion({
                 }
               }
             }
-
             if (autofocus) ed.commands.focus();
             onReady?.(ed);
-          }
-        : undefined,
+          },
+        }
+      : {}),
   }) as TypedEditor | null;
 
   return editor;
@@ -274,7 +275,7 @@ function OpenNotionInner({
   className,
 }: {
   options: OpenNotionOptions;
-  className?: string;
+  className?: string | undefined;
 }) {
   const editor = useOpenNotion(options);
   return <OpenNotionView editor={editor} className={className} />;

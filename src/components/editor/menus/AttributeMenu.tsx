@@ -19,8 +19,8 @@ export const getBlockAttr = (key: string, pos?: number): string | null => {
 interface AttributeMenuProps {
   children: React.ReactNode;
   trigger: React.ReactNode;
-  isSub?: boolean;
-  container?: React.RefObject<HTMLElement | null>;
+  isSub?: boolean | undefined;
+  container?: React.RefObject<HTMLElement | null> | undefined;
 }
 
 export function AttributeMenu({
