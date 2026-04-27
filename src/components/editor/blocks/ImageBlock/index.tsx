@@ -1,5 +1,5 @@
 import { NodeViewWrapper } from "@tiptap/react";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Input } from "@/components/editor/ui/input";
 import { cn } from "@/components/editor/lib/utils";
 import { ImageEmptyState } from "./Empty";
@@ -8,6 +8,7 @@ import {
   startImageResize,
   RESIZE_HANDLES,
   type ResizeDirection,
+  type Size,
 } from "./resize";
 import type { TypedNodeViewProps } from "../../types";
 
@@ -18,6 +19,42 @@ export const ImageBlock = ({
 }: TypedNodeViewProps<"image">) => {
   const { src, caption, align, width, height } = node.attrs;
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerSize = useRef<Size | null>(null);
+
+  // Aspect ratio lock — edges respect this; corners always lock.
+  const [aspectLocked, setAspectLocked] = useState(false);
+
+  // Natural dimensions read once when the image loads.
+  // Used as the aspect ratio source and for "reset to original size".
+  const naturalSize = useRef<Size | null>(null);
+
+  const handleImageLoad = useCallback(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    naturalSize.current = {
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+    };
+  }, []);
+
+  /**
+   * Derive the current aspect ratio from:
+   *   1. Current rendered size (most accurate if already resized), or
+   *   2. Natural image dimensions (fallback on first drag before any resize).
+   */
+  const getAspectRatio = useCallback((): number => {
+    const img = imgRef.current;
+    if (!img) return 0;
+
+    const w = img.offsetWidth;
+    const h = img.offsetHeight;
+    if (w > 0 && h > 0) return w / h;
+
+    const nat = naturalSize.current;
+    if (nat && nat.height > 0) return nat.width / nat.height;
+
+    return 0;
+  }, []);
 
   const onResizeStart = useCallback(
     (e: React.MouseEvent, direction: ResizeDirection) => {
@@ -26,11 +63,36 @@ export const ImageBlock = ({
         direction,
         event: e,
         element: imgRef.current,
+        aspectRatio: getAspectRatio(),
+        locked: aspectLocked,
         onEnd: (size) => updateAttributes(size),
+        containerSize: containerSize.current!,
       });
     },
-    [updateAttributes],
+    [updateAttributes, aspectLocked, getAspectRatio, containerSize],
   );
+
+  const handleReset = useCallback(() => {
+    // Clear explicit dimensions → image returns to its natural / CSS-driven size.
+    updateAttributes({ width: "", height: "" });
+    // Also imperatively clear the inline style set during drag (before React re-renders).
+    if (imgRef.current) {
+      imgRef.current.style.width = "";
+      imgRef.current.style.height = "";
+    }
+  }, [updateAttributes]);
+
+  const containerRef = useCallback((el: HTMLDivElement | null) => {
+    if (!el) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      containerSize.current = { width, height };
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (!src) {
     return (
@@ -40,7 +102,6 @@ export const ImageBlock = ({
     );
   }
 
-  const hasExplicitSize = width != null || height != null;
   const isFullWidth = align === "full";
 
   return (
@@ -56,8 +117,8 @@ export const ImageBlock = ({
               ? "items-end"
               : "items-stretch",
       )}
+      ref={containerRef}
     >
-      {/* Subtle selection ring lives on this wrapper so it doesn't clip the image */}
       <div
         className={cn(
           "group relative inline-block rounded-xl",
@@ -68,9 +129,9 @@ export const ImageBlock = ({
           ref={imgRef}
           src={src}
           alt={caption || "Image"}
+          onLoad={handleImageLoad}
           className={cn(
             "rounded-xl select-none block",
-            !hasExplicitSize && "max-h-[600px] object-contain",
             isFullWidth && "w-full",
           )}
           style={
@@ -104,7 +165,10 @@ export const ImageBlock = ({
         >
           <ImageToolbar
             align={align}
+            aspectLocked={aspectLocked}
             onAlignChange={(align) => updateAttributes({ align })}
+            onAspectLockChange={setAspectLocked}
+            onReset={handleReset}
             onReplace={() =>
               updateAttributes({ src: null, width: "", height: "" })
             }
