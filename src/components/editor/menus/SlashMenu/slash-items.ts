@@ -97,7 +97,12 @@ export const defaultSlashItems: SlashItem[] = [
     icon: ImageIcon,
     group: "Media",
     action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setImage({ src: "" }).run(),
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setImage({ src: "", align: "left" })
+        .run(),
   },
 
   // ── Advanced ──────────────────────────────────
@@ -144,7 +149,12 @@ export const defaultSlashItems: SlashItem[] = [
     icon: AlertCircle,
     group: "Advanced",
     action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setCallout().run(),
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setCallout({ emoji: "bulb" })
+        .run(),
   },
   {
     id: "table",

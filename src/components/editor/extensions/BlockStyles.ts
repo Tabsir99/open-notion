@@ -33,29 +33,28 @@ export const BlockStyles = Extension.create<{ types: string[] }>({
         types: this.options.types,
         attributes: {
           backgroundColor: {
-            default: null,
-            parseHTML: (el) =>
-              (el as HTMLElement).style.backgroundColor || null,
+            default: undefined,
+            parseHTML: (el) => el.style.backgroundColor ?? undefined,
             renderHTML: (attrs) =>
               attrs.backgroundColor
                 ? { style: `background-color: ${attrs.backgroundColor}` }
                 : {},
           },
           textColor: {
-            default: null,
-            parseHTML: (el) => (el as HTMLElement).style.color || null,
+            default: undefined,
+            parseHTML: (el) => el.style.color ?? undefined,
             renderHTML: (attrs) =>
               attrs.textColor ? { style: `color: ${attrs.textColor}` } : {},
           },
           fontSize: {
-            default: null,
-            parseHTML: (el) => (el as HTMLElement).style.fontSize || null,
+            default: undefined,
+            parseHTML: (el) => el.style.fontSize ?? undefined,
             renderHTML: (attrs) =>
               attrs.fontSize ? { style: `font-size: ${attrs.fontSize}` } : {},
           },
           fontFamily: {
-            default: null,
-            parseHTML: (el) => (el as HTMLElement).style.fontFamily || null,
+            default: undefined,
+            parseHTML: (el) => el.style.fontFamily ?? undefined,
             renderHTML: (attrs) =>
               attrs.fontFamily
                 ? { style: `font-family: ${attrs.fontFamily}` }

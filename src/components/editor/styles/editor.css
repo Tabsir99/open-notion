@@ -108,6 +108,14 @@
   flex: 1 1 auto;
 }
 
+.ProseMirror ul {
+  list-style: disc outside;
+}
+
+.ProseMirror ol {
+  list-style: decimal outside;
+}
+
 /* ── Blockquote ────────────────────────────────────────────────────── */
 
 .ProseMirror blockquote {

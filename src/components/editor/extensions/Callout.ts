@@ -1,18 +1,18 @@
-// extensions/callout/callout.ts
-import { Node, mergeAttributes } from "@tiptap/core";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+import { mergeAttributes } from "@tiptap/core";
 import { CalloutView } from "../blocks/Callout";
+import { createNode } from "../lib/createNode";
+import type { CalloutNode } from "../jsonContent";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     callout: {
-      setCallout: (attrs?: { emoji?: string }) => ReturnType;
+      setCallout: (attrs: CalloutNode["attrs"]) => ReturnType;
       toggleCallout: () => ReturnType;
     };
   }
 }
 
-export const Callout = Node.create({
+export const Callout = createNode({
   name: "callout",
   group: "block",
   content: "block+",
@@ -20,7 +20,7 @@ export const Callout = Node.create({
 
   addAttributes() {
     return {
-      emoji: { default: "💡" },
+      emoji: { default: "bulb" },
     };
   },
 
@@ -56,7 +56,7 @@ export const Callout = Node.create({
           if (editor.isActive("callout")) {
             return commands.lift("callout");
           }
-          return commands.setCallout();
+          return commands.setCallout({ emoji: "bulb" });
         },
     };
   },
@@ -90,7 +90,5 @@ export const Callout = Node.create({
     };
   },
 
-  addNodeView() {
-    return ReactNodeViewRenderer(CalloutView);
-  },
+  NodeView: CalloutView,
 });

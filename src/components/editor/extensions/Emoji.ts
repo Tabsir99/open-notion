@@ -4,7 +4,6 @@ import {
   getChangedRanges,
   InputRule,
   mergeAttributes,
-  Node,
   PasteRule,
 } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
@@ -15,6 +14,7 @@ import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
 import { emojiToShortcode } from "./helpers/emojiToShortcode";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji";
 import { getEditorConfig } from "../config";
+import { createNode } from "../lib/createNode";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -36,7 +36,7 @@ export const inputRegex = /:([a-zA-Z0-9_+-]+):$/;
 
 export const pasteRegex = /(^|\s):([a-zA-Z0-9_+-]+):/g;
 
-export const EmojiNode = Node.create<EmojiOptions>({
+export const EmojiNode = createNode<"emoji", EmojiOptions>({
   name: "emoji",
 
   inline: true,
@@ -72,8 +72,8 @@ export const EmojiNode = Node.create<EmojiOptions>({
 
   addOptions() {
     return {
-      HTMLAttributes: {},
       emojis: [],
+      HTMLAttributes: {},
     };
   },
 
@@ -81,7 +81,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
     return {
       name: {
         default: null,
-        parseHTML: (element) => element.dataset.name,
+        parseHTML: (element) => element.dataset.name ?? null,
         renderHTML: (attributes) => ({
           "data-name": attributes.name,
         }),
@@ -99,11 +99,9 @@ export const EmojiNode = Node.create<EmojiOptions>({
 
   renderHTML({ HTMLAttributes, node }) {
     const emojiItem = shortcodeToEmoji(node.attrs.name, this.options.emojis);
-    const attributes = mergeAttributes(
-      HTMLAttributes,
-      this.options.HTMLAttributes,
-      { "data-type": this.name },
-    );
+    const attributes = mergeAttributes(HTMLAttributes, {
+      "data-type": this.name,
+    });
 
     if (!emojiItem) {
       return ["span", attributes, `:${node.attrs.name}:`];
@@ -147,9 +145,7 @@ export const EmojiNode = Node.create<EmojiOptions>({
         ({ chain }) => {
           const emojiItem = shortcodeToEmoji(shortcode, this.options.emojis);
 
-          if (!emojiItem) {
-            return false;
-          }
+          if (!emojiItem) return false;
 
           chain()
             .insertContent({

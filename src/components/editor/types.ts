@@ -1,100 +1,33 @@
-import type { Editor } from "@tiptap/react";
+// editor.ts
+import type { Editor, NodeViewProps } from "@tiptap/react";
+import type {
+  AnyEditorNode,
+  MarkDefs,
+  BlockAttrs,
+  DocContent,
+} from "./jsonContent";
 
-// ── Registry (source of truth) ────────────────────────────────────────
+// ── Inferred registries ───────────────────────────────────────────────
 
-export const NODE_NAMES = [
-  "doc",
-  "text",
-  "paragraph",
-  "heading",
-  "bulletList",
-  "orderedList",
-  "taskList",
-  "listItem",
-  "taskItem",
-  "blockquote",
-  "codeBlock",
-  "horizontalRule",
-  "hardBreak",
-  "image",
-  "emoji",
-  "table",
-  "tableRow",
-  "tableCell",
-  "tableHeader",
-  "callout",
-] as const;
-
-export const MARK_NAMES = [
-  "bold",
-  "italic",
-  "strike",
-  "code",
-  "link",
-  "textStyle",
-  "underline",
-] as const;
-
-export type NodeName = (typeof NODE_NAMES)[number];
-export type MarkName = (typeof MARK_NAMES)[number];
+export type NodeName = AnyEditorNode["type"];
+export type MarkName = keyof MarkDefs;
 export type EntityName = NodeName | MarkName;
 
-// ── Attribute shapes ──────────────────────────────────────────────────
+// ── Inferred attr maps ────────────────────────────────────────────────
 
-type Empty = Record<string, never>;
+export type NodeAttrs = {
+  [T in AnyEditorNode as T["type"]]: T extends { attrs?: infer A }
+    ? NonNullable<A>
+    : Record<string, never>;
+};
 
-// Cross-cutting attrs applied via BlockStyles + TextAlign
-interface BlockAttrs {
-  backgroundColor?: string;
-  textColor?: string;
-  fontSize?: string;
-  fontFamily?: string;
-  textAlign?: "left" | "center" | "right" | "justify";
-}
+export type MarkAttrs = {
+  [T in keyof MarkDefs]: MarkDefs[T] extends { attrs?: infer A }
+    ? NonNullable<A>
+    : Record<string, never>;
+};
 
-interface CellAttrs {
-  backgroundColor?: string;
-  colspan?: number;
-  rowspan?: number;
-  colwidth?: number[] | null;
-}
-
-export interface NodeAttrs {
-  doc: Empty;
-  text: Empty;
-  hardBreak: Empty;
-  horizontalRule: Empty;
-  paragraph: BlockAttrs;
-  heading: BlockAttrs & { level: 1 | 2 | 3 };
-  blockquote: BlockAttrs;
-  bulletList: Empty;
-  orderedList: { start?: number };
-  taskList: Empty;
-  listItem: Empty;
-  taskItem: { checked?: boolean };
-  codeBlock: { language?: string };
-  image: {
-    src?: string;
-    caption?: string;
-    align?: "left" | "center" | "full";
-    width?: string | number;
-  };
-  emoji: { name?: string };
-  table: Empty;
-  tableRow: Empty;
-  tableCell: CellAttrs;
-  tableHeader: CellAttrs;
-}
-
-export interface MarkAttrs {
-  bold: Empty;
-  italic: Empty;
-  strike: Empty;
-  code: Empty;
-  underline: Empty;
-  link: { href: string; target?: string };
-  textStyle: { color?: string; fontFamily?: string; fontSize?: string };
-}
+// ── Helpers ───────────────────────────────────────────────────────────
 
 type AttrsFor<T extends EntityName> = T extends keyof NodeAttrs
   ? NodeAttrs[T]
@@ -104,11 +37,23 @@ type AttrsFor<T extends EntityName> = T extends keyof NodeAttrs
 
 // ── Typed editor ──────────────────────────────────────────────────────
 
-export type TypedEditor = Omit<Editor, "isActive" | "getAttributes"> & {
+export type TypedEditor = Omit<
+  Editor,
+  "isActive" | "getAttributes" | "getJSON"
+> & {
   isActive<T extends EntityName>(
     name: T,
     attrs?: Partial<AttrsFor<T>>,
   ): boolean;
   isActive(attrs: Partial<BlockAttrs>): boolean;
   getAttributes<T extends EntityName>(name: T): AttrsFor<T>;
+  getJSON(): DocContent;
+};
+
+export type TypedNodeViewProps<T extends NodeName> = Omit<
+  NodeViewProps,
+  "node" | "updateAttributes"
+> & {
+  node: Omit<NodeViewProps["node"], "attrs"> & { attrs: NodeAttrs[T] };
+  updateAttributes: (attrs: Partial<NodeAttrs[T]>) => void;
 };

@@ -1,5 +1,4 @@
 import CodeBlock from "@tiptap/extension-code-block";
-import { ReactNodeViewRenderer } from "@tiptap/react";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
@@ -10,6 +9,7 @@ import { createHighlighterCore } from "@shikijs/core";
 import { createJavaScriptRegexEngine } from "@shikijs/engine-javascript";
 import lightPlus from "@shikijs/themes/light-plus";
 import darkPlus from "@shikijs/themes/dark-plus";
+import { extendNode } from "../lib/createNode";
 
 const langLoaders: Record<string, () => Promise<any>> = {
   javascript: () => import("@shikijs/langs/javascript"),
@@ -87,77 +87,78 @@ function buildDecorations(
 
 // ── Extension ─────────────────────────────────────────────────────────
 
-export const CustomCodeBlock = CodeBlock.configure({
-  defaultLanguage: "javascript",
-}).extend({
-  addStorage() {
-    return { highlighter: null as ShikiHighlighter | null };
-  },
+export const CustomCodeBlock = extendNode<"codeBlock">(
+  CodeBlock.configure({
+    defaultLanguage: "javascript",
+  }),
+  {
+    addStorage() {
+      return { highlighter: null as ShikiHighlighter | null };
+    },
 
-  onCreate() {
-    createHighlighterCore({
-      themes: [lightPlus, darkPlus],
-      langs: preloadLangs
-        .map((l) => langLoaders[l])
-        .filter(Boolean)
-        .map((loader) => loader()),
-      engine: createJavaScriptRegexEngine(),
-    }).then(async (h) => {
-      this.storage.highlighter = h;
-      if (this.editor.view.isDestroyed) return;
+    onCreate() {
+      createHighlighterCore({
+        themes: [lightPlus, darkPlus],
+        langs: preloadLangs
+          .map((l) => langLoaders[l])
+          .filter(Boolean)
+          .map((loader) => loader()),
+        engine: createJavaScriptRegexEngine(),
+      }).then(async (h) => {
+        this.storage.highlighter = h;
+        if (this.editor.view.isDestroyed) return;
 
-      // Collect languages present in the restored doc
-      const needed = new Set<string>();
-      this.editor.state.doc.descendants((node) => {
-        if (node.type.name === this.name) {
-          const lang = node.attrs.language;
-          if (lang && lang !== "plaintext") needed.add(lang);
+        // Collect languages present in the restored doc
+        const needed = new Set<string>();
+        this.editor.state.doc.descendants((node) => {
+          if (node.type.name === this.name) {
+            const lang = node.attrs.language;
+            if (lang && lang !== "plaintext") needed.add(lang);
+          }
+        });
+
+        const loaded = new Set(h.getLoadedLanguages());
+        const toLoad = [...needed].filter(
+          (l) => !loaded.has(l) && langLoaders[l],
+        );
+        if (toLoad.length) {
+          await h.loadLanguage(...toLoad.map((l) => langLoaders[l]()));
         }
+
+        this.editor.view.dispatch(
+          this.editor.view.state.tr.setMeta(shikiPluginKey, true),
+        );
       });
+    },
 
-      const loaded = new Set(h.getLoadedLanguages());
-      const toLoad = [...needed].filter(
-        (l) => !loaded.has(l) && langLoaders[l],
-      );
-      if (toLoad.length) {
-        await h.loadLanguage(...toLoad.map((l) => langLoaders[l]()));
-      }
+    NodeView: CodeBlockView,
 
-      this.editor.view.dispatch(
-        this.editor.view.state.tr.setMeta(shikiPluginKey, true),
-      );
-    });
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(CodeBlockView);
-  },
-
-  addProseMirrorPlugins() {
-    const ext = this;
-    return [
-      ...(this.parent?.() ?? []),
-      new Plugin({
-        key: shikiPluginKey,
-        state: {
-          init(_, { doc }) {
-            return buildDecorations(doc, ext.storage.highlighter, ext.name);
+    addProseMirrorPlugins() {
+      const ext = this;
+      return [
+        ...(this.parent?.() ?? []),
+        new Plugin({
+          key: shikiPluginKey,
+          state: {
+            init(_, { doc }) {
+              return buildDecorations(doc, ext.storage.highlighter, ext.name);
+            },
+            apply(tr, old, _, newState) {
+              if (!tr.docChanged && !tr.getMeta(shikiPluginKey)) return old;
+              return buildDecorations(
+                newState.doc,
+                ext.storage.highlighter,
+                ext.name,
+              );
+            },
           },
-          apply(tr, old, _, newState) {
-            if (!tr.docChanged && !tr.getMeta(shikiPluginKey)) return old;
-            return buildDecorations(
-              newState.doc,
-              ext.storage.highlighter,
-              ext.name,
-            );
+          props: {
+            decorations(state) {
+              return this.getState(state);
+            },
           },
-        },
-        props: {
-          decorations(state) {
-            return this.getState(state);
-          },
-        },
-      }),
-    ];
+        }),
+      ];
+    },
   },
-});
+);

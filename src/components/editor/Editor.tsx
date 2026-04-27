@@ -168,9 +168,10 @@ export function useOpenNotion({
     ...(onChange || storageKey
       ? {
           onUpdate: (props) => {
-            const ed = props.editor;
+            const ed = props.editor as TypedEditor;
             const json = ed.getJSON();
             const key = getEditorConfig().storageKey;
+
             if (key) {
               localStorage.setItem(`${key}-content`, JSON.stringify(json));
             }

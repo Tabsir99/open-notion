@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ImageIcon, Upload, Link2 } from "lucide-react";
 import {
   Popover,
@@ -14,18 +13,17 @@ import {
   TabsTrigger,
 } from "@/components/editor/ui/tabs";
 import { cn } from "@/components/editor/lib/utils";
+import { useRef, useState, type SubmitEvent } from "react";
 
 interface ImageEmptyStateProps {
   onSrcChange: (src: string) => void;
 }
 
-export const ImageEmptyState: React.FC<ImageEmptyStateProps> = ({
-  onSrcChange,
-}) => {
-  const [open, setOpen] = React.useState(false);
-  const [linkInput, setLinkInput] = React.useState("");
-  const [isDragging, setIsDragging] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+export const ImageEmptyState = ({ onSrcChange }: ImageEmptyStateProps) => {
+  const [open, setOpen] = useState(false);
+  const [linkInput, setLinkInput] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith("image/")) return;
@@ -39,7 +37,7 @@ export const ImageEmptyState: React.FC<ImageEmptyStateProps> = ({
     reader.readAsDataURL(file);
   };
 
-  const handleLinkSubmit = (e: React.FormEvent) => {
+  const handleLinkSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     if (linkInput.trim()) {
       onSrcChange(linkInput.trim());
@@ -49,7 +47,13 @@ export const ImageEmptyState: React.FC<ImageEmptyStateProps> = ({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(change, e) => {
+        if (e?.reason === "trigger-hover" || e?.reason === "focus-out") return;
+        setOpen(change);
+      }}
+    >
       <PopoverTrigger
         render={
           <Button
@@ -129,6 +133,7 @@ export const ImageEmptyState: React.FC<ImageEmptyStateProps> = ({
                 placeholder="https://example.com/image.png"
                 autoFocus
                 className="h-9"
+                onClick={(e) => e.stopPropagation()}
               />
               <Button type="submit" size="sm" className="w-full">
                 Embed image

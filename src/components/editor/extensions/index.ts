@@ -17,7 +17,7 @@ import { TextStyleKit } from "@tiptap/extension-text-style/text-style-kit";
 import Heading from "@tiptap/extension-heading";
 import Blockquote from "@tiptap/extension-blockquote";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import { BulletList, OrderedList, ListItem } from "@tiptap/extension-list";
+import { ListKit } from "@tiptap/extension-list";
 import {
   TableCell,
   TableHeader,
@@ -78,15 +78,16 @@ import {
 
 // --- Custom ---
 import { EmojiNode } from "./Emoji";
-import { CustomImage } from "./CustomImage";
+import { Image } from "./CustomImage";
 import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
 import type { PlaceholderConfig } from "../config";
+import type { Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
 
 export const defaultExtensions = (
-  emojis: typeof EmojiNode.options.emojis,
+  emojis: Emoji[],
   placeholder?: PlaceholderConfig,
 ): Extensions =>
   [
@@ -108,6 +109,15 @@ export const defaultExtensions = (
         class: "editor-link",
       },
       enableClickSelection: true,
+    }).extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          target: {
+            default: "_blank",
+          },
+        };
+      },
     }),
     TextStyleKit,
     BlockStyles,
@@ -116,9 +126,7 @@ export const defaultExtensions = (
     Heading,
     Blockquote,
     HorizontalRule,
-    BulletList,
-    OrderedList,
-    ListItem,
+    ListKit,
     TableKit.configure({
       table: {
         resizable: true,
@@ -159,7 +167,7 @@ export const defaultExtensions = (
 
     // Custom
     EmojiNode.configure({ emojis }),
-    CustomImage,
+    Image,
     CustomCodeBlock,
     Callout,
   ] as Extensions;
