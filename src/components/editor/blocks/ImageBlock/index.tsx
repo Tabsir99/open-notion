@@ -74,7 +74,7 @@ export const ImageBlock = ({
 
   const handleReset = useCallback(() => {
     // Clear explicit dimensions → image returns to its natural / CSS-driven size.
-    updateAttributes({ width: "", height: "" });
+    updateAttributes({ width: undefined, height: undefined });
     // Also imperatively clear the inline style set during drag (before React re-renders).
     if (imgRef.current) {
       imgRef.current.style.width = "";
@@ -170,7 +170,11 @@ export const ImageBlock = ({
             onAspectLockChange={setAspectLocked}
             onReset={handleReset}
             onReplace={() =>
-              updateAttributes({ src: null, width: "", height: "" })
+              updateAttributes({
+                src: null,
+                width: undefined,
+                height: undefined,
+              })
             }
             onDelete={deleteNode}
           />

@@ -94,7 +94,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
   const activeStates = useEditorState({
     editor: editor as any,
     selector: (ctx) => {
-      const ed = ctx.editor as TypedEditor;
+      const ed = ctx.editor as unknown as TypedEditor;
       return {
         bold: ed.isActive("bold"),
         italic: ed.isActive("italic"),

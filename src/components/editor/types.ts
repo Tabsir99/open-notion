@@ -39,7 +39,7 @@ type AttrsFor<T extends EntityName> = T extends keyof NodeAttrs
 
 export type TypedEditor = Omit<
   Editor,
-  "isActive" | "getAttributes" | "getJSON"
+  "isActive" | "getAttributes" | "getJSON" | "getHTML" | "getMarkdown"
 > & {
   isActive<T extends EntityName>(
     name: T,
@@ -48,6 +48,9 @@ export type TypedEditor = Omit<
   isActive(attrs: Partial<BlockAttrs>): boolean;
   getAttributes<T extends EntityName>(name: T): AttrsFor<T>;
   getJSON(): DocContent;
+  getHTML: () => string;
+  getMarkdown: () => string;
+  getReact: () => React.ReactNode;
 };
 
 export type TypedNodeViewProps<T extends NodeName> = Omit<

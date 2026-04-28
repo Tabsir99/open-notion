@@ -43,7 +43,13 @@ export type AnyMark = {
 
 export type TextNode = { type: "text"; text: string; marks?: AnyMark[] };
 export type HardBreakNode = { type: "hardBreak" };
-export type EmojiNode = { type: "emoji"; attrs: { name: string } };
+export type EmojiNode = {
+  type: "emoji";
+  attrs: {
+    name: string;
+    hexId: string;
+  };
+};
 export type InlineNode = TextNode | HardBreakNode | EmojiNode;
 
 // ── Block nodes ───────────────────────────────────────────────────────
@@ -75,8 +81,8 @@ export type ImageNode = {
     src: string | null;
     caption?: string;
     align: "left" | "center" | "full" | "right";
-    width?: string | number;
-    height?: string | number;
+    width?: number | undefined;
+    height?: number | undefined;
   };
 };
 export type CalloutNode = {

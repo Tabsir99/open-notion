@@ -6,7 +6,7 @@ import {
 } from "@/components/editor/ui/popover";
 import Suggestion from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
-import { EmojiNode } from "../../extensions/Emoji";
+import { EmojiExtension } from "../../extensions/Emoji";
 import { PopoverArrow } from "@/components/editor/ui/PopoverArrow";
 import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
 import { editorStore } from "../../store";
@@ -74,7 +74,7 @@ export const EmojiPicker = memo(() => {
       }),
       allow: ({ state, range }) => {
         const $from = state.doc.resolve(range.from);
-        const type = state.schema.nodes[EmojiNode.name];
+        const type = state.schema.nodes[EmojiExtension.name];
         return !!$from.parent.type.contentMatch.matchType(type);
       },
     });

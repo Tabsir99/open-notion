@@ -248,3 +248,11 @@
 .ProseMirror.resize-cursor {
   cursor: col-resize;
 }
+
+.ProseMirror span[data-type="emoji"] img {
+  width: 1.2em;
+  height: 1.2em;
+  display: inline-block;
+  margin-inline: 0.15em;
+  margin-top: -0.1em;
+}

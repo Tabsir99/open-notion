@@ -15,6 +15,7 @@ import { emojiToShortcode } from "./helpers/emojiToShortcode";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji";
 import { getEditorConfig } from "../config";
 import { createNode } from "../lib/createNode";
+import type { EmojiNode } from "../jsonContent";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -36,7 +37,7 @@ export const inputRegex = /:([a-zA-Z0-9_+-]+):$/;
 
 export const pasteRegex = /(^|\s):([a-zA-Z0-9_+-]+):/g;
 
-export const EmojiNode = createNode<"emoji", EmojiOptions>({
+export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   name: "emoji",
 
   inline: true,
@@ -79,13 +80,8 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
 
   addAttributes() {
     return {
-      name: {
-        default: null,
-        parseHTML: (element) => element.dataset.name ?? null,
-        renderHTML: (attributes) => ({
-          "data-name": attributes.name,
-        }),
-      },
+      hexId: { default: null },
+      name: { default: null },
     };
   },
 
@@ -98,13 +94,15 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const emojiItem = shortcodeToEmoji(node.attrs.name, this.options.emojis);
+    const emojiItem = this.options.emojis.find(
+      (e) => e.id === node.attrs.hexId,
+    );
     const attributes = mergeAttributes(HTMLAttributes, {
       "data-type": this.name,
     });
 
     if (!emojiItem) {
-      return ["span", attributes, `:${node.attrs.name}:`];
+      return ["span", attributes, `:unknown:`];
     }
 
     return [
@@ -117,8 +115,6 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
           draggable: "false",
           loading: "lazy",
           alt: `${emojiItem.name} emoji`,
-          style:
-            "width: 1.2em; height: 1.2em; display: inline; margin-inline: 0.15em; margin-top: -0.1em;",
         },
       ],
     ];
@@ -151,8 +147,9 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
             .insertContent({
               type: this.name,
               attrs: {
+                hexId: emojiItem.id,
                 name: emojiItem.name,
-              },
+              } satisfies EmojiNode["attrs"],
             })
             .command(({ tr, state }) => {
               tr.setStoredMarks(
@@ -175,8 +172,9 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
         find: inputRegex,
         handler: ({ range, match, chain }) => {
           const name = match[1];
+          const emojiItem = shortcodeToEmoji(name, this.options.emojis);
 
-          if (!shortcodeToEmoji(name, this.options.emojis)) {
+          if (!emojiItem) {
             return;
           }
 
@@ -184,8 +182,9 @@ export const EmojiNode = createNode<"emoji", EmojiOptions>({
             .insertContentAt(range, {
               type: this.name,
               attrs: {
-                name,
-              },
+                hexId: emojiItem.id,
+                name: emojiItem.name,
+              } satisfies EmojiNode["attrs"],
             })
             .command(({ tr, state }) => {
               tr.setStoredMarks(

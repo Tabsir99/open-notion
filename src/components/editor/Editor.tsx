@@ -27,6 +27,8 @@ import { getEmojiUrl as twemojiGetEmojiUrl } from "./menus/EmojiPicker/getEmojiU
 import { cn } from "./lib/utils";
 import type { TypedEditor } from "./types";
 
+import { docToHTML, docToMarkdown, docToReact } from "./serializers";
+
 // ── Public types ──────────────────────────────────────────────────────
 
 export interface OpenNotionOptions {
@@ -168,7 +170,7 @@ export function useOpenNotion({
     ...(onChange || storageKey
       ? {
           onUpdate: (props) => {
-            const ed = props.editor as TypedEditor;
+            const ed = props.editor;
             const json = ed.getJSON();
             const key = getEditorConfig().storageKey;
 
@@ -206,7 +208,14 @@ export function useOpenNotion({
       : {}),
   }) as TypedEditor | null;
 
-  return editor;
+  return useMemo(() => {
+    if (!editor) return null;
+
+    editor.getHTML = () => docToHTML(editor.getJSON());
+    editor.getMarkdown = () => docToMarkdown(editor.getJSON());
+    editor.getReact = () => docToReact(editor.getJSON());
+    return editor;
+  }, [editor]);
 }
 
 // ── The view: renders the editor UI ──────────────────────────────────

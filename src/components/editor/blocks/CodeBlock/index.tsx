@@ -1,9 +1,5 @@
 import { useState, useCallback } from "react";
-import {
-  NodeViewWrapper,
-  NodeViewContent,
-  type NodeViewProps,
-} from "@tiptap/react";
+import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { cn } from "@/components/editor/lib/utils";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import {
@@ -15,13 +11,13 @@ import {
 import { languages, getLanguage } from "./languages";
 import { shikiPluginKey } from "../../extensions/CustomCodeBlock";
 import { Button } from "@/components/editor/ui/button";
+import type { TypedNodeViewProps } from "../../types";
 
-export const CodeBlockView: React.FC<NodeViewProps> = ({
+export const CodeBlockView = ({
   node,
   updateAttributes,
   editor,
-  extension,
-}) => {
+}: TypedNodeViewProps<"codeBlock">) => {
   const [copied, setCopied] = useState(false);
   const language = node.attrs.language || "plaintext";
 
@@ -32,27 +28,18 @@ export const CodeBlockView: React.FC<NodeViewProps> = ({
   }, [node.textContent]);
 
   const handleLanguageChange = useCallback(
-    async (lang: string) => {
+    (lang: string) => {
       updateAttributes({ language: lang });
-
-      const highlighter = extension.storage.highlighter;
-      if (
-        highlighter &&
-        lang !== "plaintext" &&
-        !highlighter.getLoadedLanguages().includes(lang)
-      ) {
-        await highlighter.loadLanguage(lang);
-        if (!editor.view.isDestroyed) {
-          editor.view.dispatch(
-            editor.view.state.tr.setMeta(shikiPluginKey, true),
-          );
-        }
+      if (!editor.view.isDestroyed) {
+        editor.view.dispatch(
+          editor.view.state.tr.setMeta(shikiPluginKey, true),
+        );
       }
     },
-    [editor, extension, updateAttributes],
+    [editor, updateAttributes],
   );
 
-  const { name, icon: Icon } = getLanguage(language);
+  const Lang = getLanguage(language);
 
   return (
     <NodeViewWrapper
@@ -65,8 +52,8 @@ export const CodeBlockView: React.FC<NodeViewProps> = ({
       >
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger className="group flex items-center gap-1.5 rounded-md p-2 -ml-1.5 text-xs font-medium tracking-widest uppercase text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all outline-none">
-            <Icon size={18} />
-            {name}
+            <Lang.icon size={18} />
+            {Lang.name}
             <ChevronDown className="size-3 opacity-70 group-hover:opacity-100 transition-all group-data-popup-open:rotate-180" />{" "}
           </DropdownMenuTrigger>
 

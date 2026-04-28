@@ -77,7 +77,7 @@ import {
 } from "@tiptap/extensions";
 
 // --- Custom ---
-import { EmojiNode } from "./Emoji";
+import { EmojiExtension } from "./Emoji";
 import { Image } from "./CustomImage";
 import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
@@ -166,7 +166,7 @@ export const defaultExtensions = (
     }),
 
     // Custom
-    EmojiNode.configure({ emojis }),
+    EmojiExtension.configure({ emojis }),
     Image,
     CustomCodeBlock,
     Callout,
