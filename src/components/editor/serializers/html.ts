@@ -260,6 +260,14 @@ function renderBlockContent(nodes?: BlockNode[]): string {
 
 // ── Entry point ───────────────────────────────────────────────────────
 
-export function docToHTML(doc: DocContent): string {
-  return doc.content.map(renderBlock).join("");
+interface DocRendererOptions {
+  className: string;
+  Tag: keyof HTMLElement;
+}
+
+export function docToHTML(
+  doc: DocContent,
+  { Tag, className }: Partial<DocRendererOptions>,
+): string {
+  return `<${Tag} class="${className} open-notion-doc"> ${doc.content.map(renderBlock).join("")} </${Tag}>`;
 }

@@ -311,16 +311,15 @@ function renderBlockContent(nodes?: BlockNode[]): ReactNode[] {
 
 interface DocRendererOptions {
   className: string;
-  style: CSSProperties;
   Tag: keyof JSX.IntrinsicElements;
 }
 
 export function docToReact(
   doc: DocContent,
-  { className, style, Tag = "div" }: Partial<DocRendererOptions> = {},
+  { className, Tag = "div" }: Partial<DocRendererOptions> = {},
 ) {
   return (
-    <Tag className={className} style={style}>
+    <Tag id="open-notion" className={className + " open-notion-doc"}>
       {doc.content.map((node, i) => renderBlock(node, String(i)))}
     </Tag>
   );
