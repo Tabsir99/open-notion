@@ -1,4 +1,4 @@
-const CDN = {
+export const CDN = {
   twemoji: "https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets",
   notoAnimated: "https://fonts.gstatic.com/s/e/notoemoji/latest",
 } as const;

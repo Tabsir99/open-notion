@@ -51,6 +51,7 @@ export type TypedEditor = Omit<
   getHTML: () => string;
   getMarkdown: () => string;
   getReact: () => React.ReactNode;
+  getPDF: (filename?: string, download?: boolean) => Promise<Blob>;
 };
 
 export type TypedNodeViewProps<T extends NodeName> = Omit<

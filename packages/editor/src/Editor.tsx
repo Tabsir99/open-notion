@@ -27,7 +27,12 @@ import { getEmojiUrl as twemojiGetEmojiUrl } from "./menus/EmojiPicker/getEmojiU
 import { cn } from "./lib/utils";
 import type { TypedEditor } from "./types";
 
-import { docToHTML, docToMarkdown, docToReact } from "@open-notion/serializers";
+import {
+  docToHTML,
+  docToMarkdown,
+  docToReact,
+  docToPDF,
+} from "@open-notion/serializers";
 
 // ── Public types ──────────────────────────────────────────────────────
 
@@ -214,6 +219,12 @@ export function useOpenNotion({
     editor.getHTML = () => docToHTML(editor.getJSON());
     editor.getMarkdown = () => docToMarkdown(editor.getJSON());
     editor.getReact = () => docToReact(editor.getJSON());
+    editor.getPDF = (filename, download = true) =>
+      docToPDF(editor.getJSON(), {
+        download,
+        interactiveCheckboxes: true,
+        ...(filename && { filename }),
+      });
     return editor;
   }, [editor]);
 }
