@@ -1,0 +1,106 @@
+{
+  "name": "@open-notion/editor",
+  "version": "0.1.0",
+  "description": "A production-grade Notion-style block editor built on Tiptap v3, Base UI, and shadcn.",
+  "license": "MIT",
+  "homepage": "https://github.com/tabsircg/open-notion",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tabsircg/open-notion.git",
+    "directory": "packages/editor"
+  },
+  "keywords": [
+    "tiptap",
+    "editor",
+    "notion",
+    "block-editor",
+    "rich-text",
+    "react"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles": {
+      "development": "./src/styles/dev.css",
+      "import": "./dist/styles/index.css"
+    },
+    "./styles.css": "./dist/styles/compiled.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup && pnpm build:css && pnpm registry:build",
+    "build:css": "tailwindcss -i src/styles/_full.css -o dist/styles/compiled.css --minify && node -e \"require('fs').cpSync('src/styles', 'dist/styles', { recursive: true })\"",
+    "dev": "tsup --watch",
+    "registry:build": "shadcn build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@open-notion/serializers": "workspace:*",
+    "@tiptap/core": "^3.22.0",
+    "@tiptap/pm": "^3.22.0",
+    "@tiptap/react": "^3.22.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.3.0",
+    "@devicon/react": "^0.0.3",
+    "@floating-ui/dom": "^1.7.6",
+    "@tiptap/extension-blockquote": "^3.22.3",
+    "@tiptap/extension-bold": "^3.22.3",
+    "@tiptap/extension-code": "^3.22.3",
+    "@tiptap/extension-code-block": "^3.22.3",
+    "@tiptap/extension-document": "^3.22.3",
+    "@tiptap/extension-hard-break": "^3.22.3",
+    "@tiptap/extension-heading": "^3.22.3",
+    "@tiptap/extension-horizontal-rule": "^3.22.3",
+    "@tiptap/extension-image": "^3.22.3",
+    "@tiptap/extension-italic": "^3.22.3",
+    "@tiptap/extension-link": "^3.22.3",
+    "@tiptap/extension-list": "^3.22.3",
+    "@tiptap/extension-paragraph": "^3.22.3",
+    "@tiptap/extension-strike": "^3.22.3",
+    "@tiptap/extension-table": "^3.22.3",
+    "@tiptap/extension-text": "^3.22.3",
+    "@tiptap/extension-text-align": "^3.22.3",
+    "@tiptap/extension-text-style": "^3.22.3",
+    "@tiptap/extension-underline": "^3.22.3",
+    "@tiptap/extensions": "^3.22.3",
+    "@tiptap/suggestion": "^3.22.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "emoji-regex": "^10.3.0",
+    "lucide-react": "^1.7.0",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@open-notion/serializers": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "shadcn": "^4.6.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "@tailwindcss/cli": "^4.1.17",
+    "tailwindcss": "^4.1.17"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

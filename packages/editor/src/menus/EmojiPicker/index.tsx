@@ -1,0 +1,106 @@
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Popover, PopoverContent, PopoverTitle } from "../../ui/popover";
+import Suggestion from "@tiptap/suggestion";
+import { PluginKey } from "@tiptap/pm/state";
+import { EmojiExtension } from "../../extensions/Emoji";
+import { PopoverArrow } from "../../ui/PopoverArrow";
+import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
+import { editorStore } from "../../store";
+
+const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
+
+export const EmojiPicker = memo(() => {
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const apiRef = useRef<EmojiPickerApi | null>(null);
+  const rangeRef = useRef<{ from: number; to: number } | null>(null);
+
+  const insertEmoji = useCallback((shortcode: string) => {
+    if (!rangeRef.current) return;
+    editorStore
+      .get()
+      .editor?.chain()
+      .focus()
+      .deleteRange(rangeRef.current)
+      .setEmoji(shortcode)
+      .run();
+  }, []);
+
+  const setContainer = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node) {
+        apiRef.current = createEmojiPicker(node, { onSelect: insertEmoji });
+        apiRef.current.renderAll();
+      } else {
+        apiRef.current?.destroy();
+        apiRef.current = null;
+      }
+    },
+    [insertEmoji],
+  );
+
+  useEffect(() => {
+    const { editor } = editorStore.get();
+    if (!editor) return;
+
+    const plugin = Suggestion({
+      editor: editor as any,
+      char: ":",
+      pluginKey: EmojiSuggestionPluginKey,
+      render: () => ({
+        onStart(props) {
+          setAnchor(props.clientRect?.() ?? null);
+          setOpen(true);
+          rangeRef.current = props.range;
+          if (props.query) apiRef.current?.renderFiltered(props.query);
+          else apiRef.current?.renderAll();
+        },
+        onUpdate(props) {
+          setAnchor(props.clientRect?.() ?? null);
+          rangeRef.current = props.range;
+          if (props.query) apiRef.current?.renderFiltered(props.query);
+          else apiRef.current?.renderAll();
+        },
+        onExit() {
+          setOpen(false);
+          rangeRef.current = null;
+        },
+        onKeyDown: ({ event }) => apiRef.current?.handleKey(event) ?? false,
+      }),
+      allow: ({ state, range }) => {
+        const $from = state.doc.resolve(range.from);
+        const type = state.schema.nodes[EmojiExtension.name];
+        return !!$from.parent.type.contentMatch.matchType(type);
+      },
+    });
+
+    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
+    return () => {
+      editor.unregisterPlugin(EmojiSuggestionPluginKey);
+    };
+  }, []);
+
+  const virtualAnchor = useMemo(
+    () => ({ getBoundingClientRect: () => anchor ?? new DOMRect() }),
+    [anchor],
+  );
+
+  return (
+    <Popover open={open} onOpenChange={() => setOpen(false)}>
+      <PopoverContent
+        initialFocus={false}
+        finalFocus={false}
+        anchor={virtualAnchor}
+        sideOffset={24}
+        side="right"
+        align="center"
+        className="w-lg h-120 p-0 flex flex-col gap-0 duration-200 ease-in overflow-visible shadow-2xl transition-all"
+      >
+        <PopoverTitle className="sr-only">Emoji Picker</PopoverTitle>
+        <div ref={setContainer} />
+        <PopoverArrow facing="left" align="center" size={18} />
+      </PopoverContent>
+    </Popover>
+  );
+});
