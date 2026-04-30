@@ -9,7 +9,6 @@
     "types": ["vite/client"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "customConditions": ["development"],
     "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] }
   },

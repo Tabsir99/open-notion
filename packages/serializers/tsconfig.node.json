@@ -6,6 +6,5 @@
     "composite": true,
     "noEmit": true,
     "types": ["node"]
-  },
-  "include": ["tsup.config.ts"]
+  }
 }

@@ -15,6 +15,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./react": {
+      "development": "./src/react.tsx",
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./html": {
+      "development": "./src/html.ts",
+      "types": "./dist/html.d.ts",
+      "import": "./dist/html.js"
+    },
+    "./markdown": {
+      "development": "./src/markdown.ts",
+      "types": "./dist/markdown.d.ts",
+      "import": "./dist/markdown.js"
+    },
+    "./pdf": {
+      "development": "./src/pdf.tsx",
+      "types": "./dist/pdf.d.ts",
+      "import": "./dist/pdf.js"
+    },
     "./styles.css": "./dist/styles/open-notion-doc.css"
   },
   "main": "./dist/index.js",
@@ -27,8 +47,7 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "tsup && mkdir -p dist/styles && cp src/styles/open-notion-doc.css dist/styles/open-notion-doc.css",
-    "dev": "tsup --watch",
+    "build": "tsc -b && mkdir -p dist/styles && cp src/styles/open-notion-doc.css dist/styles/open-notion-doc.css",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
@@ -50,7 +69,6 @@
   "devDependencies": {
     "@react-pdf/types": "^2.11.1",
     "@types/react": "^19.0.0",
-    "react": "^19.0.0",
-    "tsup": "^8.3.0"
+    "react": "^19.0.0"
   }
 }
