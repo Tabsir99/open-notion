@@ -16,4 +16,4 @@ export type {
 export { defaultSlashItems } from "./menus/SlashMenu/slash-items";
 export { defaultTurnIntoItems } from "./menus/TurnIntoMenu/items";
 
-export type { TypedEditor } from "./types";
+export type { TypedEditor, DocContent } from "./types";

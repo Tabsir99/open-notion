@@ -61,3 +61,5 @@ export type TypedNodeViewProps<T extends NodeName> = Omit<
   node: Omit<NodeViewProps["node"], "attrs"> & { attrs: NodeAttrs[T] };
   updateAttributes: (attrs: Partial<NodeAttrs[T]>) => void;
 };
+
+export type { DocContent };
