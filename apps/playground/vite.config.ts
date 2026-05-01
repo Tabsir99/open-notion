@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     visualizer({
-      filename: "bundle-stats.html",
+      filename: "temp/bundle-stats.html",
       open: false,
       template: "list",
     }) as any,

@@ -1,6 +1,6 @@
 import "./styles/editor.css";
 import { Suspense, use, useMemo } from "react";
-import { useEditor, EditorContent, type JSONContent } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import type { Editor, Extensions } from "@tiptap/core";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
 import { BubbleMenu } from "./menus/BubbleMenu";
@@ -27,16 +27,21 @@ import { getEmojiUrl as twemojiGetEmojiUrl } from "./menus/EmojiPicker/getEmojiU
 import { cn } from "./lib/utils";
 import type { TypedEditor } from "./types";
 
-import { docToHTML, docToMarkdown, docToReact } from "@open-notion/serializers";
+import {
+  docToHTML,
+  docToMarkdown,
+  docToReact,
+  type DocContent,
+} from "@open-notion/serializers";
 
 // ── Public types ──────────────────────────────────────────────────────
 
 export interface OpenNotionOptions {
   /** Initial document content (JSON). Only applied on mount. */
-  content?: JSONContent;
+  content?: DocContent;
 
   /** Called whenever the document changes. */
-  onChange?: (json: JSONContent) => void;
+  onChange?: (json: DocContent) => void;
 
   /** Called once when the editor is ready. */
   onReady?: (editor: Editor) => void;
@@ -177,7 +182,7 @@ export function useOpenNotion({
             if (key) {
               localStorage.setItem(`${key}-content`, JSON.stringify(json));
             }
-            onChange?.(json);
+            onChange?.(json as DocContent);
           },
         }
       : {}),

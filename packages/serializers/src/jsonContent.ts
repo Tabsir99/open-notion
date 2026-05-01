@@ -10,7 +10,7 @@ export interface BlockAttrs {
   textAlign?: "left" | "center" | "right" | "justify";
 }
 
-interface CellAttrs {
+export interface CellAttrs {
   backgroundColor?: string;
   colspan?: number;
   rowspan?: number;

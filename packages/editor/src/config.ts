@@ -1,9 +1,9 @@
 import type { Extensions, Range, ChainedCommands } from "@tiptap/core";
 import type { Node as PMNode, Schema } from "@tiptap/pm/model";
 import type { LucideIcon } from "lucide-react";
-import type { JSONContent } from "@tiptap/react";
 import type { TypedEditor } from "./types";
 import { getEmojiUrl as defaultGetEmojiUrl } from "./menus/EmojiPicker/getEmojiUrl";
+import type { DocContent } from "@open-notion/serializers";
 
 // ── Public item shapes ────────────────────────────────────────────────
 
@@ -60,8 +60,8 @@ export interface EditorConfig {
   getEmojiUrl: GetEmojiUrl;
   storageKey: string | false;
   placeholder?: PlaceholderConfig | undefined;
-  initialContent?: JSONContent | undefined;
-  onChange?: ((json: JSONContent) => void) | undefined;
+  initialContent?: DocContent | undefined;
+  onChange?: ((json: DocContent) => void) | undefined;
 }
 
 // ── Module-level singleton ────────────────────────────────────────────
