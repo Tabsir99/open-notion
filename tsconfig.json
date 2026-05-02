@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
 
-    "customConditions": ["development"],
+    "customConditions": ["source"],
 
     "strict": true,
     "noUnusedLocals": true,

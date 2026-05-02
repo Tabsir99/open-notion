@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/serializers",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "JSON → HTML / Markdown / React / PDF serializers for Open Notion editor content.",
   "type": "module",
   "license": "MIT",
@@ -11,32 +11,32 @@
   },
   "exports": {
     ".": {
-      "development": "./src/index.ts",
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./react": {
-      "development": "./src/react.tsx",
+      "source": "./src/react.tsx",
       "types": "./dist/react.d.ts",
       "import": "./dist/react.js"
     },
     "./html": {
-      "development": "./src/html.ts",
+      "source": "./src/html.ts",
       "types": "./dist/html.d.ts",
       "import": "./dist/html.js"
     },
     "./markdown": {
-      "development": "./src/markdown.ts",
+      "source": "./src/markdown.ts",
       "types": "./dist/markdown.d.ts",
       "import": "./dist/markdown.js"
     },
     "./text": {
-      "development": "./src/text.ts",
+      "source": "./src/text.ts",
       "types": "./dist/text.d.ts",
       "import": "./dist/text.js"
     },
     "./pdf": {
-      "development": "./src/pdf.tsx",
+      "source": "./src/pdf.tsx",
       "types": "./dist/pdf.d.ts",
       "import": "./dist/pdf.js"
     },

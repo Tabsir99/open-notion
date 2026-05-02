@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/editor",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "A production-grade Notion-style block editor built on Tiptap v3, Base UI, and shadcn.",
   "license": "MIT",
   "homepage": "https://github.com/tabsircg/open-notion",
@@ -27,12 +27,12 @@
   ],
   "exports": {
     ".": {
-      "development": "./src/index.ts",
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./styles": {
-      "development": "./src/styles/dev.css",
+      "style": "./src/styles/dev.css",
       "import": "./dist/styles/index.css"
     },
     "./styles.css": "./dist/styles/compiled.css"
