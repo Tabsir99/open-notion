@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/serializers",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "JSON → HTML / Markdown / React / PDF serializers for Open Notion editor content.",
   "type": "module",
   "license": "MIT",

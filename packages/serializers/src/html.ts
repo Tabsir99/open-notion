@@ -184,7 +184,7 @@ function renderOrderedList(node: OrderedListNode): string {
 }
 
 function renderTaskList(node: TaskListNode): string {
-  return `<ul data-type="task-list">${(node.content ?? []).map(renderTaskItem).join("")}</ul>`;
+  return `<ul data-type="taskList">${(node.content ?? []).map(renderTaskItem).join("")}</ul>`;
 }
 
 // ── Tables ────────────────────────────────────────────────────────────

@@ -25,18 +25,18 @@ export const Callout = createNode({
   },
 
   parseHTML() {
-    return [{ tag: "div[data-callout]" }];
+    return [{ tag: 'div[data-type="callout"]' }];
   },
 
   renderHTML({ node, HTMLAttributes }) {
     return [
       "div",
       mergeAttributes(HTMLAttributes, {
-        "data-callout": "",
+        "data-type": "callout",
         "data-emoji": node.attrs.emoji,
       }),
-      ["span", { "data-callout-emoji": "" }, node.attrs.emoji],
-      ["div", { "data-callout-content": "" }, 0],
+      ["span", { "data-type": "emoji" }, node.attrs.emoji],
+      ["div", {}, 0],
     ];
   },
 

@@ -38,8 +38,7 @@ export function CalloutView({
 
   return (
     <NodeViewWrapper
-      data-callout=""
-      className="callout"
+      data-type="callout"
       as="div"
       style={{
         backgroundColor,
@@ -53,7 +52,7 @@ export function CalloutView({
         type="button"
         contentEditable={false}
         suppressContentEditableWarning
-        className="callout-emoji"
+        className="shrink-0 size-7 flex items-center justify-center text-lg leading-none rounded-[4px] cursor-pointer select-none border-0 bg-transparent transition-colors duration-150 hover:bg-muted"
         onClick={() => setPickerOpen((p) => !p)}
       >
         <img
@@ -65,7 +64,7 @@ export function CalloutView({
         />
       </button>
 
-      <NodeViewContent className="callout-content" />
+      <NodeViewContent />
 
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverContent

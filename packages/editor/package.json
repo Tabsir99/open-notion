@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/editor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A production-grade Notion-style block editor built on Tiptap v3, Base UI, and shadcn.",
   "license": "MIT",
   "homepage": "https://github.com/tabsircg/open-notion",
