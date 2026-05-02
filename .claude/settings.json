@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm build:editor)",
+      "Bash(pnpm build:playground)",
+      "Bash(pnpm --filter playground build)"
+    ]
+  }
+}

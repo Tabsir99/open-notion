@@ -316,18 +316,18 @@
 
 /* Task list */
 
-.open-notion-doc [data-type="task-list"] {
+.open-notion-doc [data-type="taskList"] {
   list-style: none;
   padding-left: 0.25rem;
 }
 
-.open-notion-doc [data-type="task-list"] li {
+.open-notion-doc [data-type="taskList"] li {
   display: flex;
   gap: 0.625rem;
   align-items: flex-start;
 }
 
-.open-notion-doc [data-type="task-list"] li > input[type="checkbox"] {
+.open-notion-doc [data-type="taskList"] li > input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   flex-shrink: 0;
@@ -344,13 +344,13 @@
     border-color 0.15s ease;
 }
 
-.open-notion-doc [data-type="task-list"] li > input[type="checkbox"]:checked {
+.open-notion-doc [data-type="taskList"] li > input[type="checkbox"]:checked {
   background: var(--ond-accent);
   border-color: var(--ond-accent);
 }
 
 .open-notion-doc
-  [data-type="task-list"]
+  [data-type="taskList"]
   li
   > input[type="checkbox"]:checked::after {
   content: "";
@@ -364,7 +364,7 @@
   transform: translate(-50%, -60%) rotate(45deg);
 }
 
-.open-notion-doc [data-type="task-list"] li > div {
+.open-notion-doc [data-type="taskList"] li > div {
   flex: 1;
   min-width: 0;
 }

@@ -59,16 +59,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Editor-specific tokens → Tailwind utilities (bg-surface, text-editor-muted, etc.) */
-  --color-surface: var(--editor-surface);
-  --color-surface-hover: var(--editor-surface-hover);
-  --color-editor-border: var(--editor-border);
-  --color-editor-text: var(--editor-text);
-  --color-editor-text-secondary: var(--editor-text-secondary);
-  --color-editor-text-muted: var(--editor-text-muted);
-  --color-editor-accent: var(--editor-accent);
-  --color-editor-selected: var(--editor-selected);
-
   /* Radii */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -116,16 +106,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-
-  /* Editor */
-  --editor-surface: #f4f4f5;
-  --editor-surface-hover: #e4e4e7;
-  --editor-border: #d4d4d8;
-  --editor-text: #09090b;
-  --editor-text-secondary: #52525b;
-  --editor-text-muted: #a1a1aa;
-  --editor-accent: #3b82f6;
-  --editor-selected: #21bab225;
 }
 
 /* ── Dark theme ──────────────────────────────────────────────────────── */
@@ -163,13 +143,4 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-
-  /* Editor */
-  --editor-surface: #18181b;
-  --editor-surface-hover: #27272a;
-  --editor-border: #27272a;
-  --editor-text: #fafafa;
-  --editor-text-secondary: #a1a1aa;
-  --editor-text-muted: #52525b;
-  --editor-accent: #3b82f6;
 }

@@ -228,7 +228,7 @@ function renderOrderedList(node: OrderedListNode, key: string): ReactNode {
 
 function renderTaskList(node: TaskListNode, key: string): ReactNode {
   return (
-    <ul key={key} data-type="task-list">
+    <ul key={key} data-type="taskList">
       {(node.content ?? []).map((item, i) => renderTaskItem(item, String(i)))}
     </ul>
   );
