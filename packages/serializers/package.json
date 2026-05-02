@@ -39,8 +39,7 @@
       "source": "./src/pdf.tsx",
       "types": "./dist/pdf.d.ts",
       "import": "./dist/pdf.js"
-    },
-    "./styles.css": "./dist/styles/open-notion-doc.css"
+    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -48,11 +47,9 @@
     "dist",
     "README.md"
   ],
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "sideEffects": false,
   "scripts": {
-    "build": "tsc -b && mkdir -p dist/styles && cp src/styles/open-notion-doc.css dist/styles/open-notion-doc.css",
+    "build": "tsc -b",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },

@@ -6,14 +6,18 @@
   "scripts": {
     "dev": "pnpm --filter playground dev",
     "build": "pnpm -r build",
-    "build:serializers": "pnpm --filter @open-notion/serializers build",
+    "build:serializers": "pnpm --filter serializers build",
     "build:editor": "pnpm --filter editor build",
+    "build:playground": "pnpm --filter playground build",
+    "start:playground": "pnpm --filter playground start",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "registry:build": "pnpm --filter editor registry:build",
-    "publish:serializers": "pnpm --filter @open-notion/serializers publish --access public",
-    "clean": "rm -rf packages/*/dist apps/*/dist"
+    "publish:serializers": "pnpm --filter serializers publish --access public",
+    "publish:styles": "pnpm --filter styles publish --access public",
+    "publish:editor": "pnpm --filter editor publish --access public",
+    "clean:dist": "rm -rf packages/*/dist apps/*/dist",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
   },
   "devDependencies": {
     "typescript": "^5.6.0",

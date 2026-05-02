@@ -1,4 +1,3 @@
-import "../../styles/callout.css";
 import { useCallback, useRef, useState } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import { Popover, PopoverContent, PopoverTitle } from "../../ui/popover";

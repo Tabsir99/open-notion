@@ -231,6 +231,8 @@ importers:
         specifier: ^19.0.0
         version: 19.2.5
 
+  packages/styles: {}
+
 packages:
 
   '@babel/code-frame@7.29.0':

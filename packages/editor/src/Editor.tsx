@@ -1,4 +1,3 @@
-import "./styles/editor.css";
 import { Suspense, use, useMemo } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import type { Editor, Extensions } from "@tiptap/core";
@@ -157,6 +156,9 @@ export function useOpenNotion({
     editable,
     autofocus,
     immediatelyRender: false,
+    editorProps: {
+      attributes: { class: "open-notion-doc" },
+    },
 
     ...(storageKey || onselectionchange
       ? {

@@ -4,7 +4,6 @@ import { useHoveredBlock } from "./useHoveredBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "../lib/utils";
 import { Button } from "../ui/button";
-import "../styles/block-side-menu.css";
 import { editorStore } from "../store";
 
 export function BlockSideMenu() {

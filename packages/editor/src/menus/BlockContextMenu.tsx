@@ -112,6 +112,7 @@ export const BlockContextMenu = memo(
     );
 
     const blockpos = useEditorStore((s) => s.hoveredBlock?.pos);
+    console.log("REnders BlockContextMenu");
 
     const renderItems = (items: MenuItem[]) =>
       items.map(({ id, label, icon: Icon, shortcut }) => (
