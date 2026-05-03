@@ -21,6 +21,7 @@ export const Callout = createNode({
   addAttributes() {
     return {
       emoji: { default: "bulb" },
+      hexId: { default: "1F4A1" },
     };
   },
 
@@ -56,7 +57,7 @@ export const Callout = createNode({
           if (editor.isActive("callout")) {
             return commands.lift("callout");
           }
-          return commands.setCallout({ emoji: "bulb" });
+          return commands.setCallout({ emoji: "bulb", hexId: "1F4A1" });
         },
     };
   },

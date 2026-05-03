@@ -129,7 +129,7 @@ function renderBlockquote(node: BlockquoteNode): string {
 
 function renderCodeBlock(node: CodeBlockNode): string {
   const text = (node.content ?? []).map((t) => t.text).join("");
-  return `<pre><code${attr("data-language", node.attrs.language)}>${escapeText(text)}</code></pre>`;
+  return `<div data-type="codeBlock"><pre><code${attr("data-language", node.attrs.language)}>${escapeText(text)}</code></pre></div>`;
 }
 
 function renderImage(node: ImageNode): string {
@@ -159,7 +159,7 @@ function renderImage(node: ImageNode): string {
 function renderCallout(node: CalloutNode): string {
   const emoji = `<span data-type="emoji"><img${attr(
     "src",
-    getEmojiUrl(node.attrs.emoji, "callout-icon"),
+    getEmojiUrl(node.attrs.hexId, "callout-icon"),
   )}${attr("alt", node.attrs.emoji)}></span>`;
   return `<div data-type="callout"${styleAttr(blockAttrsToStyle(node.attrs))}>${emoji}<div>${renderBlockContent(node.content)}</div></div>`;
 }
@@ -222,7 +222,7 @@ function renderTableRow(node: TableRowNode): string {
 }
 
 function renderTable(node: TableNode): string {
-  return `<table>${buildColgroup(node)}<tbody>${(node.content ?? []).map(renderTableRow).join("")}</tbody></table>`;
+  return `<div data-type="tableContainer"><table>${buildColgroup(node)}<tbody>${(node.content ?? []).map(renderTableRow).join("")}</tbody></table></div>`;
 }
 
 // ── Dispatcher ────────────────────────────────────────────────────────
@@ -262,12 +262,13 @@ function renderBlockContent(nodes?: BlockNode[]): string {
 
 interface DocRendererOptions {
   className: string;
-  Tag: keyof HTMLElement;
+  Tag: HTMLElement["tagName"];
 }
 
 export function docToHTML(
   doc: DocContent,
-  { Tag, className }: Partial<DocRendererOptions> = {},
+  { Tag = "div", className = "" }: Partial<DocRendererOptions> = {},
 ): string {
+  console.log(doc)
   return `<${Tag} class="${className} open-notion-doc"> ${doc.content.map(renderBlock).join("")} </${Tag}>`;
 }

@@ -144,11 +144,13 @@ function renderBlockquote(node: BlockquoteNode, key: string): ReactNode {
 
 function renderCodeBlock(node: CodeBlockNode, key: string): ReactNode {
   return (
-    <pre key={key}>
-      <code data-language={node.attrs.language}>
-        {(node.content ?? []).map((t) => t.text).join("")}
-      </code>
-    </pre>
+    <div key={key} data-type="codeBlock">
+      <pre>
+        <code data-language={node.attrs.language}>
+          {(node.content ?? []).map((t) => t.text).join("")}
+        </code>
+      </pre>
+    </div>
   );
 }
 
@@ -181,7 +183,7 @@ function renderCallout(node: CalloutNode, key: string): ReactNode {
     <div key={key} style={blockAttrsToStyle(node.attrs)} data-type="callout">
       <span data-type="emoji">
         <img
-          src={getEmojiUrl(node.attrs.emoji, "callout-icon")}
+          src={getEmojiUrl(node.attrs.hexId, "callout-icon")}
           alt={node.attrs.emoji}
         />
       </span>
@@ -266,11 +268,13 @@ function renderTableRow(node: TableRowNode, key: string): ReactNode {
 
 function renderTable(node: TableNode, key: string): ReactNode {
   return (
-    <table key={key}>
-      <tbody>
-        {(node.content ?? []).map((row, i) => renderTableRow(row, String(i)))}
-      </tbody>
-    </table>
+    <div data-type="tableContainer">
+      <table key={key}>
+        <tbody>
+          {(node.content ?? []).map((row, i) => renderTableRow(row, String(i)))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -319,7 +323,7 @@ export function docToReact(
   { className, Tag = "div" }: Partial<DocRendererOptions> = {},
 ) {
   return (
-    <Tag id="open-notion" className={className + " open-notion-doc"}>
+    <Tag className={className + " open-notion-doc"}>
       {doc.content.map((node, i) => renderBlock(node, String(i)))}
     </Tag>
   );

@@ -44,10 +44,10 @@ export const CodeBlockView = ({
   return (
     <NodeViewWrapper
       as="div"
-      className="my-4 rounded-md overflow-hidden border border-editor-border/50 shadow-sm"
+      className="my-4 rounded-md overflow-hidden border border-(--ond-border)/50 shadow-sm"
     >
       <div
-        className="flex items-center justify-between px-3.5 py-2 border-b border-editor-border/50"
+        className="flex items-center justify-between px-3.5 py-2 border-b border-(--ond-border)/50"
         contentEditable={false}
       >
         <DropdownMenu modal={false}>

@@ -188,11 +188,10 @@ const renderBlock = (
     }
 
     case "callout": {
-      const hex = emojiToHex(node.attrs.emoji);
       return (
         <View key={key} style={pdfStyles.callout} wrap={false}>
           <Image
-            src={`${CDN.twemoji}/72x72/${hex}.png`}
+            src={`${CDN.twemoji}/72x72/${node.attrs.hexId}.png`}
             style={pdfStyles.calloutIcon}
           />
           <View style={pdfStyles.calloutBody}>
@@ -315,14 +314,6 @@ const renderTableCell = (
     {cell.content?.map((c, i) => renderBlock(c, i, true, opts))}
   </View>
 );
-
-// ── Emoji codepoint helper ───────────────────────────────────────────
-
-const emojiToHex = (emoji: string): string =>
-  Array.from(emoji)
-    .map((c) => c.codePointAt(0)?.toString(16))
-    .filter(Boolean)
-    .join("-");
 
 // ── Public API ───────────────────────────────────────────────────────
 

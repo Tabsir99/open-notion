@@ -7,20 +7,23 @@
  */
 
 .open-notion-doc {
-  /* Tokens — override any of these on a wrapper to theme. */
-  --ond-text: #1f2328;
-  --ond-text-muted: #59636e;
-  --ond-text-faint: #818b98;
+  color-scheme: light dark;
+  --ond-text: light-dark(#0d1117, #eaecf1);
+  --ond-text-muted: color-mix(in srgb, var(--ond-text) 50%, transparent);
+  --ond-text-faint: color-mix(in srgb, var(--ond-text) 30%, transparent);
   --ond-bg: transparent;
-  --ond-bg-subtle: #f6f8fa;
-  --ond-bg-code: #f6f8fa;
-  --ond-bg-callout: #f6f8fa;
-  --ond-border: #d1d9e0;
-  --ond-border-strong: #b6bcc4;
-  --ond-accent: #0969da;
-  --ond-accent-hover: #0550ae;
-  --ond-success: #1a7f37;
-  --ond-danger: #cf222e;
+  --ond-bg-subtle: color-mix(in srgb, currentColor 6%, transparent);
+  --ond-bg-code: color-mix(in srgb, currentColor 6%, transparent);
+  --ond-bg-callout: color-mix(in srgb, var(--ond-accent) 10%, transparent);
+  --ond-border: color-mix(in srgb, var(--ond-text) 15%, transparent);
+  --ond-border-strong: color-mix(in srgb, var(--ond-text) 28%, transparent);
+  --ond-accent: light-dark(#4f62ef, #7d91f5);
+  --ond-accent-hover: light-dark(
+    color-mix(in srgb, var(--ond-accent) 80%, #000),
+    color-mix(in srgb, var(--ond-accent) 80%, #fff)
+  );
+  --ond-success: light-dark(#0c9e6a, #2dd4a0);
+  --ond-danger: light-dark(#e4304f, #f16080);
 
   --ond-radius-sm: 4px;
   --ond-radius-md: 6px;
@@ -48,29 +51,15 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--ond-block-gap);
 }
 
-@media (prefers-color-scheme: dark) {
-  .open-notion-doc {
-    --ond-text: #e6edf3;
-    --ond-text-muted: #9198a1;
-    --ond-text-faint: #6e7681;
-    --ond-bg-subtle: #151b23;
-    --ond-bg-code: #151b23;
-    --ond-bg-callout: #151b23;
-    --ond-border: #3d444d;
-    --ond-border-strong: #4d555e;
-    --ond-accent: #4493f8;
-    --ond-accent-hover: #58a6ff;
-    --ond-success: #3fb950;
-    --ond-danger: #f85149;
-  }
-}
-
-/* ── Block flow ───────────────────────────────────────────────────── */
-
-.open-notion-doc > * + * {
-  margin-top: var(--ond-block-gap);
+.dark .open-notion-doc,
+.dark.open-notion-doc {
+  color-scheme: dark;
 }
 
 /* ── Headings ─────────────────────────────────────────────────────── */
@@ -80,36 +69,41 @@
 .open-notion-doc h3 {
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.25;
   scroll-margin-top: 4rem;
 }
 
 .open-notion-doc h1 {
   font-size: 2rem;
-  margin-top: 1.75rem;
+  line-height: 1.2;
   letter-spacing: -0.025em;
 }
 
 .open-notion-doc h2 {
   font-size: 1.5rem;
-  margin-top: 1.5rem;
+  line-height: 1.25;
 }
 
 .open-notion-doc h3 {
   font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+/* More space upstream before a heading */
+.open-notion-doc * + h1 {
+  margin-top: 1.75rem;
+}
+.open-notion-doc * + h2 {
+  margin-top: 1.5rem;
+}
+.open-notion-doc * + h3 {
   margin-top: 1.25rem;
 }
 
-.open-notion-doc > h1:first-child,
-.open-notion-doc > h2:first-child,
-.open-notion-doc > h3:first-child {
-  margin-top: 0;
-}
-
-/* ── Paragraph ────────────────────────────────────────────────────── */
-
-.open-notion-doc p {
-  margin: 0;
+/* Tighter gap downstream from heading into first content block */
+.open-notion-doc h1 + *,
+.open-notion-doc h2 + *,
+.open-notion-doc h3 + * {
+  margin-top: 0.35rem;
 }
 
 /* ── Inline marks ─────────────────────────────────────────────────── */
@@ -170,12 +164,14 @@
 
 /* ── Code block ───────────────────────────────────────────────────── */
 
-.open-notion-doc pre {
-  margin: 0;
+.open-notion-doc [data-type="codeBlock"] {
   padding: 1rem 1.25rem;
   background: var(--ond-bg-code);
-  border: 1px solid var(--ond-border);
   border-radius: var(--ond-radius-md);
+  border: 1px solid var(--ond-border);
+}
+
+.open-notion-doc pre {
   overflow-x: auto;
   font-size: 0.875em;
   line-height: 1.55;
@@ -186,7 +182,6 @@
   font-family: var(--ond-font-mono);
   background: transparent;
   border: 0;
-  padding: 0;
   border-radius: 0;
   color: inherit;
   font-size: inherit;
@@ -196,30 +191,21 @@
 /* ── Blockquote ───────────────────────────────────────────────────── */
 
 .open-notion-doc blockquote {
-  margin: 0;
   padding: 0.25rem 0 0.25rem 1rem;
   color: var(--ond-text-muted);
   border-left: 3px solid var(--ond-border-strong);
 }
 
-.open-notion-doc blockquote > * + * {
-  margin-top: 0.5rem;
-}
-
 /* ── Horizontal rule ──────────────────────────────────────────────── */
 
 .open-notion-doc hr {
-  border: 0;
-  height: 1px;
-  background: var(--ond-border);
-  margin: 2rem 0;
+  height: 0;
+  border: none;
+  border-top: 1px solid var(--ond-border);
+  margin: 1.5rem 0;
 }
 
 /* ── Image / figure ───────────────────────────────────────────────── */
-
-.open-notion-doc figure {
-  margin: 0;
-}
 
 .open-notion-doc figure img {
   max-width: 100%;
@@ -253,13 +239,16 @@
   line-height: 1.4;
 }
 
+/* Callout emoji images are larger than inline emoji */
+.open-notion-doc [data-type="callout"] > [data-type="emoji"] img {
+  width: 1.35rem;
+  height: 1.35rem;
+  vertical-align: middle;
+}
+
 .open-notion-doc [data-type="callout"] > div {
   flex: 1;
   min-width: 0;
-}
-
-.open-notion-doc [data-type="callout"] > div > * + * {
-  margin-top: 0.5rem;
 }
 
 /* ── Emoji ────────────────────────────────────────────────────────── */
@@ -271,24 +260,24 @@
   vertical-align: -0.2em;
 }
 
+/* ── Nested block flow ────────────────────────────────────────────── */
+/* Unified spacing for content inside blockquote, callout, and list items */
+
+.open-notion-doc blockquote > * + *,
+.open-notion-doc [data-type="callout"] > div > * + *,
+.open-notion-doc li > * + * {
+  margin-top: 0.5rem;
+}
+
 /* ── Lists ────────────────────────────────────────────────────────── */
 
 .open-notion-doc ul,
 .open-notion-doc ol {
-  margin: 0;
   padding-left: 1.6rem;
-}
-
-.open-notion-doc li {
-  margin: 0;
 }
 
 .open-notion-doc li + li {
   margin-top: 0.25rem;
-}
-
-.open-notion-doc li > * + * {
-  margin-top: 0.5rem;
 }
 
 .open-notion-doc ul ul,
@@ -301,20 +290,31 @@
 .open-notion-doc ul {
   list-style: disc;
 }
-
 .open-notion-doc ul ul {
   list-style: circle;
 }
-
 .open-notion-doc ul ul ul {
   list-style: square;
 }
-
 .open-notion-doc ol {
   list-style: decimal;
 }
 
-/* Task list */
+/* Ordered list type variants (wired from OrderedListNode.attrs.type) */
+.open-notion-doc ol[data-list-type="lower-alpha"] {
+  list-style-type: lower-alpha;
+}
+.open-notion-doc ol[data-list-type="upper-alpha"] {
+  list-style-type: upper-alpha;
+}
+.open-notion-doc ol[data-list-type="lower-roman"] {
+  list-style-type: lower-roman;
+}
+.open-notion-doc ol[data-list-type="upper-roman"] {
+  list-style-type: upper-roman;
+}
+
+/* ── Task list ────────────────────────────────────────────────────── */
 
 .open-notion-doc [data-type="taskList"] {
   list-style: none;
@@ -324,16 +324,16 @@
 .open-notion-doc [data-type="taskList"] li {
   display: flex;
   gap: 0.625rem;
-  align-items: flex-start;
+  align-items: baseline;
 }
 
-.open-notion-doc [data-type="taskList"] li > input[type="checkbox"] {
+.open-notion-doc [data-type="taskList"] li input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   flex-shrink: 0;
   width: 1.05em;
   height: 1.05em;
-  margin-top: 0.3em;
+  transform: translateY(0.1em);
   border: 1.5px solid var(--ond-border-strong);
   border-radius: var(--ond-radius-sm);
   background: var(--ond-bg);
@@ -344,7 +344,7 @@
     border-color 0.15s ease;
 }
 
-.open-notion-doc [data-type="taskList"] li > input[type="checkbox"]:checked {
+.open-notion-doc [data-type="taskList"] li input[type="checkbox"]:checked {
   background: var(--ond-accent);
   border-color: var(--ond-accent);
 }
@@ -352,7 +352,7 @@
 .open-notion-doc
   [data-type="taskList"]
   li
-  > input[type="checkbox"]:checked::after {
+  input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -371,15 +371,20 @@
 
 /* ── Tables ───────────────────────────────────────────────────────── */
 
+.open-notion-doc div[data-type="tableContainer"] {
+  overflow-x: auto;
+  width: 100%;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 .open-notion-doc table {
   border-collapse: collapse;
   border-spacing: 0;
   width: 100%;
   font-size: 0.95em;
-  margin: 0;
-  display: block;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  display: table;
+  table-layout: fixed;
 }
 
 .open-notion-doc table th,
@@ -388,7 +393,7 @@
   border: 1px solid var(--ond-border);
   text-align: left;
   vertical-align: top;
-  min-width: 5rem;
+  height: 3rem;
 }
 
 .open-notion-doc table th {
@@ -398,16 +403,6 @@
 
 .open-notion-doc table tr:hover td {
   background: color-mix(in srgb, var(--ond-bg-subtle) 50%, transparent);
-}
-
-.open-notion-doc table th > *,
-.open-notion-doc table td > * {
-  margin: 0;
-}
-
-.open-notion-doc table th > * + *,
-.open-notion-doc table td > * + * {
-  margin-top: 0.5rem;
 }
 
 /* ── Selection ────────────────────────────────────────────────────── */

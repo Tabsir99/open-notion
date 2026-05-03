@@ -87,7 +87,7 @@ export function TableControls() {
           {drag && <DragIndicator drag={drag} />}
           {focused && (
             <div
-              className="absolute pointer-events-none rounded-[2px] ring-2 ring-editor-accent/50
+              className="absolute pointer-events-none rounded-[2px] ring-2 ring-(--ond-accent)/50
                transition-[top,left,width,height] duration-200 ease-out z-30"
               style={{ ...focused.cell, left: focused.cell.trueLeft }}
             />

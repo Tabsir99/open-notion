@@ -157,7 +157,9 @@ export function useOpenNotion({
     autofocus,
     immediatelyRender: false,
     editorProps: {
-      attributes: { class: "open-notion-doc" },
+      attributes: {
+        class: cn("outline-none m-0 open-notion-doc"),
+      },
     },
 
     ...(storageKey || onselectionchange
@@ -248,7 +250,7 @@ export function OpenNotionView({
       }}
       className={cn(
         "relative w-full cursor-text",
-        "max-w-4xl min-h-svh cursor-text bg-background border border-border",
+        "max-w-4xl min-h-svh",
         className,
       )}
       onClick={() => editor.chain().focus().run()}

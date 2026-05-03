@@ -3,38 +3,8 @@
  * blockquote, links, code, tables, callouts, emoji, etc. */
 @import "@open-notion/styles/open-notion-doc.css";
 
-@theme inline {
-  --color-surface: var(--editor-surface);
-  --color-surface-hover: var(--editor-surface-hover);
-  --color-editor-border: var(--editor-border);
-  --color-editor-text: var(--editor-text);
-  --color-editor-text-secondary: var(--editor-text-secondary);
-  --color-editor-text-muted: var(--editor-text-muted);
-  --color-editor-accent: var(--editor-accent);
-  --color-editor-selected: var(--editor-selected);
-}
-
 :root {
-  /* Editor */
-  --editor-surface: #f4f4f5;
-  --editor-surface-hover: #e4e4e7;
-  --editor-border: #d4d4d8;
-  --editor-text: #09090b;
-  --editor-text-secondary: #52525b;
-  --editor-text-muted: #a1a1aa;
-  --editor-accent: #3b82f6;
-  --editor-selected: #21bab202;
-}
-
-.dark {
-  /* Editor */
-  --editor-surface: #18181b;
-  --editor-surface-hover: #27272a;
-  --editor-border: #27272a;
-  --editor-text: #fafafa;
-  --editor-text-secondary: #a1a1aa;
-  --editor-text-muted: #52525b;
-  --editor-accent: #3b82f6;
+  --editor-selected: #21bab237;
 }
 
 /* ── BlockContextMenu scrollbar ────────────────────────────────────── */
@@ -53,15 +23,6 @@
 }
 
 /* ── ProseMirror surface ───────────────────────────────────────────── */
-
-.ProseMirror {
-  outline: none;
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.75;
-  color: var(--editor-text);
-  margin: 0 auto;
-}
 
 .tiptap ::selection {
   background: var(--editor-selected);
@@ -91,24 +52,9 @@
 .ProseMirror [data-type="callout"] p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: var(--editor-text-muted);
+  color: var(--ond-text-muted);
   pointer-events: none;
   height: 0;
-}
-
-/* ── Task list — Tiptap wraps the checkbox in <label>, which the
- * shared doc styles don't account for. ────────────────────────────── */
-
-.ProseMirror ul[data-type="task-list"] li > label {
-  flex: 0 0 auto;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  height: 1.75em;
-}
-
-.ProseMirror ul[data-type="task-list"] li > div {
-  flex: 1 1 auto;
 }
 
 /* ── Code block — the CodeBlock NodeView paints chrome on the wrapper
@@ -123,21 +69,6 @@
   overflow-x: visible;
 }
 
-/* ── Horizontal rule — bigger hit/hover area than rendered docs ──── */
-
-.tiptap hr {
-  height: 1.5em;
-  border: none;
-  background: linear-gradient(
-    transparent calc(50% - 0.5px),
-    #ccc calc(50% - 0.5px),
-    #ccc calc(50% + 0.5px),
-    transparent calc(50% + 0.5px)
-  );
-  margin: 0;
-  cursor: default;
-}
-
 /* ── Tables — restore display:table so prosemirror-tables `colwidth`
  * (rendered as <col width=...>) is honored. The shared doc styles set
  * display:block for horizontal scroll, but our CustomTableView wraps
@@ -149,19 +80,9 @@
   margin-bottom: 2em;
 }
 
-.ProseMirror .table-container {
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
+.ProseMirror div[data-type="tableContainer"] {
   position: relative;
   padding: 6px 6px 2px 6px;
-}
-
-.ProseMirror table {
-  display: table;
-  overflow: visible;
-  border-collapse: collapse;
-  table-layout: fixed;
 }
 
 .ProseMirror table td,
@@ -186,7 +107,7 @@
   bottom: 0;
   width: 2px;
   margin-top: -0.1em;
-  background-color: var(--editor-accent);
+  background-color: var(--ond-accent);
   pointer-events: none;
   z-index: 20;
 }

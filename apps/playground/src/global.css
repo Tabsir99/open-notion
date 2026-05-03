@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @import "@open-notion/editor/styles";
 
 @custom-variant dark (&:is(.dark *));

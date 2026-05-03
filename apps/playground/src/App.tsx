@@ -1,13 +1,22 @@
-import { OpenNotionView, useOpenNotion } from "@open-notion/editor";
-import { FPSMonitor } from "./_dev/fps";
+import { Suspense } from "react";
+import { PlaygroundWorkspace } from "./playground/PlaygroundWorkspace";
+
+function LoadingFallback() {
+  return (
+    <div className="flex h-dvh w-dvw items-center justify-center bg-background text-4xl text-foreground">
+      Loading…
+    </div>
+  );
+}
 
 function App() {
-  const editor = useOpenNotion({ storageKey: "oeditor" });
   return (
-    <main className="min-h-screen bg-background text-text-primary">
-      <OpenNotionView editor={editor} />
-      <FPSMonitor />
-    </main>
+    <>
+      <Suspense fallback={<LoadingFallback />}>
+        <PlaygroundWorkspace />
+      </Suspense>
+      {/* <FPSMonitor /> */}
+    </>
   );
 }
 
