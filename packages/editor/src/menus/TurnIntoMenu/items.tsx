@@ -147,7 +147,7 @@ export const defaultTurnIntoItems: TurnIntoItem[] = [
     label: "Callout",
     icon: AlertCircle,
     isActive: (editor) => editor.isActive("callout"),
-    applyChain: (c) => c.setCallout({ emoji: "bulb" }),
+    applyChain: (c) => c.setCallout({ emoji: "bulb", hexId: "1F4A1" }),
     buildNode: (s) => s.nodes.callout.create(),
   },
   {

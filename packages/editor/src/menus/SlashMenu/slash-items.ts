@@ -153,7 +153,7 @@ export const defaultSlashItems: SlashItem[] = [
         .chain()
         .focus()
         .deleteRange(range)
-        .setCallout({ emoji: "bulb" })
+        .setCallout({ emoji: "bulb", hexId: "1F4A1" })
         .run(),
   },
   {

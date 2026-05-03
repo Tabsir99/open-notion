@@ -26,6 +26,27 @@ import {
 } from "@tiptap/extension-table";
 import { Callout } from "./Callout";
 
+// --- Functionality ---
+import TextAlign from "@tiptap/extension-text-align";
+import {
+  Dropcursor,
+  Gapcursor,
+  TrailingNode,
+  CharacterCount,
+  UndoRedo,
+  Placeholder,
+} from "@tiptap/extensions";
+
+// --- Custom ---
+import { EmojiExtension } from "./Emoji";
+import { Image } from "./CustomImage";
+import { CustomCodeBlock } from "./CustomCodeBlock";
+import { BlockStyles } from "./BlockStyles";
+
+import type { Extensions } from "@tiptap/core";
+import type { PlaceholderConfig } from "../config";
+import type { Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
+
 const bgAttr = {
   backgroundColor: {
     default: null,
@@ -54,7 +75,7 @@ class CustomTableView extends TableView {
     super(node, cellMinWidth);
 
     const wrapper = document.createElement("div");
-    wrapper.className = "table-container";
+    wrapper.dataset.type = "tableContainer";
 
     this.dom.classList.add("group/table");
 
@@ -63,28 +84,6 @@ class CustomTableView extends TableView {
     this.dom.appendChild(wrapper);
   }
 }
-
-// --- Functionality ---
-import TextAlign from "@tiptap/extension-text-align";
-import {
-  Dropcursor,
-  Gapcursor,
-  TrailingNode,
-  CharacterCount,
-  UndoRedo,
-  Selection,
-  Placeholder,
-} from "@tiptap/extensions";
-
-// --- Custom ---
-import { EmojiExtension } from "./Emoji";
-import { Image } from "./CustomImage";
-import { CustomCodeBlock } from "./CustomCodeBlock";
-import { BlockStyles } from "./BlockStyles";
-
-import type { Extensions } from "@tiptap/core";
-import type { PlaceholderConfig } from "../config";
-import type { Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
 
 export const defaultExtensions = (
   emojis: Emoji[],
@@ -161,9 +160,6 @@ export const defaultExtensions = (
     TrailingNode,
     UndoRedo,
     CharacterCount,
-    Selection.configure({
-      className: "bg-editor-selected",
-    }),
 
     // Custom
     EmojiExtension.configure({ emojis }),

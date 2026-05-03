@@ -57,7 +57,7 @@ export const ImageEmptyState = ({ onSrcChange }: ImageEmptyStateProps) => {
         }
       />
       <PopoverContent className="w-96 p-3" align="start" side="bottom">
-        <Tabs defaultValue="upload" className="gap-3">
+        <Tabs defaultValue="upload" className="gap-3 flex-col">
           <TabsList className="grid grid-cols-2 w-full h-9 p-1 bg-muted rounded-md">
             <TabsTrigger
               value="upload"

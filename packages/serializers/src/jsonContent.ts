@@ -14,7 +14,7 @@ export interface CellAttrs {
   backgroundColor?: string;
   colspan?: number;
   rowspan?: number;
-  colwidth?: number[] | null;
+  colwidth: number[] | null;
 }
 
 // ── Marks ─────────────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ export type ImageNode = {
 };
 export type CalloutNode = {
   type: "callout";
-  attrs: BlockAttrs & { emoji: string };
+  attrs: BlockAttrs & { emoji: string, hexId: string };
   content?: BlockNode[];
 };
 
