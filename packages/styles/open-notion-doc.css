@@ -61,6 +61,13 @@
   color-scheme: dark;
 }
 
+.open-notion-doc code span {
+  color: var(--shiki-light);
+}
+.dark .open-notion-doc code span {
+  color: var(--shiki-dark);
+}
+
 /* ── Headings ─────────────────────────────────────────────────────── */
 
 .open-notion-doc h1,

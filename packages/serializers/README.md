@@ -41,7 +41,7 @@ Text (with optional **marks**), hard break, emoji (Twemoji-style `hexId` + displ
 
 ### Architectural choice
 
-**Single schema, multiple projections.** Each file implements the same conceptual walk: inline pipeline (text + marks) → block dispatcher → nested structures (lists, tables). That keeps outputs aligned at the cost of duplicating dispatch switches across files.
+**Single schema, multiple projections.** Markdown, text, and PDF each implement their own walk (inline → blocks → nesting). **HTML and React share one implementation:** `DocRenderer` awaits **`_renderBlockContent`** from `html.ts` and injects that string into the DOM, so block markup stays identical between `docToHTML` and the React wrapper.
 
 ---
 
@@ -52,7 +52,7 @@ Published **subpath exports** (see `package.json`):
 | Import | Module | Output |
 |--------|--------|--------|
 | `@open-notion/serializers` | `src/index.ts` | Re-exports all public APIs + types |
-| `@open-notion/serializers/react` | `react.tsx` | `docToReact` |
+| `@open-notion/serializers/react` | `react.tsx` | `DocRenderer` |
 | `@open-notion/serializers/html` | `html.ts` | `docToHTML` |
 | `@open-notion/serializers/markdown` | `markdown.ts` | `docToMarkdown` |
 | `@open-notion/serializers/text` | `text.ts` | `docToText` |
@@ -66,10 +66,9 @@ Types are re-exported from `./jsonContent` via `export type *` on the root entry
 
 ### `highlighter.ts` — Shiki for code (HTML + React only)
 
-- **`getHighlighter()`** — async singleton: builds Shiki **core** highlighter with a fixed language set (TypeScript, Python, HTML, CSS, JSON, Bash, SQL, Go, Rust, YAML, Markdown, Dockerfile), **Light+** / **Dark+** themes, JavaScript regex engine.
-- **`getCachedHighlighter()`** — sync; returns `{ h, lightTheme, darkTheme }` or **`null`** until `getHighlighter()` has resolved once.
+- **`getHighlighter()`** — async **singleton**: first call builds Shiki **core** with a fixed language set (TypeScript, Python, HTML, CSS, JSON, Bash, SQL, Go, Rust, YAML, Markdown, Dockerfile), **Light+** / **Dark+** themes, and the JavaScript regex engine; later calls reuse the same instance.
 
-**HTML** and **React** code blocks: if highlighter is missing, language is `plaintext`, or language is not loaded, output falls back to escaped plain text. Theme picks **`document.documentElement.classList.contains("dark")`** when `document` exists (browser); otherwise defaults safely inside try/catch.
+**HTML** (including the string used inside **`DocRenderer`**) code blocks: if the highlighter is unavailable, language is `plaintext`, or the language is not loaded, output falls back to escaped plain text. Otherwise **`codeToHtml`** runs with **Light+** and **Dark+** from **`getHighlighter()`** (`themes.light` / `themes.dark`).
 
 Markdown / text / PDF **do not** use Shiki (fenced code or plain monospace respectively).
 
@@ -78,20 +77,23 @@ Markdown / text / PDF **do not** use Shiki (fenced code or plain monospace respe
 - **`CDN`**: Twemoji assets + Noto animated emoji base URLs.
 - **`getEmojiUrl(hexId, source)`**: inline emojis → Twemoji SVG; callout icons → Noto animated WebP path shape.
 
-### `react.tsx` — `docToReact(doc, options?)`
+### `react.tsx` — `DocRenderer`
 
-- Renders into a wrapper whose tag and `className` are configurable; root always includes CSS hook class **`open-notion-doc`** (pairs with shared doc styles in the wider design system).
-- **Marks** → semantic / styled React elements (`strong`, `a`, `span` + `textStyle`, etc.).
-- **Code blocks** → `SerializedCodeBlock`: header (language + copy via `navigator.clipboard`), body highlighted like HTML when Shiki is warm.
-- **Tables** → `data-type="tableContainer"` + `<table><tbody>…` (no separate thead in DOM; first row may still be `tableHeader` cells).
-- **Task lists** — read-only checkboxes.
+- **Async** component: awaits **`_renderBlockContent`** from `html.ts`, then renders it with **`dangerouslySetInnerHTML`** on a wrapper element.
+- Wrapper **`as`** (intrinsic tag) and **`className`** are optional; the root always includes CSS hook class **`open-notion-doc`** (pairs with shared doc styles in the wider design system).
+- **Marks**, **code blocks** (Shiki when warm), **tables**, and **task lists** all follow the same HTML string as `docToHTML` for the inner document.
 
-### `html.ts` — `docToHTML(doc, options?)`
+### `html.ts` — `docToHTML(doc, options?)` + `_renderBlockContent`
 
 - String output with **escaped** text and attributes.
-- Mirrors React structure for blocks (including code block chrome and **inline** copy script on the button — works in static HTML without React).
+- **`HTML_DATA_ATTR`** in `htmlDataAttrs.ts` is the single source of truth for serialized `data-*` names and `data-type` values (shared with `script.ts`).
+- **Code blocks**: header (language + copy control markup). Pair with **`hydrationScript()`** from `script.ts` for clipboard copy in static HTML without React.
 - **Tables**: optional `<colgroup>` from first-row `colwidth` metadata when present.
-- Same Shiki integration and dark-mode detection as React.
+- Same Shiki integration and dark-mode detection as the React path (via shared `_renderBlockContent`).
+
+### `script.ts` — `hydrationScript()`
+
+- Injects a small **`click`** listener for code-block **copy** buttons. Uses the same attribute names as `htmlDataAttrs.ts` / `html.ts` so selectors and `getAttribute` stay aligned.
 
 ### `markdown.ts` — `docToMarkdown(doc)`
 
@@ -117,7 +119,7 @@ Markdown / text / PDF **do not** use Shiki (fenced code or plain monospace respe
 ## Dependencies
 
 - **Runtime**: `@react-pdf/renderer`, `@shikijs/core`, `@shikijs/engine-javascript`, `@shikijs/langs`, `@shikijs/themes`.
-- **Peer**: `react >= 18` (**optional** in `peerDependenciesMeta`) — only required for `react` export and for `docToReact` from the root barrel if you bundle that path.
+- **Peer**: `react >= 18` (**optional** in `peerDependenciesMeta`) — only required for the `react` subpath and for **`DocRenderer`** from the root barrel if you bundle that path.
 
 ---
 
@@ -147,10 +149,12 @@ const html = docToHTML(doc, { className: "preview", Tag: "article" });
 ```
 
 ```tsx
-import { docToReact } from "@open-notion/serializers/react";
+import { DocRenderer } from "@open-notion/serializers/react";
 
-export function Preview({ doc }: { doc: DocContent }) {
-  return docToReact(doc, { className: "preview", Tag: "article" });
+export async function Preview({ doc }: { doc: DocContent }) {
+  return (
+    <DocRenderer doc={doc} className="preview" as="article" />
+  );
 }
 ```
 
@@ -162,6 +166,8 @@ export function Preview({ doc }: { doc: DocContent }) {
 |----------|-----------|
 | Shared `jsonContent` types | One contract between editor and all outputs. |
 | Separate files per format | Clear boundaries; different escaping and host constraints (DOM vs string vs PDF). |
-| Shiki lazy + sync cache | Avoid paying async cost on every render after first init; graceful degradation if not ready. |
+| `DocRenderer` + `_renderBlockContent` | One HTML generation path for string export and React `dangerouslySetInnerHTML`. |
+| `HTML_DATA_ATTR` + `hydrationScript` | Serialized `data-*` names stay aligned with static copy-button behavior. |
+| Shiki via `getHighlighter()` singleton | Pay setup cost once; graceful fallback when highlighter or language is unavailable. |
 | Optional React peer | HTML/Markdown/text usable in non-React servers and CLIs. |
 | PDF via react-pdf + shared styles | Deterministic layout; different model than HTML/CSS. |

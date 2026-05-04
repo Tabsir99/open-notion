@@ -18,3 +18,4 @@ export const getEmojiUrl = (
       return `${CDN.notoAnimated}/${underscored}/512.webp`;
   }
 };
+

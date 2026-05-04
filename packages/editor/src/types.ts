@@ -48,9 +48,8 @@ export type TypedEditor = Omit<
   isActive(attrs: Partial<BlockAttrs>): boolean;
   getAttributes<T extends EntityName>(name: T): AttrsFor<T>;
   getJSON(): DocContent;
-  getHTML: () => string;
-  getMarkdown: () => string;
-  getReact: () => React.ReactNode;
+  getHTML: () => Promise<string>;
+  getMarkdown: () => Promise<string>;
   getPDF: (filename?: string, download?: boolean) => Promise<Blob>;
 };
 

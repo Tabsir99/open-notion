@@ -139,6 +139,6 @@ function renderBlockContent(nodes?: BlockNode[]): string {
 
 // ── Entry ─────────────────────────────────────────────────────────────
 
-export function docToText(doc: DocContent): string {
+export async function docToText(doc: DocContent): Promise<string> {
   return doc.content.map(renderBlock).join("\n\n") + "\n";
 }

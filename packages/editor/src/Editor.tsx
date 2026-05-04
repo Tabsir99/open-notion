@@ -29,7 +29,6 @@ import type { TypedEditor } from "./types";
 import {
   docToHTML,
   docToMarkdown,
-  docToReact,
   type DocContent,
 } from "@open-notion/serializers";
 
@@ -220,10 +219,9 @@ export function useOpenNotion({
   return useMemo(() => {
     if (!editor) return null;
 
-    editor.getHTML = () => docToHTML(editor.getJSON());
-    editor.getMarkdown = () => docToMarkdown(editor.getJSON());
-    editor.getReact = () => docToReact(editor.getJSON());
-    editor.getPDF = (filename, download = true) =>
+    editor.getHTML = async () => docToHTML(editor.getJSON());
+    editor.getMarkdown = async () => docToMarkdown(editor.getJSON());
+    editor.getPDF = async (filename, download = true) =>
       import("@open-notion/serializers/pdf").then(({ docToPDF }) =>
         docToPDF(editor.getJSON(), {
           download,

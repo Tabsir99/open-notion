@@ -1,4 +1,8 @@
-import { OpenNotionView, useOpenNotion, type TypedEditor } from "@open-notion/editor";
+import {
+  OpenNotionView,
+  useOpenNotion,
+  type TypedEditor,
+} from "@open-notion/editor";
 import { docToText } from "@open-notion/serializers";
 import {
   useCallback,
@@ -33,11 +37,11 @@ export function PlaygroundWorkspace() {
 
   const editor = useOpenNotion({
     storageKey: "oeditor",
-    onChange: () => {
+    onChange: async () => {
       setPdfError(null);
       const ed = editorRef.current;
       if (!ed || previewModeRef.current !== "live") return;
-      setLiveHtml(ed.getHTML());
+      setLiveHtml(await ed.getHTML());
     },
   });
 
@@ -47,9 +51,10 @@ export function PlaygroundWorkspace() {
 
   useEffect(() => {
     if (!editor) return;
-    const html = editor.getHTML();
-    setLiveHtml(html);
-    setStaticHtml(html);
+    editor.getHTML().then((html) => {
+      setLiveHtml(html);
+      setStaticHtml(html);
+    });
   }, [editor]);
 
   useEffect(() => {
@@ -60,7 +65,7 @@ export function PlaygroundWorkspace() {
 
   const handlePreviewModeChange = useCallback((mode: PreviewMode) => {
     if (mode === "static" && editorRef.current) {
-      setStaticHtml(editorRef.current.getHTML());
+      editorRef.current.getHTML().then(setStaticHtml);
     }
     setPreviewMode(mode);
   }, []);
@@ -68,7 +73,7 @@ export function PlaygroundWorkspace() {
   const refreshStatic = useCallback(() => {
     const ed = editorRef.current;
     if (!ed) return;
-    setStaticHtml(ed.getHTML());
+    ed.getHTML().then(setStaticHtml);
   }, []);
 
   const previewHtml = previewMode === "live" ? liveHtml : staticHtml;
@@ -86,7 +91,9 @@ export function PlaygroundWorkspace() {
       });
       setPreviewTab("pdf");
     } catch (err) {
-      setPdfError(err instanceof Error ? err.message : "Could not generate PDF");
+      setPdfError(
+        err instanceof Error ? err.message : "Could not generate PDF",
+      );
     } finally {
       setPdfBusy(false);
     }
@@ -100,7 +107,9 @@ export function PlaygroundWorkspace() {
     try {
       await ed.getPDF("document.pdf", true);
     } catch (err) {
-      setPdfError(err instanceof Error ? err.message : "Could not download PDF");
+      setPdfError(
+        err instanceof Error ? err.message : "Could not download PDF",
+      );
     } finally {
       setPdfBusy(false);
     }
@@ -108,45 +117,60 @@ export function PlaygroundWorkspace() {
 
   const exportDisabled = !editor;
 
-  const exportHtml = useCallback(() => {
+  const exportHtml = useCallback(async () => {
     const ed = editorRef.current;
     if (!ed) return;
-    downloadText("document.html", ed.getHTML(), "text/html;charset=utf-8");
+    downloadText(
+      "document.html",
+      await ed.getHTML(),
+      "text/html;charset=utf-8",
+    );
   }, []);
 
-  const exportMarkdown = useCallback(() => {
+  const exportMarkdown = useCallback(async () => {
     const ed = editorRef.current;
     if (!ed) return;
-    downloadText("document.md", ed.getMarkdown(), "text/markdown;charset=utf-8");
+    downloadText(
+      "document.md",
+      await ed.getMarkdown(),
+      "text/markdown;charset=utf-8",
+    );
   }, []);
 
-  const exportPlain = useCallback(() => {
+  const exportPlain = useCallback(async () => {
     const ed = editorRef.current;
     if (!ed) return;
-    downloadText("document.txt", docToText(ed.getJSON()), "text/plain;charset=utf-8");
+    downloadText(
+      "document.txt",
+      await docToText(ed.getJSON()),
+      "text/plain;charset=utf-8",
+    );
   }, []);
 
-  const onDividerMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const wrap = splitRef.current;
-    if (!wrap) return;
-    const rect = wrap.getBoundingClientRect();
-    const startX = e.clientX;
-    const startPct = leftPct;
+  const onDividerMouseDown = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const wrap = splitRef.current;
+      if (!wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      const startX = e.clientX;
+      const startPct = leftPct;
 
-    const onMove = (ev: MouseEvent) => {
-      const dx = ev.clientX - startX;
-      const deltaPct = (dx / rect.width) * 100;
-      const next = Math.min(72, Math.max(28, startPct + deltaPct));
-      setLeftPct(next);
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [leftPct]);
+      const onMove = (ev: MouseEvent) => {
+        const dx = ev.clientX - startX;
+        const deltaPct = (dx / rect.width) * 100;
+        const next = Math.min(72, Math.max(28, startPct + deltaPct));
+        setLeftPct(next);
+      };
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [leftPct],
+  );
 
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground">

@@ -40,7 +40,7 @@ export function PreviewPane({
       onValueChange={(v) => onTabChange(v as PreviewTab)}
       className="flex min-h-0 min-w-0 flex-1 flex-col gap-0"
     >
-      <Card className="rounded-none">
+      <Card className="rounded-none flex flex-col flex-1 min-h-0">
         <CardHeader className="gap-3 border-b">
           <div className="flex flex-col gap-1">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -65,7 +65,6 @@ export function PreviewPane({
             </TabsList>
           </CardAction>
         </CardHeader>
-
         <CardContent className="relative flex min-h-0 flex-1 flex-col gap-0 p-0">
           <TabsContent
             value="html"
@@ -106,7 +105,7 @@ export function PreviewPane({
               <iframe
                 title="PDF preview"
                 src={pdfUrl}
-                className="min-h-0 flex-1 border-0 bg-background"
+                className="min-h-0 flex-1 border border-destructive bg-background"
               />
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
