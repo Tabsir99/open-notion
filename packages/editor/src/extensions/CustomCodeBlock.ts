@@ -20,8 +20,6 @@ function buildDecorations(
   if (!highlighter) return DecorationSet.empty;
 
   const { h, darkTheme, lightTheme } = highlighter;
-
-  const isDark = document.documentElement.classList.contains("dark");
   const loaded = h.getLoadedLanguages();
   const decorations: Decoration[] = [];
 
@@ -33,24 +31,38 @@ function buildDecorations(
     if (!code.length || lang === "plaintext" || !loaded.includes(lang)) return;
 
     try {
-      const { tokens } = h.codeToTokens(code, {
+      const { tokens: lightTokens } = h.codeToTokens(code, {
         lang,
-        theme: isDark ? darkTheme : lightTheme,
+        theme: lightTheme,
+      });
+      const { tokens: darkTokens } = h.codeToTokens(code, {
+        lang,
+        theme: darkTheme,
       });
       let offset = pos + 1;
 
-      for (let i = 0; i < tokens.length; i++) {
-        for (const token of tokens[i]) {
+      for (let i = 0; i < lightTokens.length; i++) {
+        const lightLine = lightTokens[i] ?? [];
+        const darkLine = darkTokens[i] ?? [];
+        for (let j = 0; j < lightLine.length; j++) {
+          const lightTok = lightLine[j]!;
+          const darkTok = darkLine[j];
           const from = offset;
-          const to = from + token.content.length;
-          if (token.color) {
+          const to = from + lightTok.content.length;
+          const lightColor = lightTok.color;
+          const darkColor = darkTok?.color;
+
+          if (lightColor || darkColor) {
+            const styleParts: string[] = [];
+            if (lightColor) styleParts.push(`--shiki-light: ${lightColor}`);
+            if (darkColor) styleParts.push(`--shiki-dark: ${darkColor}`);
             decorations.push(
-              Decoration.inline(from, to, { style: `color: ${token.color}` }),
+              Decoration.inline(from, to, { style: styleParts.join("; ") }),
             );
           }
           offset = to;
         }
-        if (i < tokens.length - 1) offset += 1;
+        if (i < lightTokens.length - 1) offset += 1;
       }
     } catch {
       /* language parse error — render plain */
@@ -104,31 +116,6 @@ export const CustomCodeBlock = extendNode<"codeBlock">(
             decorations(state) {
               return this.getState(state);
             },
-          },
-          view: (view) => {
-            if (typeof document === "undefined") {
-              return {};
-            }
-
-            const root = document.documentElement;
-            let prevIsDark = root.classList.contains("dark");
-            const observer = new MutationObserver(() => {
-              const nextIsDark = root.classList.contains("dark");
-              if (nextIsDark === prevIsDark || view.isDestroyed) return;
-              prevIsDark = nextIsDark;
-              view.dispatch(view.state.tr.setMeta(shikiPluginKey, true));
-            });
-
-            observer.observe(root, {
-              attributes: true,
-              attributeFilter: ["class"],
-            });
-
-            return {
-              destroy() {
-                observer.disconnect();
-              },
-            };
           },
         }),
       ];

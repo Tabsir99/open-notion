@@ -86,14 +86,14 @@ Markdown / text / PDF **do not** use Shiki (fenced code or plain monospace respe
 ### `html.ts` — `docToHTML(doc, options?)` + `_renderBlockContent`
 
 - String output with **escaped** text and attributes.
-- **`HTML_DATA_ATTR`** in `htmlDataAttrs.ts` is the single source of truth for serialized `data-*` names and `data-type` values (shared with `script.ts`).
-- **Code blocks**: header (language + copy control markup). Pair with **`hydrationScript()`** from `script.ts` for clipboard copy in static HTML without React.
+- **`DA` / `DATA_TYPE`** in `htmlDataAttrs.ts` are the single source of truth for serialized `data-*` names and `data-type` values (consumed by `@open-notion/assets/hydration.js`).
+- **Code blocks**: header (language + copy control markup). Pair with **`@open-notion/assets/hydration.js`** for clipboard copy in static HTML without React.
 - **Tables**: optional `<colgroup>` from first-row `colwidth` metadata when present.
 - Same Shiki integration and dark-mode detection as the React path (via shared `_renderBlockContent`).
 
-### `script.ts` — `hydrationScript()`
+### `@open-notion/assets/hydration.js` — client hydration for static HTML
 
-- Injects a small **`click`** listener for code-block **copy** buttons. Uses the same attribute names as `htmlDataAttrs.ts` / `html.ts` so selectors and `getAttribute` stay aligned.
+- The hydration script lives in **`@open-notion/assets`** and wires up the **code-block copy** button behavior using `DA` from this package, so selectors and attribute names stay aligned.
 
 ### `markdown.ts` — `docToMarkdown(doc)`
 
@@ -167,7 +167,7 @@ export async function Preview({ doc }: { doc: DocContent }) {
 | Shared `jsonContent` types | One contract between editor and all outputs. |
 | Separate files per format | Clear boundaries; different escaping and host constraints (DOM vs string vs PDF). |
 | `DocRenderer` + `_renderBlockContent` | One HTML generation path for string export and React `dangerouslySetInnerHTML`. |
-| `HTML_DATA_ATTR` + `hydrationScript` | Serialized `data-*` names stay aligned with static copy-button behavior. |
+| `DA` (this pkg) + `@open-notion/assets/hydration.js` | Serialized `data-*` names stay aligned with static copy-button behavior. |
 | Shiki via `getHighlighter()` singleton | Pay setup cost once; graceful fallback when highlighter or language is unavailable. |
 | Optional React peer | HTML/Markdown/text usable in non-React servers and CLIs. |
 | PDF via react-pdf + shared styles | Deterministic layout; different model than HTML/CSS. |

@@ -1,7 +1,7 @@
 /* Shared rendered-doc styles. The editor's content element carries
  * `class="open-notion-doc"`, so these rules cover headings, lists,
  * blockquote, links, code, tables, callouts, emoji, etc. */
-@import "@open-notion/styles/open-notion-doc.css";
+@import "@open-notion/assets/doc.css";
 
 :root {
   --editor-selected: #21bab237;

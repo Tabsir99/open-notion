@@ -23,7 +23,6 @@ import type {
 import { getEmojiUrl } from "./utils";
 import { getHighlighter } from "./highlighter";
 import { DA, DATA_TYPE } from "./htmlDataAttrs";
-import { getHydrationScript } from "./script";
 
 const { type, codeBlock } = DA;
 
@@ -329,12 +328,40 @@ export async function _renderBlockContent(
 interface DocRendererOptions {
   className: string;
   Tag: HTMLElement["tagName"];
+  type?: "content" | "document";
+  title?: string;
 }
 
 export async function docToHTML(
   doc: DocContent,
-  { Tag = "div", className = "" }: Partial<DocRendererOptions> = {},
+  {
+    Tag = "div",
+    className = "",
+    type = "content",
+    title = "Document",
+  }: Partial<DocRendererOptions> = {},
 ): Promise<string> {
   const rendered = (await Promise.all(doc.content.map(renderBlock))).join("");
-  return `<${Tag} class="${className} open-notion-doc"> ${rendered} ${getHydrationScript()} </${Tag}>`;
+  const content = `<${Tag} class="${className} open-notion-doc"> ${rendered} </${Tag}>`;
+
+  if (type === "document") return content;
+
+  return html`<!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+        <meta name="color-scheme" content="light dark" />
+        <title>${title}</title>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@open-notion/assets@1.0.0/doc.css"
+        />
+      </head>
+      <body>
+        ${content}
+      </body>
+    </html>`;
 }

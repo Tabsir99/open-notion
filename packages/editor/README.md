@@ -10,7 +10,7 @@ A **Notion-style block editor** for React: TipTap v3 on ProseMirror, floating an
 |--------|-----------|
 | Editing UX (menus, node views, keyboard rules) | **This package** |
 | JSON schema for documents (`DocContent`, nodes, marks) | **`@open-notion/serializers`** (types + export pipelines) |
-| Shared document chrome CSS tokens | **`@open-notion/styles`** (dependency) |
+| Shared rendered-document CSS + hydration script | **`@open-notion/assets`** (dependency) |
 
 The editor **re-exports** `@open-notion/serializers` from `src/index.ts`, so apps can import types and serializer helpers from either the serializers package or the editor barrel.
 
@@ -40,7 +40,7 @@ After the editor exists, the hook **patches** the instance with export helpers:
 
 Renders **`EditorContent`** plus chrome: **`BlockSideMenu`**, **`BubbleMenu`**, **`SlashMenu`**, **`EmojiPicker`**, **`TableControls`**. Registers the container on **`editorStore`** so menus and drag logic share one **`TypedEditor`** and DOM anchor.
 
-Root **`editorProps.attributes.class`** includes **`open-notion-doc`** so the same semantic/class hooks serializers and **`@open-notion/styles`** expect stay aligned.
+Root **`editorProps.attributes.class`** includes **`open-notion-doc`** so the same semantic/class hooks serializers and the shared doc styles in **`@open-notion/assets`** stay aligned.
 
 ### `TypedEditor` (`types.ts`)
 
@@ -124,7 +124,7 @@ Build runs **tsup** (JS only; CSS loaded as empty in bundle) then **Tailwind CLI
 
 **Peers:** `@tiptap/core`, `@tiptap/pm`, `@tiptap/react`, `react`, `react-dom`, `@base-ui/react`, `@open-notion/serializers`.
 
-**Workspace:** `@open-notion/styles` for design alignment with the rest of the Open Notion stack.
+**Workspace:** `@open-notion/assets` for shared rendered-doc styles and hydration used by the rest of the Open Notion stack.
 
 ---
 

@@ -29,6 +29,7 @@
   "references": [
     { "path": "./packages/serializers" },
     { "path": "./packages/editor" },
-    { "path": "./apps/playground" }
+    { "path": "./apps/playground" },
+    { "path": "./packages/assets" }
   ]
 }
