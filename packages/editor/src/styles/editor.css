@@ -115,3 +115,15 @@
 .ProseMirror.resize-cursor {
   cursor: col-resize;
 }
+
+.tiptap hr {
+  height: 2rem;
+  border: none;
+  background: linear-gradient(
+    transparent calc(50% - 0.5px),
+    #ccc calc(50% - 0.5px),
+    #ccc calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  margin: 0;
+}

@@ -39,6 +39,19 @@ export async function getHighlighter(): Promise<{
   };
 }
 
+export function getCachedHighlighter(): {
+  h: AppHighlighter;
+  darkTheme: string;
+  lightTheme: string;
+} | null {
+  if (!_highlighter) return null;
+  return {
+    h: _highlighter,
+    darkTheme: darkPlus.name!,
+    lightTheme: lightPlus.name!,
+  };
+}
+
 export type AppHighlighterConfig = {
   h: AppHighlighter;
   darkTheme: string;

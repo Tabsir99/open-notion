@@ -37,7 +37,7 @@
     monospace;
 
   --ond-leading: 1.65;
-  --ond-block-gap: 1rem;
+  --ond-block-gap: 0.7rem;
 
   /* Base */
   color: var(--ond-text);
@@ -50,7 +50,6 @@
   -webkit-font-smoothing: antialiased;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
 
   display: flex;
   flex-direction: column;
@@ -79,12 +78,12 @@
 }
 
 .open-notion-doc h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem; /* ↑ was 1.5rem — more visual distance from h3 */
   line-height: 1.25;
 }
 
 .open-notion-doc h3 {
-  font-size: 1.25rem;
+  font-size: 1.15rem; /* ↓ was 1.25rem — widens gap between h2 and h3 */
   line-height: 1.3;
 }
 
@@ -165,10 +164,74 @@
 /* ── Code block ───────────────────────────────────────────────────── */
 
 .open-notion-doc [data-type="codeBlock"] {
-  padding: 1rem 1.25rem;
+  padding: 0;
   background: var(--ond-bg-code);
   border-radius: var(--ond-radius-md);
   border: 1px solid var(--ond-border);
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-code-block-header] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--ond-border);
+  background: color-mix(in srgb, currentColor 3.5%, transparent);
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-code-block-language] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ond-text-muted);
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-code-block-language] img {
+  width: 0.9rem;
+  height: 0.9rem;
+  opacity: 0.7;
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-copy-button] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--ond-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ond-text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-copy-button]:hover {
+  color: var(--ond-text);
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  border-color: var(--ond-border);
+}
+
+.open-notion-doc
+  [data-type="codeBlock"]
+  [data-copy-button][data-copied="true"] {
+  color: var(--ond-success);
+}
+
+.open-notion-doc [data-type="codeBlock"] [data-copy-button] img {
+  width: 0.85rem;
+  height: 0.85rem;
 }
 
 .open-notion-doc pre {
@@ -176,6 +239,8 @@
   font-size: 0.875em;
   line-height: 1.55;
   -webkit-overflow-scrolling: touch;
+  margin: 0;
+  padding: 1rem 1.25rem;
 }
 
 .open-notion-doc pre code {
@@ -197,6 +262,12 @@
 }
 
 /* ── Horizontal rule ──────────────────────────────────────────────── */
+
+.open-notion-doc hr + h1,
+.open-notion-doc hr + h2,
+.open-notion-doc hr + h3 {
+  margin-top: 0;
+}
 
 .open-notion-doc hr {
   height: 0;
@@ -273,7 +344,7 @@
 
 .open-notion-doc ul,
 .open-notion-doc ol {
-  padding-left: 1.6rem;
+  padding-left: 1.75rem; /* ↑ was 1.6rem — pulls bullets away from content edge */
 }
 
 .open-notion-doc li + li {

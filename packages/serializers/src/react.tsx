@@ -1,4 +1,11 @@
-import { type ReactNode, type CSSProperties, Fragment, type JSX } from "react";
+import {
+  type ReactNode,
+  type CSSProperties,
+  Fragment,
+  type JSX,
+  useCallback,
+  useState,
+} from "react";
 import type {
   DocContent,
   BlockNode,
@@ -22,6 +29,7 @@ import type {
   BlockAttrs,
 } from "./jsonContent";
 import { getEmojiUrl } from "./utils";
+import { getCachedHighlighter } from "./highlighter";
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
@@ -142,15 +150,91 @@ function renderBlockquote(node: BlockquoteNode, key: string): ReactNode {
   );
 }
 
-function renderCodeBlock(node: CodeBlockNode, key: string): ReactNode {
+function renderCodeWithHighlight(language: string, code: string): ReactNode {
+  const highlighter = getCachedHighlighter();
+  if (!highlighter || !code.length || language === "plaintext") return code;
+
+  const loaded = highlighter.h.getLoadedLanguages();
+  if (!loaded.includes(language)) return code;
+
+  try {
+    const isDark =
+      typeof document !== "undefined" &&
+      document.documentElement.classList.contains("dark");
+    const { tokens } = highlighter.h.codeToTokens(code, {
+      lang: language,
+      theme: isDark ? highlighter.darkTheme : highlighter.lightTheme,
+    });
+    return tokens.map((line, lineIndex) => (
+      <Fragment key={`line-${lineIndex}`}>
+        {line.map((token, tokenIndex) => (
+          <span
+            key={`token-${lineIndex}-${tokenIndex}`}
+            style={token.color ? { color: token.color } : undefined}
+          >
+            {token.content}
+          </span>
+        ))}
+        {lineIndex < tokens.length - 1 ? "\n" : null}
+      </Fragment>
+    ));
+  } catch {
+    return code;
+  }
+}
+
+function SerializedCodeBlock({
+  language,
+  code,
+}: {
+  language: string;
+  code: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const onCopy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [code]);
+
   return (
-    <div key={key} data-type="codeBlock">
+    <div data-type="codeBlock">
+      <div data-code-block-header>
+        <span data-code-block-language>
+          <img
+            src="https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/file-code-2.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          {language}
+        </span>
+        <button type="button" data-copy-button data-copied={copied} onClick={onCopy}>
+          <img
+            src={
+              copied
+                ? "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/check.svg"
+                : "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/copy.svg"
+            }
+            alt=""
+            aria-hidden="true"
+          />
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+      </div>
       <pre>
-        <code data-language={node.attrs.language}>
-          {(node.content ?? []).map((t) => t.text).join("")}
-        </code>
+        <code data-language={language}>{renderCodeWithHighlight(language, code)}</code>
       </pre>
     </div>
+  );
+}
+
+function renderCodeBlock(node: CodeBlockNode, key: string): ReactNode {
+  const language = node.attrs.language || "plaintext";
+  const code = (node.content ?? []).map((t) => t.text).join("");
+  return (
+    <SerializedCodeBlock key={key} language={language} code={code} />
   );
 }
 
