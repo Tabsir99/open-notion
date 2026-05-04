@@ -25,7 +25,6 @@ function buildDecorations(
   const loaded = h.getLoadedLanguages();
   const decorations: Decoration[] = [];
 
-  console.log(loaded);
   doc.descendants((node, pos) => {
     if (node.type.name !== typeName) return;
 
@@ -105,6 +104,31 @@ export const CustomCodeBlock = extendNode<"codeBlock">(
             decorations(state) {
               return this.getState(state);
             },
+          },
+          view: (view) => {
+            if (typeof document === "undefined") {
+              return {};
+            }
+
+            const root = document.documentElement;
+            let prevIsDark = root.classList.contains("dark");
+            const observer = new MutationObserver(() => {
+              const nextIsDark = root.classList.contains("dark");
+              if (nextIsDark === prevIsDark || view.isDestroyed) return;
+              prevIsDark = nextIsDark;
+              view.dispatch(view.state.tr.setMeta(shikiPluginKey, true));
+            });
+
+            observer.observe(root, {
+              attributes: true,
+              attributeFilter: ["class"],
+            });
+
+            return {
+              destroy() {
+                observer.disconnect();
+              },
+            };
           },
         }),
       ];

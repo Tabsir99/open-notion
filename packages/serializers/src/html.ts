@@ -21,6 +21,7 @@ import type {
   BlockAttrs,
 } from "./jsonContent";
 import { getEmojiUrl } from "./utils";
+import { getCachedHighlighter } from "./highlighter";
 
 // ── Escapers ──────────────────────────────────────────────────────────
 
@@ -128,8 +129,58 @@ function renderBlockquote(node: BlockquoteNode): string {
 }
 
 function renderCodeBlock(node: CodeBlockNode): string {
+  const copyIcon =
+    "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/copy.svg";
+  const checkIcon =
+    "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/check.svg";
+  const fileCodeIcon =
+    "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/file-code-2.svg";
+  const lang = node.attrs.language || "plaintext";
   const text = (node.content ?? []).map((t) => t.text).join("");
-  return `<div data-type="codeBlock"><pre><code${attr("data-language", node.attrs.language)}>${escapeText(text)}</code></pre></div>`;
+  const escapedText = escapeText(text);
+  const highlighter = getCachedHighlighter();
+  const loaded = highlighter?.h.getLoadedLanguages() ?? [];
+  let highlighted = escapedText;
+
+  if (highlighter && text.length && lang !== "plaintext" && loaded.includes(lang)) {
+    try {
+      const isDark =
+        typeof document !== "undefined" &&
+        document.documentElement.classList.contains("dark");
+      const { tokens } = highlighter.h.codeToTokens(text, {
+        lang,
+        theme: isDark ? highlighter.darkTheme : highlighter.lightTheme,
+      });
+      highlighted = tokens
+        .map((line) =>
+          line
+            .map((token) => {
+              const content = escapeText(token.content);
+              return token.color
+                ? `<span style="color:${token.color}">${content}</span>`
+                : content;
+            })
+            .join(""),
+        )
+        .join("\n");
+    } catch {
+      highlighted = escapedText;
+    }
+  }
+
+  return `<div data-type="codeBlock">
+<div data-code-block-header>
+<span data-code-block-language>
+<img src="${fileCodeIcon}" alt="" aria-hidden="true">
+${escapeText(lang)}
+</span>
+<button type="button" data-copy-button data-copy-text="${escapeAttr(text)}" onclick="(function(btn){var icon=btn.querySelector('[data-copy-icon]');var label=btn.querySelector('[data-copy-label]');var copyText=btn.getAttribute('data-copy-text')||'';navigator.clipboard.writeText(copyText).then(function(){btn.setAttribute('data-copied','true');if(icon)icon.setAttribute('src','${checkIcon}');if(label)label.textContent='Copied';setTimeout(function(){btn.setAttribute('data-copied','false');if(icon)icon.setAttribute('src','${copyIcon}');if(label)label.textContent='Copy';},2000);});})(this)">
+<img src="${copyIcon}" alt="" aria-hidden="true" data-copy-icon>
+<span data-copy-label>Copy</span>
+</button>
+</div>
+<pre><code${attr("data-language", lang)}>${highlighted}</code></pre>
+</div>`;
 }
 
 function renderImage(node: ImageNode): string {
@@ -269,6 +320,5 @@ export function docToHTML(
   doc: DocContent,
   { Tag = "div", className = "" }: Partial<DocRendererOptions> = {},
 ): string {
-  console.log(doc)
   return `<${Tag} class="${className} open-notion-doc"> ${doc.content.map(renderBlock).join("")} </${Tag}>`;
 }
