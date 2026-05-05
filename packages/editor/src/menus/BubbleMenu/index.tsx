@@ -21,6 +21,7 @@ import { TurnIntomenu } from "../TurnIntoMenu";
 import { ColorMenu } from "../ColorMenu";
 import { LinkInput } from "./LinkInput";
 import type { TypedEditor } from "../../types";
+import { NodeSelection } from "@tiptap/pm/state";
 
 // ── Data ──────────────────────────────────────────────────────────────
 
@@ -134,7 +135,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
         }
 
         // Don't show on node selections (images, etc.)
-        if (selection.constructor.name === "_NodeSelection") return false;
+        if (selection instanceof NodeSelection) return false;
 
         return true;
       }}
