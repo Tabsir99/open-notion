@@ -134,7 +134,7 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
         }
 
         // Don't show on node selections (images, etc.)
-        if (selection.constructor.name === "NodeSelection") return false;
+        if (selection.constructor.name === "_NodeSelection") return false;
 
         return true;
       }}

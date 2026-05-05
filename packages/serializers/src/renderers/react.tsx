@@ -1,7 +1,7 @@
 // ── Root component ────────────────────────────────────────────────────
 
 import type { JSX } from "react";
-import type { DocContent } from "./jsonContent";
+import type { DocContent } from "../jsonContent";
 import { _renderBlockContent } from "./html";
 
 export async function DocRenderer({

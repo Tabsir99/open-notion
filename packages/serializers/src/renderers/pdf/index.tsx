@@ -21,9 +21,9 @@ import type {
   TableRowNode,
   TableCellNode,
   TableHeaderNode,
-} from "./jsonContent";
+} from "../../jsonContent";
 import { pdfStyles } from "./pdfStyles";
-import { CDN } from "./utils";
+import { CDN } from "../../utils";
 
 // Register Twemoji as fallback for raw unicode emojis in text
 Font.registerEmojiSource({

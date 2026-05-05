@@ -96,7 +96,7 @@ export const ImageBlock = ({
 
   if (!src) {
     return (
-      <NodeViewWrapper as="div" className="w-full my-2">
+      <NodeViewWrapper as="div" className="w-full">
         <ImageEmptyState onSrcChange={(src) => updateAttributes({ src })} />
       </NodeViewWrapper>
     );
@@ -108,7 +108,7 @@ export const ImageBlock = ({
     <NodeViewWrapper
       as="div"
       className={cn(
-        "relative my-2 flex flex-col",
+        "relative flex flex-col",
         align === "center"
           ? "items-center"
           : align === "left"

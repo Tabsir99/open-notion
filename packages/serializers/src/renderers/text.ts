@@ -14,7 +14,7 @@ import type {
   TableNode,
   TableCellNode,
   TableHeaderNode,
-} from "./jsonContent";
+} from "../jsonContent";
 
 // ── Text helpers ──────────────────────────────────────────────────────
 

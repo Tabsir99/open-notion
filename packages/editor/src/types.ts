@@ -5,6 +5,7 @@ import type {
   MarkDefs,
   BlockAttrs,
   DocContent,
+  docToHTML,
 } from "@open-notion/serializers";
 
 // ── Inferred registries ───────────────────────────────────────────────
@@ -48,7 +49,7 @@ export type TypedEditor = Omit<
   isActive(attrs: Partial<BlockAttrs>): boolean;
   getAttributes<T extends EntityName>(name: T): AttrsFor<T>;
   getJSON(): DocContent;
-  getHTML: () => Promise<string>;
+  getHTML: (params?: Parameters<typeof docToHTML>["1"]) => Promise<string>;
   getMarkdown: () => Promise<string>;
   getPDF: (filename?: string, download?: boolean) => Promise<Blob>;
 };

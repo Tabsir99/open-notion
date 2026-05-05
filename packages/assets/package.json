@@ -10,15 +10,20 @@
   },
   "exports": {
     "./doc.css": {
-      "default": "./dist/open-notion-doc.css"
+      "style": "./src/doc.css",
+      "import": "./dist/doc.css"
     },
     "./hydration.js": {
-      "default": "./dist/open-notion-hydration.js"
+      "source": "./src/hydration.ts",
+      "import": "./dist/hydration.js"
+    },
+    "./package.json": {
+      "import": "./package.json"
     }
   },
   "files": [
-    "dist/open-notion-doc.css",
-    "dist/open-notion-hydration.js",
+    "dist/doc.css",
+    "dist/hydration.js",
     "README.md"
   ],
   "scripts": {

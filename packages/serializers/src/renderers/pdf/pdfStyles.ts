@@ -20,7 +20,7 @@ export const tokens = {
   leading: 1.55,
 
   // Spacing
-  blockGap: 12,
+  blockGap: 9,
 } as const;
 
 export const pdfStyles = StyleSheet.create({

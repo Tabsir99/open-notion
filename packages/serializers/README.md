@@ -52,11 +52,11 @@ Published **subpath exports** (see `package.json`):
 | Import | Module | Output |
 |--------|--------|--------|
 | `@open-notion/serializers` | `src/index.ts` | Re-exports all public APIs + types |
-| `@open-notion/serializers/react` | `react.tsx` | `DocRenderer` |
-| `@open-notion/serializers/html` | `html.ts` | `docToHTML` |
-| `@open-notion/serializers/markdown` | `markdown.ts` | `docToMarkdown` |
-| `@open-notion/serializers/text` | `text.ts` | `docToText` |
-| `@open-notion/serializers/pdf` | `pdf.tsx` | `docToPDF` |
+| `@open-notion/serializers/react` | `src/renderers/react.tsx` | `DocRenderer` |
+| `@open-notion/serializers/html` | `src/renderers/html/index.ts` | `docToHTML` |
+| `@open-notion/serializers/markdown` | `src/renderers/markdown.ts` | `docToMarkdown` |
+| `@open-notion/serializers/text` | `src/renderers/text.ts` | `docToText` |
+| `@open-notion/serializers/pdf` | `src/renderers/pdf/index.tsx` | `docToPDF` |
 
 Types are re-exported from `./jsonContent` via `export type *` on the root entry.
 
@@ -83,7 +83,7 @@ Markdown / text / PDF **do not** use Shiki (fenced code or plain monospace respe
 - Wrapper **`as`** (intrinsic tag) and **`className`** are optional; the root always includes CSS hook class **`open-notion-doc`** (pairs with shared doc styles in the wider design system).
 - **Marks**, **code blocks** (Shiki when warm), **tables**, and **task lists** all follow the same HTML string as `docToHTML` for the inner document.
 
-### `html.ts` — `docToHTML(doc, options?)` + `_renderBlockContent`
+### `renderers/html` — `docToHTML(doc, options?)` + `_renderBlockContent`
 
 - String output with **escaped** text and attributes.
 - **`DA` / `DATA_TYPE`** in `htmlDataAttrs.ts` are the single source of truth for serialized `data-*` names and `data-type` values (consumed by `@open-notion/assets/hydration.js`).

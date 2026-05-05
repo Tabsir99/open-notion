@@ -29,6 +29,9 @@ importers:
       '@fontsource-variable/geist':
         specifier: ^5.2.8
         version: 5.2.8
+      '@open-notion/assets':
+        specifier: workspace:*
+        version: link:../../packages/assets
       '@open-notion/editor':
         specifier: workspace:*
         version: link:../../packages/editor

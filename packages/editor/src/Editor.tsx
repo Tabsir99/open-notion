@@ -31,6 +31,7 @@ import {
   docToMarkdown,
   type DocContent,
 } from "@open-notion/serializers";
+import { version, name } from "@open-notion/assets/package.json";
 
 // ── Public types ──────────────────────────────────────────────────────
 
@@ -219,7 +220,14 @@ export function useOpenNotion({
   return useMemo(() => {
     if (!editor) return null;
 
-    editor.getHTML = async () => docToHTML(editor.getJSON());
+    const cdnBase = "https://cdn.jsdelivr.net/npm";
+
+    editor.getHTML = async (opt) =>
+      docToHTML(editor.getJSON(), {
+        stylesheetUrl: `${cdnBase}/${name}@${version}/doc.css`,
+        hydrationScriptUrl: `${cdnBase}/${name}@${version}/hydration.js`,
+        ...opt,
+      });
     editor.getMarkdown = async () => docToMarkdown(editor.getJSON());
     editor.getPDF = async (filename, download = true) =>
       import("@open-notion/serializers/pdf").then(({ docToPDF }) =>

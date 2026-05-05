@@ -7,7 +7,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
+    tailwindcss({ optimize: true }),
     visualizer({
       filename: "temp/bundle-stats.html",
       open: false,

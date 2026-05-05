@@ -16,29 +16,29 @@
       "import": "./dist/index.js"
     },
     "./react": {
-      "source": "./src/react.tsx",
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.js"
+      "source": "./src/renderers/react.tsx",
+      "types": "./dist/renderers/react.d.ts",
+      "import": "./dist/renderers/react.js"
     },
     "./html": {
-      "source": "./src/html.ts",
-      "types": "./dist/html.d.ts",
-      "import": "./dist/html.js"
+      "source": "./src/renderers/html/index.ts",
+      "types": "./dist/renderers/html/index.d.ts",
+      "import": "./dist/renderers/html/index.js"
     },
     "./markdown": {
-      "source": "./src/markdown.ts",
-      "types": "./dist/markdown.d.ts",
-      "import": "./dist/markdown.js"
+      "source": "./src/renderers/markdown.ts",
+      "types": "./dist/renderers/markdown.d.ts",
+      "import": "./dist/renderers/markdown.js"
     },
     "./text": {
-      "source": "./src/text.ts",
-      "types": "./dist/text.d.ts",
-      "import": "./dist/text.js"
+      "source": "./src/renderers/text.ts",
+      "types": "./dist/renderers/text.d.ts",
+      "import": "./dist/renderers/text.js"
     },
     "./pdf": {
-      "source": "./src/pdf.tsx",
-      "types": "./dist/pdf.d.ts",
-      "import": "./dist/pdf.js"
+      "source": "./src/renderers/pdf/index.tsx",
+      "types": "./dist/renderers/pdf/index.d.ts",
+      "import": "./dist/renderers/pdf/index.js"
     }
   },
   "main": "./dist/index.js",

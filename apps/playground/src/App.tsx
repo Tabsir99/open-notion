@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { PlaygroundWorkspace } from "./playground/PlaygroundWorkspace";
+import "@open-notion/assets/hydration.js";
 
 function LoadingFallback() {
   return (
@@ -15,7 +16,6 @@ function App() {
       <Suspense fallback={<LoadingFallback />}>
         <PlaygroundWorkspace />
       </Suspense>
-      {/* <FPSMonitor /> */}
     </>
   );
 }
