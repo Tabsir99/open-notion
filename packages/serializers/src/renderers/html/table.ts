@@ -4,7 +4,7 @@ import type {
   TableNode,
   TableRowNode,
 } from "../../jsonContent";
-import { DA, DATA_TYPE } from "./htmlDataAttrs";
+import { DA, DATA_TYPE } from "./dataAttr";
 import { _renderBlockContent } from "./renderers";
 import { attr, styleAttr } from "./_internal";
 

@@ -1,5 +1,5 @@
 import type { AnyMark, BlockAttrs, InlineNode } from "../../jsonContent";
-import { DA, DATA_TYPE } from "./htmlDataAttrs";
+import { DA, DATA_TYPE } from "./dataAttr";
 import { getEmojiUrl } from "../../utils";
 
 const { type } = DA;

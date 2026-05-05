@@ -2,11 +2,12 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
-    "hydration.js": "src/hydration.ts",
-    "doc.css": "src/doc.css",
+    hydration: "src/hydration.ts",
+    doc: "src/doc.css",
   },
-  format: ["iife"],
+  format: ["esm"],
   outDir: "dist",
+  outExtension: () => ({ js: ".js" }),
   bundle: true,
   minify: true,
   dts: false,

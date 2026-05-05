@@ -29,11 +29,9 @@
   "scripts": {
     "build": "tsup"
   },
-  "dependencies": {
-    "@open-notion/serializers": "workspace:*"
-  },
   "devDependencies": {
-    "tsup": "^8.0.0"
+    "tsup": "^8.0.0",
+    "@open-notion/serializers": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

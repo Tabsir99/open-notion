@@ -39,6 +39,10 @@
       "source": "./src/renderers/pdf/index.tsx",
       "types": "./dist/renderers/pdf/index.d.ts",
       "import": "./dist/renderers/pdf/index.js"
+    },
+    "./const": {
+      "source": "./src/renderers/html/dataAttr.ts",
+      "import": "./dist/renderers/html/dataAttr.js"
     }
   },
   "main": "./dist/index.js",

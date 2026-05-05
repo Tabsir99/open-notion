@@ -1,4 +1,4 @@
-import { DA } from "@open-notion/serializers";
+import { DA } from "@open-notion/serializers/const";
 
 const { codeBlock } = DA;
 

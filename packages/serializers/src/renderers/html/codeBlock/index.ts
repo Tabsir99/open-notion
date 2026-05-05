@@ -1,6 +1,6 @@
 import type { CodeBlockNode } from "../../../jsonContent";
 import { getHighlighter } from "../../../highlighter";
-import { DA, DATA_TYPE } from "../htmlDataAttrs";
+import { DA, DATA_TYPE } from "../dataAttr";
 import { attr, dataAttrFlag, escapeText } from "../_internal";
 import { getLanguageIconUrl } from "./languageIcons";
 

@@ -13,6 +13,7 @@ export default defineConfig({
   tsconfig: "tsconfig.json",
   sourcemap: true,
   clean: true,
+  minify: true,
   target: "es2022",
   external: [
     "react",

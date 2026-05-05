@@ -12,7 +12,7 @@ import type {
   TaskItemNode,
   TaskListNode,
 } from "../../jsonContent";
-import { DA, DATA_TYPE } from "./htmlDataAttrs";
+import { DA, DATA_TYPE } from "./dataAttr";
 import { getEmojiUrl } from "../../utils";
 import {
   attr,
