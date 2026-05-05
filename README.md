@@ -37,7 +37,7 @@ src/
 │       ├── blocks/          # React Components representing Rich Text Nodes (e.g., Image, Callout)
 │       ├── extensions/      # Tiptap Extensions configs schema definitions, commands, shortcuts
 │       ├── menus/           # Floating UIs: Popovers, Context Menus, Slash Commands, Toolbars
-│       └── styles/          # ProseMirror-specific aesthetic adjustments (`editor.css`)
+│       └── styles/          # ProseMirror-specific aesthetic adjustments (`index.css`)
 ```
 
 ---
@@ -120,7 +120,7 @@ Current testing strictly revolves around two pillars:
 
 **The Onboarding Rules to Stay Consistent:**
 1. **Never import from Radix.** If you use Shadcn, ensure base primitives come from `@base-ui/react/...` (e.g. `import { Menu as MenuPrimitive } from "@base-ui/react/menu"`).
-2. **Never inline color classes.** Use `bg-muted` over `bg-gray-100`. If ProseMirror internals require styles, modify them strictly in `editor.css` utilizing defined custom `var(--editor-text)` tokens. 
+2. **Never inline color classes.** Use `bg-muted` over `bg-gray-100`. If ProseMirror internals require styles, modify them strictly in `src/styles/index.css` utilizing defined custom tokens.
 3. **Follow the Tiptap v3 import rules.** Don't blindly pull things from `@tiptap/react`. Use designated subdirectories: `import { BubbleMenu } from "@tiptap/react/menus"`, `import { TaskList } from "@tiptap/extension-list"`. 
 4. **Keep Extensions headless.** Logic, data handling, and Tiptap API interactions belong in `/extensions/`. Do not pollute React rendering in `/blocks/` with pure transaction algorithms if possible.
 5. **Clean Memory Links.** Menus and overlays frequently inject manual DOM Listeners (`.addEventListener('pointerover')`). Every active listener attached to the editor container must return an exact un-mount function (`.removeEventListener`) to avoid memory leaks.

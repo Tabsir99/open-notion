@@ -1,3 +1,131 @@
-@source "../**/*.js";
+/* Shared rendered-doc styles. The editor's content element carries
+* `class="open-notion-doc"`, so these rules cover headings, lists,
+* blockquote, links, code, tables, callouts, emoji, etc. */
+@import "@open-notion/assets/doc.css";
 
-@import "./editor.css";
+@source "../**/*.{js,ts,tsx}";
+
+:root {
+  --editor-selected: #21bab237;
+}
+
+/* ── BlockContextMenu scrollbar ────────────────────────────────────── */
+
+.block-context-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.block-context-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.block-context-menu::-webkit-scrollbar-thumb {
+  background-color: #3f3f46;
+  border-radius: 4px;
+}
+
+/* ── ProseMirror surface ───────────────────────────────────────────── */
+
+.tiptap ::selection {
+  background: var(--editor-selected);
+}
+
+.ProseMirror-selectednode {
+  position: relative;
+}
+
+.ProseMirror-selectednode::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 6px;
+  background-color: rgba(35, 131, 226, 0.16);
+  outline: 3px solid rgba(35, 131, 226, 0.3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Placeholders ──────────────────────────────────────────────────── */
+
+.ProseMirror p.is-empty::before,
+.ProseMirror h1.is-empty::before,
+.ProseMirror h2.is-empty::before,
+.ProseMirror h3.is-empty::before,
+.ProseMirror [data-type="callout"] p.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--ond-text-muted);
+  pointer-events: none;
+  height: 0;
+}
+
+/* ── Code block — the CodeBlock NodeView paints chrome on the wrapper
+ * div, not on <pre>. Reset shared doc <pre> styles inside the editor. */
+
+.ProseMirror pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow-x: visible;
+}
+
+/* ── Tables — restore display:table so prosemirror-tables `colwidth`
+ * (rendered as <col width=...>) is honored. The shared doc styles set
+ * display:block for horizontal scroll, but our CustomTableView wraps
+ * the table in .table-container for that. ────────────────────────── */
+
+.ProseMirror .tableWrapper {
+  position: relative;
+  margin-top: 1.2em;
+  margin-bottom: 2em;
+}
+
+.ProseMirror div[data-type="tableContainer"] {
+  position: relative;
+  padding: 6px 6px 2px 6px;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  position: relative;
+}
+
+/* prosemirror-tables adds .selectedCell on the active cell */
+.ProseMirror table .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--editor-selected);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-top: -0.1em;
+  background-color: var(--ond-accent);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+.tiptap hr {
+  height: 2rem;
+  border: none;
+  background: linear-gradient(
+    transparent calc(50% - 0.5px),
+    #ccc calc(50% - 0.5px),
+    #ccc calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  margin: 0;
+}

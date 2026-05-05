@@ -111,10 +111,10 @@ Block node views (**`ImageBlock`**, **`CalloutView`**) with commands like **`set
 
 ## Styles
 
-- **`@open-notion/editor/styles`** — dev entry (`src/styles/dev.css`) vs built **`dist/styles/index.css`**.
-- **`@open-notion/editor/styles.css`** — single **compiled** Tailwind bundle for apps that do not process the package source.
+- **`@open-notion/editor/styles`** — source CSS entrypoint (`src/styles/index.css`). Use this when your app/tooling can consume package CSS (Vite, PostCSS, Tailwind v4, etc.).
+- **`@open-notion/editor/styles/compiled`** — precompiled CSS bundle (`dist/styles/compiled.css`) for apps that **do not** process the package source CSS.
 
-Build runs **tsup** (JS only; CSS loaded as empty in bundle) then **Tailwind CLI** on **`src/styles/_full.css`**, which imports **`editor.css`** and **`@source`** for tree scanning.
+Build runs **tsup** (JS only; CSS loaded as empty in bundle) then **Tailwind CLI** on **`src/styles/_full.css`**, which imports the main style entry and uses **`@source`** for tree scanning.
 
 **`sideEffects: ["**/*.css"]`** so bundlers do not drop CSS imports.
 
@@ -143,7 +143,7 @@ pnpm lint
 
 1. Install peers (TipTap 3.x, React 18+, Base UI).
 2. Serve **`emojis.json`** at **`emojiDataUrl`** (or override URL); wrap the editor tree in **`Suspense`** if using **`useOpenNotion`** / **`OpenNotion`** directly.
-3. Import **`@open-notion/editor/styles.css`** (or the split style export) alongside app layout.
+3. Import **`@open-notion/editor/styles`** (or **`@open-notion/editor/styles/compiled`** if you can’t process package CSS) alongside app layout.
 4. Optionally call **`getHighlighter()`** from serializers early so first paint of code blocks and static HTML export stay in sync with theme.
 
 ---

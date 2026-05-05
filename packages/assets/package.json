@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/assets",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Drop-in CSS and JS assets for content rendered by Open Notion serializers.",
   "license": "MIT",
   "repository": {
@@ -9,10 +9,7 @@
     "directory": "packages/assets"
   },
   "exports": {
-    "./doc.css": {
-      "style": "./src/doc.css",
-      "import": "./dist/doc.css"
-    },
+    "./doc.css": "./src/doc.css",
     "./hydration.js": {
       "source": "./src/hydration.ts",
       "import": "./dist/hydration.js"
@@ -22,8 +19,8 @@
     }
   },
   "files": [
-    "dist/doc.css",
-    "dist/hydration.js",
+    "dist",
+    "src/doc.css",
     "README.md"
   ],
   "scripts": {
