@@ -11,7 +11,7 @@ export default defineConfig({
     visualizer({
       filename: "temp/bundle-stats.html",
       open: false,
-      template: "list",
+      template: "treemap",
     }) as any,
   ],
   resolve: {

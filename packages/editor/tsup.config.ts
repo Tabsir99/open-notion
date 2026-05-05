@@ -1,5 +1,6 @@
 import { defineConfig } from "tsup";
 import { cpSync } from "fs";
+import { execSync } from "child_process";
 
 export default defineConfig({
   entry: ["src/index.ts"],
@@ -26,7 +27,11 @@ export default defineConfig({
   loader: {
     ".css": "empty",
   },
+
   onSuccess: async () => {
     cpSync("src/styles", "dist/styles", { recursive: true });
+    execSync(
+      "tailwindcss -i src/styles/_full.css -o dist/styles/compiled.css --minify && rm dist/styles/_full.css dist/styles/dev.css",
+    );
   },
 });

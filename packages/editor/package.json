@@ -23,6 +23,7 @@
   ],
   "files": [
     "dist",
+    "src/styles/dev.css",
     "README.md"
   ],
   "exports": {
@@ -35,10 +36,10 @@
       "style": "./src/styles/dev.css",
       "import": "./dist/styles/index.css"
     },
-    "./styles.css": "./dist/styles/compiled.css"
+    "./styles/compiled": "./dist/styles/compiled.css"
   },
   "scripts": {
-    "build": "tailwindcss -i src/styles/_full.css -o dist/styles/compiled.css --minify && tsup",
+    "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
