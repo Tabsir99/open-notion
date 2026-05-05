@@ -40,7 +40,12 @@ type AttrsFor<T extends EntityName> = T extends keyof NodeAttrs
 
 export type TypedEditor = Omit<
   Editor,
-  "isActive" | "getAttributes" | "getJSON" | "getHTML" | "getMarkdown"
+  | "isActive"
+  | "getAttributes"
+  | "getJSON"
+  | "getHTML"
+  | "getMarkdown"
+  | "getText"
 > & {
   isActive<T extends EntityName>(
     name: T,
@@ -52,6 +57,7 @@ export type TypedEditor = Omit<
   getHTML: (params?: Parameters<typeof docToHTML>["1"]) => Promise<string>;
   getMarkdown: () => Promise<string>;
   getPDF: (filename?: string, download?: boolean) => Promise<Blob>;
+  getText: () => Promise<string>;
 };
 
 export type TypedNodeViewProps<T extends NodeName> = Omit<

@@ -29,6 +29,7 @@ import type { TypedEditor } from "./types";
 import {
   docToHTML,
   docToMarkdown,
+  docToText,
   type DocContent,
 } from "@open-notion/serializers";
 import { version, name } from "@open-notion/assets/package.json";
@@ -237,6 +238,7 @@ export function useOpenNotion({
           ...(filename && { filename }),
         }),
       );
+    editor.getText = async () => docToText(editor.getJSON());
     return editor;
   }, [editor]);
 }

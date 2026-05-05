@@ -3,7 +3,6 @@ import {
   useOpenNotion,
   type TypedEditor,
 } from "@open-notion/editor";
-import { docToText } from "@open-notion/serializers";
 import {
   useCallback,
   useEffect,
@@ -142,7 +141,7 @@ export function PlaygroundWorkspace() {
     if (!ed) return;
     downloadText(
       "document.txt",
-      await docToText(ed.getJSON()),
+      await ed.getText(),
       "text/plain;charset=utf-8",
     );
   }, []);

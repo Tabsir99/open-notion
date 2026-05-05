@@ -3,7 +3,8 @@
 * blockquote, links, code, tables, callouts, emoji, etc. */
 @import "@open-notion/assets/doc.css";
 
-@source "../**/*.{js,ts,tsx}";
+@source "../../dist/index.js";
+@source "../**/*.{ts,tsx}";
 
 :root {
   --editor-selected: #21bab237;
