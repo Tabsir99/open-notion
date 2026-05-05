@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup";
+import { cpSync } from "fs";
 
 export default defineConfig({
   entry: ["src/index.ts"],
@@ -24,5 +25,8 @@ export default defineConfig({
   ],
   loader: {
     ".css": "empty",
+  },
+  onSuccess: async () => {
+    cpSync("src/styles", "dist/styles", { recursive: true });
   },
 });

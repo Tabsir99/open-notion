@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/editor",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "A production-grade Notion-style block editor built on Tiptap v3, Base UI, and shadcn.",
   "license": "MIT",
   "homepage": "https://github.com/tabsircg/open-notion",
@@ -38,26 +38,25 @@
     "./styles.css": "./dist/styles/compiled.css"
   },
   "scripts": {
-    "build": "tsup && pnpm build:css",
-    "build:css": "tailwindcss -i src/styles/_full.css -o dist/styles/compiled.css --minify && node -e \"require('fs').cpSync('src/styles', 'dist/styles', { recursive: true })\"",
+    "build": "tailwindcss -i src/styles/_full.css -o dist/styles/compiled.css --minify && tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
+    "@base-ui/react": "^1.3.0",
     "@open-notion/serializers": "workspace:*",
     "@tiptap/core": "^3.22.0",
     "@tiptap/pm": "^3.22.0",
     "@tiptap/react": "^3.22.0",
     "react": ">=18",
-    "react-dom": ">=18",
-    "@base-ui/react": "^1.3.0"
+    "react-dom": ">=18"
   },
   "dependencies": {
-    "@open-notion/assets": "workspace:*",
     "@devicon/react": "^0.0.3",
     "@floating-ui/dom": "^1.7.6",
+    "@open-notion/assets": "workspace:*",
     "@tiptap/extension-blockquote": "^3.22.3",
     "@tiptap/extension-bold": "^3.22.3",
     "@tiptap/extension-code": "^3.22.3",
@@ -89,15 +88,16 @@
   "devDependencies": {
     "@base-ui/react": "^1.3.0",
     "@open-notion/serializers": "workspace:*",
+    "@tailwindcss/cli": "^4.1.17",
+    "@types/node": "^25.6.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "shadcn": "^4.6.0",
+    "tailwindcss": "^4.1.17",
     "tsup": "^8.3.0",
-    "typescript": "^5.6.0",
-    "@tailwindcss/cli": "^4.1.17",
-    "tailwindcss": "^4.1.17"
+    "typescript": "^5.6.0"
   },
   "publishConfig": {
     "access": "public"

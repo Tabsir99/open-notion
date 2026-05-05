@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build && mkdir -p apps/playground/public/r && cp -r packages/editor/public/r/* apps/playground/public/r/",
+  "buildCommand": "pnpm build",
   "outputDirectory": "apps/playground/dist",
   "installCommand": "pnpm install",
   "framework": "vite"
