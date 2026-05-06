@@ -26,6 +26,7 @@ type ToolbarProps = {
   previewMode: PreviewMode;
   onPreviewModeChange: (mode: PreviewMode) => void;
   onRefreshStatic: () => void;
+  onGoToRandomPage: () => void;
   theme: "light" | "dark";
   onToggleTheme: () => void;
   exportDisabled: boolean;
@@ -42,6 +43,7 @@ export const PlaygroundToolbar = memo(
     previewMode,
     onPreviewModeChange,
     onRefreshStatic,
+    onGoToRandomPage,
     theme,
     onToggleTheme,
     exportDisabled,
@@ -148,6 +150,15 @@ export const PlaygroundToolbar = memo(
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onGoToRandomPage}
+          >
+            Random page
+          </Button>
 
           <div className="flex flex-1 min-[520px]:justify-end">
             <Button

@@ -49,7 +49,7 @@
 .ProseMirror [data-type="callout"] p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: var(--ond-text-muted);
+  color: var(--ond-text-faint);
   pointer-events: none;
   height: 0;
 }

@@ -106,7 +106,13 @@ export function useHoveredBlock({ menuRef, open }: Options) {
   }, [menuRef]);
 
   useEffect(() => {
-    const editorDom = editor?.view.dom;
+    let editorDom: HTMLElement | null = null;
+    try {
+      // In tiptap, `editor.view` throws if the view isn't mounted yet.
+      editorDom = editor?.view?.dom ?? null;
+    } catch {
+      editorDom = null;
+    }
     if (!editorDom || open) return;
 
     const handlePointerOver = (e: PointerEvent) => {

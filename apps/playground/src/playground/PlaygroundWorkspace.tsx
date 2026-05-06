@@ -9,7 +9,11 @@ import { useLivePreview } from "./hooks/useLivePreview";
 import { usePdfActions } from "./hooks/usePdfActions";
 import { PreviewPane, type PreviewTab } from "./PreviewPane";
 
-export function PlaygroundWorkspace() {
+export function PlaygroundWorkspace({
+  onGoToRandomPage,
+}: {
+  onGoToRandomPage: () => void;
+}) {
   const { theme, toggleTheme } = usePlaygroundTheme();
   const [previewTab, setPreviewTab] = useState<PreviewTab>("html");
 
@@ -47,6 +51,7 @@ export function PlaygroundWorkspace() {
         previewMode={previewMode}
         onPreviewModeChange={(m) => handlePreviewModeChange(editor, m)}
         onRefreshStatic={() => refreshStatic(editor)}
+        onGoToRandomPage={onGoToRandomPage}
         theme={theme}
         onToggleTheme={toggleTheme}
         exportDisabled={!editor}

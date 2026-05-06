@@ -106,6 +106,22 @@ export function useOpenNotion({
     });
   }, [emojiDataUrl, getEmojiUrl, storageKey]);
 
+  const { initContent, initCursor } = useMemo(() => {
+    const key = storageKey ?? false;
+    if (!key || !!content) return { initContent: content, initCursor: null };
+
+    try {
+      const savedContent = localStorage.getItem(`${key}-content`);
+      const savedCursor = localStorage.getItem(`${key}-cursor`);
+      return {
+        initContent: savedContent ? JSON.parse(savedContent) : "",
+        initCursor: savedCursor ? Number(savedCursor) : null,
+      };
+    } catch {
+      return { initContent: "", initCursor: null };
+    }
+  }, [storageKey, content]);
+
   const throttleUpdateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const throttleSelectionRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -114,7 +130,7 @@ export function useOpenNotion({
   const editor = useEditor(
     {
       extensions: defaultExtensions(getEmojiArray()),
-      content: content ?? "",
+      content: initContent,
       editable,
       autofocus,
       immediatelyRender: false,
@@ -166,19 +182,11 @@ export function useOpenNotion({
         ? {
             onCreate: (props) => {
               const ed = props.editor;
-              const key = getEditorConfig().storageKey;
-              if (key && content === undefined) {
-                const savedContent = localStorage.getItem(`${key}-content`);
-                const savedCursor = localStorage.getItem(`${key}-cursor`);
-                if (savedContent) {
-                  try {
-                    ed.commands.setContent(JSON.parse(savedContent));
-                    if (savedCursor) {
-                      ed.commands.setTextSelection(Number(savedCursor));
-                    }
-                  } catch {
-                    // Ignore malformed saved content
-                  }
+              if (initCursor !== null && Number.isFinite(initCursor)) {
+                try {
+                  ed.commands.setTextSelection(initCursor);
+                } catch {
+                  // Ignore invalid selection restore
                 }
               }
               if (autofocus) ed.commands.focus();
@@ -225,7 +233,11 @@ export const OpenNotionView = memo(
     return (
       <div
         ref={(el) => {
-          editorStore.set({ editor, editorContainer: el });
+          editorStore.set({
+            editor: el ? editor : null,
+            editorContainer: el,
+            hoveredBlock: el ? editorStore.get().hoveredBlock : null,
+          });
         }}
         className={cn(
           "relative w-full cursor-text",
