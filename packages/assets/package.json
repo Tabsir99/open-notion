@@ -10,6 +10,7 @@
   },
   "exports": {
     "./doc.css": "./src/doc.css",
+    "./emojis.json": "./src/emojis.json",
     "./hydration.js": {
       "source": "./src/hydration.ts",
       "import": "./dist/hydration.js"
@@ -21,6 +22,7 @@
   "files": [
     "dist",
     "src/doc.css",
+    "src/emojis.json",
     "README.md"
   ],
   "scripts": {

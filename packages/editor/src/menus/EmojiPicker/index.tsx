@@ -5,11 +5,14 @@ import { PluginKey } from "@tiptap/pm/state";
 import { EmojiExtension } from "../../extensions/Emoji";
 import { PopoverArrow } from "../../ui/PopoverArrow";
 import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
-import { editorStore } from "../../store";
+import { editorStore, useEditor } from "../../store";
+import { getEmojiArray } from "./createEmojipicker/data";
 
 const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
 
 export const EmojiPicker = memo(() => {
+  const editor = useEditor();
+
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -41,7 +44,6 @@ export const EmojiPicker = memo(() => {
   );
 
   useEffect(() => {
-    const { editor } = editorStore.get();
     if (!editor) return;
 
     const plugin = Suggestion({
@@ -50,6 +52,7 @@ export const EmojiPicker = memo(() => {
       pluginKey: EmojiSuggestionPluginKey,
       render: () => ({
         onStart(props) {
+          if (!getEmojiArray().length) return;
           setAnchor(props.clientRect?.() ?? null);
           setOpen(true);
           rangeRef.current = props.range;
@@ -79,7 +82,7 @@ export const EmojiPicker = memo(() => {
     return () => {
       editor.unregisterPlugin(EmojiSuggestionPluginKey);
     };
-  }, []);
+  }, [editor]);
 
   const virtualAnchor = useMemo(
     () => ({ getBoundingClientRect: () => anchor ?? new DOMRect() }),

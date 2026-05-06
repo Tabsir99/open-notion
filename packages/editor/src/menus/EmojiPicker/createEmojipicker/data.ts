@@ -31,28 +31,31 @@ let _cache: EmojiData | null = null;
 let _emojiArray: Emoji[] | null = null;
 let _inflight: Promise<EmojiData> | null = null;
 
+const _setEmojiData = (data: EmojiData) => {
+  _cache = data;
+  _emojiArray = Object.values(data.emojis);
+  return data;
+};
 /**
  * Configurable URL — point this to wherever emoji.json is served.
  * Defaults to /emoji.json (public folder in Next.js / Vite).
  */
 
-export async function loadEmojiData(url: string): Promise<EmojiData> {
-  if (_cache) return _cache;
+export async function loadEmojiData(loader: string | EmojiData) {
   if (!_inflight) {
-    _inflight = fetch(url)
+    if (typeof loader !== "string") {
+      _setEmojiData(loader);
+      return;
+    }
+
+    _inflight = fetch(loader)
       .then((r) => r.json())
-      .then((data) => {
-        _cache = data;
-        _emojiArray = Object.values(data.emojis);
-        return data;
-      })
+      .then(_setEmojiData)
       .catch((err) => {
         _inflight = null;
         throw err;
       });
   }
-
-  return _inflight;
 }
 
 /** Synchronous access — only valid after loadEmojiData() has resolved */

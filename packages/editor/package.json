@@ -74,6 +74,7 @@
     "@tiptap/extension-text-align": "^3.22.3",
     "@tiptap/extension-text-style": "^3.22.3",
     "@tiptap/extension-underline": "^3.22.3",
+    "@tiptap/extension-unique-id": "^3.22.5",
     "@tiptap/extensions": "^3.22.3",
     "@tiptap/suggestion": "^3.22.3",
     "class-variance-authority": "^0.7.1",

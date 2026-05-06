@@ -5,7 +5,7 @@ import { Popover, PopoverContent } from "../../ui/popover";
 import { Separator } from "../../ui/separator";
 import { cn } from "../../lib/utils";
 import { filterSlashItems, groupItems, type SlashItem } from "./slash-items";
-import { editorStore } from "../../store";
+import { editorStore, useEditor } from "../../store";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 
@@ -37,9 +37,9 @@ export function SlashMenu() {
   const listRef = useRef<HTMLDivElement>(null);
 
   const close = () => setState((s) => ({ ...s, open: false }));
+  const editor = useEditor();
 
   useEffect(() => {
-    const { editor } = editorStore.get();
     if (!editor) return;
 
     const plugin = Suggestion<SlashItem, SlashItem>({
@@ -111,7 +111,7 @@ export function SlashMenu() {
     return () => {
       editor.unregisterPlugin(PLUGIN_KEY);
     };
-  }, []);
+  }, [editor]);
 
   useLayoutEffect(() => {
     listRef.current

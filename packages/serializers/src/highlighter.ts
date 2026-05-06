@@ -5,15 +5,15 @@ import darkPlus from "@shikijs/themes/dark-plus";
 
 type AppHighlighter = Awaited<ReturnType<typeof createHighlighterCore>>;
 
-let _highlighter: AppHighlighter | null = null;
+let _promise: Promise<AppHighlighter> | null = null;
 
 export async function getHighlighter(): Promise<{
   h: AppHighlighter;
   darkTheme: string;
   lightTheme: string;
 }> {
-  if (!_highlighter)
-    _highlighter = await createHighlighterCore({
+  if (!_promise)
+    _promise = createHighlighterCore({
       themes: [lightPlus, darkPlus],
       langs: [
         import("@shikijs/langs/typescript"),
@@ -33,7 +33,7 @@ export async function getHighlighter(): Promise<{
     });
 
   return {
-    h: _highlighter,
+    h: await _promise,
     darkTheme: darkPlus.name!,
     lightTheme: lightPlus.name!,
   };

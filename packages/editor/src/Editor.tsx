@@ -1,4 +1,4 @@
-import { Suspense, use, useMemo } from "react";
+import { useState, useEffect, useMemo, memo, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import type { Editor, Extensions } from "@tiptap/core";
 import { BlockSideMenu } from "./menus/BlockSideMenu";
@@ -38,46 +38,48 @@ import { version, name } from "@open-notion/assets/package.json";
 
 export interface OpenNotionOptions {
   /** Initial document content (JSON). Only applied on mount. */
-  content?: DocContent;
+  content: DocContent;
 
   /** Called whenever the document changes. */
-  onChange?: (json: DocContent) => void;
+  onChange: (json: DocContent) => void;
 
   /** Called once when the editor is ready. */
-  onReady?: (editor: Editor) => void;
+  onReady: (editor: Editor) => void;
 
   /** Called when the selection changes. */
-  onSelectionChange?: (editor: Editor) => void;
+  onSelectionChange: (editor: Editor) => void;
 
   /**
    * Enable localStorage persistence. Pass a string to use as the key prefix.
    * Leave undefined (default) for no persistence.
    */
-  storageKey?: string;
+  storageKey: string;
 
   /** URL of the emoji data JSON. Defaults to "/emojis.json". */
-  emojiDataUrl?: string;
+  emojiDataUrl: string;
 
   /** Override how emoji image URLs are generated. */
-  getEmojiUrl?: GetEmojiUrl;
+  getEmojiUrl: GetEmojiUrl;
 
   /** Placeholder text (string or per-node function). */
-  placeholder?: PlaceholderConfig;
+  placeholder: PlaceholderConfig;
 
   /** Whether the editor is editable. Default: true. */
-  editable?: boolean;
+  editable: boolean;
 
   /** Whether to autofocus the editor on mount. Default: true. */
-  autofocus?: boolean;
+  autofocus: boolean;
+
+  throttle: number;
 
   /** Modify the slash menu items. */
-  slashItems?: (defaults: SlashItem[]) => SlashItem[];
+  slashItems: (defaults: SlashItem[]) => SlashItem[];
 
   /** Modify the "Turn into" menu items. */
-  turnIntoItems?: (defaults: TurnIntoItem[]) => TurnIntoItem[];
+  turnIntoItems: (defaults: TurnIntoItem[]) => TurnIntoItem[];
 
   /** Modify the extension list. */
-  extensions?: (defaults: Extensions) => Extensions;
+  extensions: (defaults: Extensions) => Extensions;
 }
 
 export interface OpenNotionViewProps {
@@ -88,17 +90,20 @@ export interface OpenNotionViewProps {
   className?: string | undefined;
 }
 
-// ── Emoji data loader (Suspense boundary) ─────────────────────────────
+// ── Emoji data loader ─────────────────────────────
 
-const dataPromiseCache = new Map<string, Promise<void>>();
+function useEmojiData(url?: string) {
+  const [ready, setReady] = useState(false);
 
-function useEmojiData(url: string) {
-  let promise = dataPromiseCache.get(url);
-  if (!promise) {
-    promise = loadEmojiData(url).then(() => void 0);
-    dataPromiseCache.set(url, promise);
-  }
-  use(promise);
+  useEffect(() => {
+    if (url) loadEmojiData(url).then(() => setReady(true));
+    else
+      import("@open-notion/assets/emojis.json")
+        .then((m) => loadEmojiData(m.default))
+        .then(() => setReady(true));
+  }, [url]);
+
+  return ready;
 }
 
 // ── The hook: creates and manages the editor ─────────────────────────
@@ -109,17 +114,20 @@ export function useOpenNotion({
   onReady,
   onSelectionChange,
   storageKey,
-  emojiDataUrl = "/emojis.json",
+  emojiDataUrl,
   getEmojiUrl,
   placeholder,
   editable = true,
   autofocus = true,
+  throttle = 0,
   slashItems,
   turnIntoItems,
   extensions,
-}: OpenNotionOptions = {}): TypedEditor | null {
+}: Partial<OpenNotionOptions> = {}): TypedEditor | null {
   // Wait for emoji data. Requires Suspense boundary from caller.
-  useEmojiData(emojiDataUrl);
+  // const ready = useEmojiData(emojiDataUrl);
+
+  const ready = useEmojiData(emojiDataUrl);
 
   // Set config once, before any menu renders.
   useMemo(() => {
@@ -131,7 +139,6 @@ export function useOpenNotion({
         ? turnIntoItems(defaultTurnIntoItems)
         : defaultTurnIntoItems,
       extensionsFn: extensions,
-      emojiDataUrl,
       getEmojiUrl: getEmojiUrl ?? twemojiGetEmojiUrl,
       storageKey: storageKey ?? false,
       placeholder,
@@ -146,77 +153,90 @@ export function useOpenNotion({
     placeholder,
   ]);
 
-  const emojis = getEmojiArray();
+  const throttleUpdateRef = useRef<NodeJS.Timeout | null>(null);
+  const throttleSelectionRef = useRef<NodeJS.Timeout | null>(null);
 
-  const editor = useEditor({
-    extensions: (() => {
-      const defaults = defaultExtensions(emojis);
-      return extensions ? extensions(defaults) : defaults;
-    })(),
-    content: content ?? "",
-    editable,
-    autofocus,
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        class: cn("outline-none m-0 open-notion-doc"),
+  const editor = useEditor(
+    {
+      extensions: (() => {
+        const defaults = defaultExtensions(getEmojiArray());
+        return extensions ? extensions(defaults) : defaults;
+      })(),
+      content: content ?? "",
+      editable,
+      autofocus,
+      immediatelyRender: false,
+      shouldRerenderOnTransaction: false,
+
+      editorProps: {
+        attributes: {
+          class: cn("outline-none m-0 open-notion-doc"),
+        },
       },
-    },
 
-    ...(storageKey || onselectionchange
-      ? {
-          onSelectionUpdate: (props) => {
-            const ed = props.editor;
-            const key = getEditorConfig().storageKey;
-            if (key) {
-              const { from } = ed.state.selection;
-              localStorage.setItem(`${key}-cursor`, String(from));
-            }
-            onSelectionChange?.(ed);
-          },
-        }
-      : {}),
+      ...(storageKey || onSelectionChange
+        ? {
+            onSelectionUpdate: (props) => {
+              if (throttleSelectionRef.current) return;
+              throttleSelectionRef.current = setTimeout(() => {
+                const ed = props.editor;
+                const key = getEditorConfig().storageKey;
+                if (key) {
+                  const { from } = ed.state.selection;
+                  localStorage.setItem(`${key}-cursor`, String(from));
+                }
+                onSelectionChange?.(ed);
+                throttleSelectionRef.current = null;
+              }, throttle);
+            },
+          }
+        : {}),
 
-    ...(onChange || storageKey
-      ? {
-          onUpdate: (props) => {
-            const ed = props.editor;
-            const json = ed.getJSON();
-            const key = getEditorConfig().storageKey;
+      ...(onChange || storageKey
+        ? {
+            onUpdate: (props) => {
+              if (throttleUpdateRef.current) return;
+              throttleUpdateRef.current = setTimeout(() => {
+                const ed = props.editor;
+                const json = ed.getJSON();
+                const key = getEditorConfig().storageKey;
+                if (key) {
+                  localStorage.setItem(`${key}-content`, JSON.stringify(json));
+                }
+                onChange?.(json as DocContent);
+                throttleUpdateRef.current = null;
+              }, throttle);
+            },
+          }
+        : {}),
 
-            if (key) {
-              localStorage.setItem(`${key}-content`, JSON.stringify(json));
-            }
-            onChange?.(json as DocContent);
-          },
-        }
-      : {}),
-
-    ...(content || onReady || storageKey
-      ? {
-          onCreate: (props) => {
-            const ed = props.editor;
-            const key = getEditorConfig().storageKey;
-            if (key && content === undefined) {
-              const savedContent = localStorage.getItem(`${key}-content`);
-              const savedCursor = localStorage.getItem(`${key}-cursor`);
-              if (savedContent) {
-                try {
-                  ed.commands.setContent(JSON.parse(savedContent));
-                  if (savedCursor) {
-                    ed.commands.setTextSelection(Number(savedCursor));
+      ...(content || onReady || storageKey
+        ? {
+            onCreate: (props) => {
+              const ed = props.editor;
+              const key = getEditorConfig().storageKey;
+              if (key && content === undefined) {
+                const savedContent = localStorage.getItem(`${key}-content`);
+                const savedCursor = localStorage.getItem(`${key}-cursor`);
+                if (savedContent) {
+                  try {
+                    ed.commands.setContent(JSON.parse(savedContent));
+                    if (savedCursor) {
+                      ed.commands.setTextSelection(Number(savedCursor));
+                    }
+                  } catch {
+                    // Ignore malformed saved content
                   }
-                } catch {
-                  // Ignore malformed saved content
                 }
               }
-            }
-            if (autofocus) ed.commands.focus();
-            onReady?.(ed);
-          },
-        }
-      : {}),
-  }) as unknown as TypedEditor | null;
+              if (autofocus) ed.commands.focus();
+              onReady?.(ed);
+            },
+          }
+        : {}),
+    },
+    [ready],
+  ) as unknown as TypedEditor | null;
 
   return useMemo(() => {
     if (!editor) return null;
@@ -225,18 +245,21 @@ export function useOpenNotion({
 
     editor.getHTML = async (opt) =>
       docToHTML(editor.getJSON(), {
-        stylesheetUrl: `${cdnBase}/${name}@${version}/doc.css`,
-        hydrationScriptUrl: `${cdnBase}/${name}@${version}/hydration.js`,
+        ...(opt?.type === "document"
+          ? {
+              stylesheetUrl:
+                opt.stylesheetUrl ?? `${cdnBase}/${name}@${version}/doc.css`,
+              hydrationScriptUrl:
+                opt.hydrationScriptUrl ??
+                `${cdnBase}/${name}@${version}/hydration.js`,
+            }
+          : {}),
         ...opt,
       });
     editor.getMarkdown = async () => docToMarkdown(editor.getJSON());
-    editor.getPDF = async (filename, download = true) =>
+    editor.getPDF = async () =>
       import("@open-notion/serializers/pdf").then(({ docToPDF }) =>
-        docToPDF(editor.getJSON(), {
-          download,
-          interactiveCheckboxes: true,
-          ...(filename && { filename }),
-        }),
+        docToPDF(editor.getJSON()),
       );
     editor.getText = async () => docToText(editor.getJSON());
     return editor;
@@ -245,73 +268,42 @@ export function useOpenNotion({
 
 // ── The view: renders the editor UI ──────────────────────────────────
 
-export function OpenNotionView({
-  editor,
-  className = "pl-20 pr-10 py-16",
-}: OpenNotionViewProps) {
-  if (!editor) return null;
+export const OpenNotionView = memo(
+  ({ editor, className = "pl-20 pr-10 py-16" }: OpenNotionViewProps) => {
+    if (!editor) return null;
 
-  return (
-    <div
-      ref={(el) => {
-        editorStore.set({ editor, editorContainer: el });
-      }}
-      className={cn(
-        "relative w-full cursor-text",
-        "max-w-4xl min-h-svh",
-        className,
-      )}
-      onClick={() => editor.chain().focus().run()}
-    >
-      <BlockSideMenu />
-      <BubbleMenu editor={editor} />
-      <SlashMenu />
-      <EmojiPicker />
-      <TableControls />
+    return (
+      <div
+        ref={(el) => {
+          editorStore.set({ editor, editorContainer: el });
+        }}
+        className={cn(
+          "relative w-full cursor-text",
+          "max-w-4xl min-h-svh",
+          className,
+        )}
+        onClick={() => editor.chain().focus().run()}
+      >
+        <BlockSideMenu />
+        <BubbleMenu editor={editor} />
+        <SlashMenu />
+        <EmojiPicker />
+        <TableControls />
 
-      <EditorContent editor={editor as any} />
-    </div>
-  );
-}
+        <EditorContent editor={editor as any} />
+      </div>
+    );
+  },
+);
 
 // ── Suspense wrapper (so consumers don't need to remember) ──────────
 
 export interface OpenNotionProps extends OpenNotionOptions {
   /** Class applied to the container. */
   className?: string;
-
-  /** Fallback shown while emoji data loads. */
-  fallback?: React.ReactNode;
 }
 
-/**
- * Convenience wrapper for the common case: one editor, no parent-level
- * control, use defaults. For imperative control or custom layouts, use
- * `useOpenNotion()` + `<OpenNotionView>` directly.
- */
-export function OpenNotion({
-  className,
-  fallback = (
-    <div className="w-dvw h-dvh flex justify-center items-center text-4xl">
-      Loading...
-    </div>
-  ),
-  ...options
-}: OpenNotionProps) {
-  return (
-    <Suspense fallback={fallback}>
-      <OpenNotionInner options={options} className={className} />
-    </Suspense>
-  );
-}
-
-function OpenNotionInner({
-  options,
-  className,
-}: {
-  options: OpenNotionOptions;
-  className?: string | undefined;
-}) {
+export const OpenNotion = memo(({ className, ...options }: OpenNotionProps) => {
   const editor = useOpenNotion(options);
   return <OpenNotionView editor={editor} className={className} />;
-}
+});

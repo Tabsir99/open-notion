@@ -56,7 +56,7 @@ export interface EditorConfig {
   slashItems: SlashItem[];
   turnIntoItems: TurnIntoItem[];
   extensionsFn?: ((defaults: Extensions) => Extensions) | undefined;
-  emojiDataUrl: string;
+  // emojiDataUrl: string;
   getEmojiUrl: GetEmojiUrl;
   storageKey: string | false;
   placeholder?: PlaceholderConfig | undefined;
@@ -71,7 +71,7 @@ export interface EditorConfig {
 let config: EditorConfig = {
   slashItems: [],
   turnIntoItems: [],
-  emojiDataUrl: "/emoji.json",
+  // emojiDataUrl: "/emoji.json",
   getEmojiUrl: defaultGetEmojiUrl,
   storageKey: false,
 };

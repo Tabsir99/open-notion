@@ -36,6 +36,7 @@ import {
   UndoRedo,
   Placeholder,
 } from "@tiptap/extensions";
+import UniqueId from "@tiptap/extension-unique-id";
 
 // --- Custom ---
 import { EmojiExtension } from "./Emoji";
@@ -160,6 +161,8 @@ export const defaultExtensions = (
     TrailingNode,
     UndoRedo,
     CharacterCount,
+
+    UniqueId.configure({ types: ["heading"] }),
 
     // Custom
     EmojiExtension.configure({ emojis }),

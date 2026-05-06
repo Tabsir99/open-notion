@@ -61,7 +61,7 @@ export type ParagraphNode = {
 };
 export type HeadingNode = {
   type: "heading";
-  attrs: BlockAttrs & { level: 1 | 2 | 3 };
+  attrs: BlockAttrs & { level: 1 | 2 | 3; id: string };
   content?: InlineNode[];
 };
 export type BlockquoteNode = {
@@ -87,7 +87,7 @@ export type ImageNode = {
 };
 export type CalloutNode = {
   type: "callout";
-  attrs: BlockAttrs & { emoji: string, hexId: string };
+  attrs: BlockAttrs & { emoji: string; hexId: string };
   content?: BlockNode[];
 };
 
@@ -152,3 +152,10 @@ export type AnyEditorNode =
 // ── Root ──────────────────────────────────────────────────────────────
 
 export type DocContent = { type: "doc"; content: BlockNode[] };
+
+export type TocItem = {
+  id: string;
+  level: 1 | 2 | 3;
+  text: string;
+  children: TocItem[];
+};

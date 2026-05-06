@@ -60,18 +60,6 @@
   height: 0;
 }
 
-/* ── Code block — the CodeBlock NodeView paints chrome on the wrapper
- * div, not on <pre>. Reset shared doc <pre> styles inside the editor. */
-
-.ProseMirror pre {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  overflow-x: visible;
-}
-
 /* ── Tables — restore display:table so prosemirror-tables `colwidth`
  * (rendered as <col width=...>) is honored. The shared doc styles set
  * display:block for horizontal scroll, but our CustomTableView wraps

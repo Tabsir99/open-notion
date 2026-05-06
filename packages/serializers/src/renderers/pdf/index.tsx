@@ -333,20 +333,5 @@ const DocComponent = ({
 
 export const docToPDF = async (
   doc: DocContent,
-  options: DocToPDFOptions & { filename?: string; download?: boolean } = {},
-): Promise<Blob> => {
-  const { filename = "document.pdf", download = true, ...opts } = options;
-
-  const blob = await pdf(<DocComponent doc={doc} opts={opts} />).toBlob();
-
-  if (download && typeof window !== "undefined") {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  return blob;
-};
+  options: DocToPDFOptions = {},
+): Promise<Blob> => pdf(<DocComponent doc={doc} opts={options} />).toBlob();

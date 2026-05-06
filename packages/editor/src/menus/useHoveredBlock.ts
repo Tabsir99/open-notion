@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { editorStore, type NodeBlock } from "../store";
+import { editorStore, useEditor, type NodeBlock } from "../store";
 
 interface Options {
   menuRef: React.RefObject<HTMLDivElement | null>;
@@ -25,6 +25,7 @@ const computeTop = (blockEl: HTMLElement, menu: HTMLElement): number => {
 };
 
 export function useHoveredBlock({ menuRef, open }: Options) {
+  const editor = useEditor();
   const hasPositionedRef = useRef(false);
 
   const getBlockFromEl = useCallback(
@@ -105,7 +106,7 @@ export function useHoveredBlock({ menuRef, open }: Options) {
   }, [menuRef]);
 
   useEffect(() => {
-    const editorDom = editorStore.get().editor?.view.dom;
+    const editorDom = editor?.view.dom;
     if (!editorDom || open) return;
 
     const handlePointerOver = (e: PointerEvent) => {
@@ -136,6 +137,7 @@ export function useHoveredBlock({ menuRef, open }: Options) {
     clearActive,
     menuRef,
     open,
+    editor,
   ]);
 
   return { clearActive };

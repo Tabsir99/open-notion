@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo, type MouseEvent } from "react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { cn } from "../../lib/utils";
 import { Check, ChevronDown, Copy } from "lucide-react";
@@ -10,118 +10,101 @@ import {
 } from "../../ui/dropdown-menu";
 import { languages, getLanguage } from "./languages";
 import { shikiPluginKey } from "../../extensions/CustomCodeBlock";
-import { Button } from "../../ui/button";
 import type { TypedNodeViewProps } from "../../types";
 
-export const CodeBlockView = ({
-  node,
-  updateAttributes,
-  editor,
-}: TypedNodeViewProps<"codeBlock">) => {
-  const [copied, setCopied] = useState(false);
-  const language = node.attrs.language || "plaintext";
+export const CodeBlockView = memo(
+  ({ node, updateAttributes, editor }: TypedNodeViewProps<"codeBlock">) => {
+    const [copied, setCopied] = useState(false);
+    const language = node.attrs.language || "plaintext";
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(node.textContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [node.textContent]);
+    const handleCopy = useCallback(
+      async (e: MouseEvent) => {
+        e.stopPropagation();
+        await navigator.clipboard.writeText(node.textContent);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      [node.textContent],
+    );
 
-  const handleLanguageChange = useCallback(
-    (lang: string) => {
-      updateAttributes({ language: lang });
-      if (!editor.view.isDestroyed) {
-        editor.view.dispatch(
-          editor.view.state.tr.setMeta(shikiPluginKey, true),
-        );
-      }
-    },
-    [editor, updateAttributes],
-  );
+    const handleLanguageChange = useCallback(
+      (lang: string) => {
+        updateAttributes({ language: lang });
+        if (!editor.view.isDestroyed) {
+          editor.view.dispatch(
+            editor.view.state.tr.setMeta(shikiPluginKey, true),
+          );
+        }
+      },
+      [editor, updateAttributes],
+    );
 
-  const Lang = getLanguage(language);
+    const Lang = getLanguage(language);
 
-  return (
-    <NodeViewWrapper
-      as="div"
-      className="rounded-md overflow-hidden border border-(--ond-border)/50 shadow-sm"
-    >
-      <div
-        className="flex items-center justify-between px-3.5 py-2 border-b border-(--ond-border)/50"
-        contentEditable={false}
+    return (
+      <NodeViewWrapper
+        ref={(el: HTMLElement | null) => {
+          el?.parentElement?.setAttribute("data-type", "codeBlock");
+        }}
+        as="div"
       >
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger className="group flex items-center gap-1.5 rounded-md p-2 -ml-1.5 text-xs font-medium tracking-widest uppercase text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all outline-none">
-            <Lang.icon size={18} />
-            {Lang.name}
-            <ChevronDown className="size-3 opacity-70 group-hover:opacity-100 transition-all group-data-popup-open:rotate-180" />{" "}
-          </DropdownMenuTrigger>
+        <div data-code-block-header contentEditable={false}>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger
+              data-code-block-language
+              className="cursor-pointer hover:bg-foreground/5 p-1.5 rounded-md"
+            >
+              <Lang.icon size={14} />
+              {Lang.name}
+              <ChevronDown size={10} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="max-h-64 overflow-y-auto min-w-40 p-1 rounded-lg"
+            >
+              {languages.map((lang) => (
+                <DropdownMenuItem
+                  key={lang.id}
+                  className={cn(
+                    "flex items-center gap-2.5 h-7 px-2 py-5 rounded-md text-sm font-medium",
+                    language === lang.id && "bg-foreground/5 text-foreground",
+                  )}
+                  onClick={() => handleLanguageChange(lang.id)}
+                >
+                  <span className="flex items-center size-3.5 opacity-70">
+                    <lang.icon />
+                  </span>
+                  <span className="flex-1">{lang.name}</span>
+                  {language === lang.id && (
+                    <Check className="size-3 text-muted-foreground/50" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <DropdownMenuContent
-            align="start"
-            className="max-h-64 overflow-y-auto min-w-40 p-1 rounded-lg"
+          <button
+            data-copy-button
+            data-copied={copied}
+            onClick={handleCopy}
+            type="button"
           >
-            {languages.map((lang) => (
-              <DropdownMenuItem
-                key={lang.id}
-                className={cn(
-                  "flex items-center gap-2.5 h-7 px-2 py-5 rounded-md text-sm font-medium",
-                  language === lang.id && "bg-foreground/5 text-foreground",
-                )}
-                onClick={() => handleLanguageChange(lang.id)}
-              >
-                <span className="flex items-center size-3.5 opacity-70">
-                  <lang.icon />
-                </span>
-                <span className="flex-1">{lang.name}</span>
-                {language === lang.id && (
-                  <Check className="size-3 text-muted-foreground/50" />
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            {copied ? <Check size={12} /> : <Copy size={12} />}
+            <span>{copied ? "Copied" : "Copy"}</span>
+          </button>
+        </div>
 
-        {/* Copy button */}
-        <Button
-          onClick={handleCopy}
-          className={cn(
-            "group flex items-center gap-1.5",
-            "text-[11px] font-medium tracking-wide",
-            "text-muted-foreground hover:text-foreground",
-            "hover:bg-[hsl(var(--foreground)/0.05)]",
-            // Copied state
-            copied && "text-emerald-500 hover:text-emerald-500",
-          )}
-          variant="ghost"
-          type="button"
-        >
-          <span
-            className={cn(
-              "transition-all duration-200",
-              copied ? "scale-110" : "scale-100 group-hover:scale-105",
-            )}
-          >
-            {copied ? (
-              <Check className="size-3.5" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
-          </span>
-          <span className="uppercase tracking-wider">
-            {copied ? "Copied" : "Copy"}
-          </span>
-        </Button>
-      </div>
-
-      <pre spellCheck="false" className="m-0 bg-transparent p-0">
-        <code>
-          <NodeViewContent
-            as="div"
-            className="block px-5 py-4 text-[13px] leading-relaxed font-mono overflow-x-auto"
-          />
-        </code>
-      </pre>
-    </NodeViewWrapper>
-  );
-};
+        <pre spellCheck="false">
+          <code>
+            <NodeViewContent as="div" />
+          </code>
+        </pre>
+      </NodeViewWrapper>
+    );
+  },
+  (p, n) => {
+    if (p.node.attrs.language !== n.node.attrs.language) return false;
+    if (p.node.textContent !== n.node.textContent) return false;
+    return true;
+  },
+);

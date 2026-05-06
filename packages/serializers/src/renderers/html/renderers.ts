@@ -36,7 +36,7 @@ function renderParagraph(node: ParagraphNode): string {
 
 function renderHeading(node: HeadingNode): string {
   const tag = `h${node.attrs.level}`;
-  return `<${tag}${styleAttr(blockAttrsToStyle(node.attrs))}>${renderInlineContent(node.content)}</${tag}>`;
+  return `<${tag}${styleAttr(blockAttrsToStyle(node.attrs))}${attr("id", node.attrs.id)}>${renderInlineContent(node.content)}</${tag}>`;
 }
 
 async function renderBlockquote(node: BlockquoteNode): Promise<string> {
@@ -67,6 +67,7 @@ function renderImage(node: ImageNode): string {
 }
 
 async function renderCallout(node: CalloutNode): Promise<string> {
+  console.log(node);
   const emoji = `<span${attr(DATA_TYPE, type.emoji)}><img${attr(
     "src",
     getEmojiUrl(node.attrs.hexId, "callout-icon"),

@@ -20,8 +20,8 @@ export function CalloutView({
     (el: HTMLDivElement | null) => {
       if (!el) return;
       const api = createEmojiPicker(el, {
-        onSelect: (emoji: string) => {
-          updateAttributes({ emoji });
+        onSelect: (emoji, id) => {
+          updateAttributes({ emoji, hexId: id });
           setPickerOpen(false);
           editor.commands.focus();
         },
@@ -38,8 +38,8 @@ export function CalloutView({
 
   return (
     <NodeViewWrapper
-      data-type="callout"
       as="div"
+      data-type="callout"
       style={{
         backgroundColor,
         color: textColor,
@@ -50,21 +50,20 @@ export function CalloutView({
       <button
         ref={btnRef}
         type="button"
+        data-type="emoji"
         contentEditable={false}
-        suppressContentEditableWarning
-        className="shrink-0 size-7 flex items-center justify-center text-lg leading-none rounded-[4px] cursor-pointer select-none border-0 bg-transparent transition-colors duration-150 hover:bg-muted"
         onClick={() => setPickerOpen((p) => !p)}
+        className="hover:bg-foreground/5 rounded-md cursor-pointer"
       >
         <img
-          src={getEmojiUrl(emoji?.id!, "callout-icon")}
+          src={getEmojiUrl(emoji?.id ?? "1f4ac", "callout-icon")}
           draggable="false"
           loading="lazy"
           alt={`${emoji?.name} emoji`}
-          className="w-5 h-5"
         />
       </button>
 
-      <NodeViewContent />
+      <NodeViewContent as="div" />
 
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverContent

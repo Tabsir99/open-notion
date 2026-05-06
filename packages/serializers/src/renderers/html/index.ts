@@ -1,16 +1,24 @@
 import type { DocContent } from "../../jsonContent";
 import { renderDocContent, _renderBlockContent } from "./renderers";
-
 const html = String.raw;
 
-interface DocRendererOptions {
+interface BaseRendererOptions {
   className: string;
   Tag: HTMLElement["tagName"];
-  type: "content" | "document";
+}
+
+interface ContentRendererOptions extends BaseRendererOptions {
+  type: "content";
+}
+
+interface DocumentRendererOptions extends BaseRendererOptions {
+  type: "document";
   title: string;
   stylesheetUrl: string | null;
   hydrationScriptUrl: string | null;
 }
+
+export type DocToHTMLOpt = ContentRendererOptions | DocumentRendererOptions;
 
 /**
  * Renders a {@link DocContent} node into an HTML string.
@@ -20,29 +28,20 @@ interface DocRendererOptions {
  */
 export async function docToHTML(
   doc: DocContent,
-  {
-    Tag = "div",
-    className = "",
-    type = "content",
-    title = "Document",
-    /**
-     * URL for the document stylesheet.
-     * Defaults to the jsDelivr CDN build for the current package version.
-     * Pass `null` to omit the stylesheet entirely.
-     */
-    stylesheetUrl,
-    /**
-     * URL for the hydration script (enables copy buttons in static HTML).
-     * Omitted by default — only needed for fully static, no-bundler output.
-     * Pass `null` to explicitly omit.
-     */
-    hydrationScriptUrl,
-  }: Partial<DocRendererOptions> = {},
+  options: Partial<DocToHTMLOpt> = {},
 ): Promise<string> {
+  const { Tag = "div", className = "", type = "content" } = options;
+
   const rendered = await renderDocContent(doc);
   const content = `<${Tag} class="${className} open-notion-doc">${rendered}</${Tag}>`;
 
   if (type === "content") return content;
+
+  const {
+    title = "Document",
+    stylesheetUrl,
+    hydrationScriptUrl,
+  } = options as Partial<DocumentRendererOptions>;
 
   const stylesheet = stylesheetUrl
     ? `<link rel="stylesheet" href="${stylesheetUrl}" />`

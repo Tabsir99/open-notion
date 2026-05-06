@@ -8,7 +8,7 @@ const STORAGE_KEY = "recentEmojis";
 const MAX_RECENT = 18;
 
 export interface EmojiPickerOptions {
-  onSelect: (shortcode: string) => void;
+  onSelect: (shortcode: string, id: string) => void;
 }
 
 export type EmojiPickerApi = ReturnType<typeof createEmojiPicker>;
@@ -61,7 +61,7 @@ export function createEmojiPicker(
     if (!shortcode) return;
     recent = [id, ...recent.filter((x) => x !== id)].slice(0, MAX_RECENT);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recent));
-    options.onSelect(shortcode);
+    options.onSelect(shortcode, id);
   };
 
   const selectFocused = () => {

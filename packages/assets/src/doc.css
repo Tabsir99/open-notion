@@ -9,8 +9,8 @@
 .open-notion-doc {
   color-scheme: light dark;
   --ond-text: light-dark(#0d1117, #eaecf1);
-  --ond-text-muted: color-mix(in srgb, var(--ond-text) 50%, transparent);
-  --ond-text-faint: color-mix(in srgb, var(--ond-text) 30%, transparent);
+  --ond-text-muted: color-mix(in srgb, var(--ond-text) 70%, transparent);
+  --ond-text-faint: color-mix(in srgb, var(--ond-text) 40%, transparent);
   --ond-bg: transparent;
   --ond-bg-subtle: color-mix(in srgb, currentColor 6%, transparent);
   --ond-bg-code: color-mix(in srgb, currentColor 6%, transparent);
@@ -37,7 +37,7 @@
     monospace;
 
   --ond-leading: 1.65;
-  --ond-block-gap: 0.7rem;
+  --ond-block-gap: 0.8rem;
 
   /* Base */
   color: var(--ond-text);
@@ -105,7 +105,7 @@
 }
 
 .open-notion-doc h1 + * {
-  margin-top: 0.8rem;
+  margin-top: 1.2rem;
 }
 .open-notion-doc h2 + * {
   margin-top: 0.65rem;
@@ -114,9 +114,41 @@
   margin-top: 0.5rem;
 }
 
-.open-notion-doc h1 + h2,
 .open-notion-doc h2 + h3 {
   margin-top: 0.4rem;
+}
+
+/* Paragraph ─────────────────────────────────────────────────── */
+
+/* ── Live editor node spacing ── */
+.open-notion-doc
+  :is(
+    p,
+    ul,
+    ol,
+    [data-type="codeBlock"],
+    [data-type="callout"],
+    div[data-type="tableContainer"],
+    div:has(> [data-type="callout"])
+  )
+  + :is(
+    [data-type="codeBlock"],
+    [data-type="callout"],
+    div[data-type="tableContainer"],
+    div:has(> [data-type="callout"])
+  ) {
+  margin-top: 1.25rem;
+}
+
+.open-notion-doc
+  :is(
+    [data-type="codeBlock"],
+    [data-type="callout"],
+    div[data-type="tableContainer"],
+    div:has(> [data-type="callout"])
+  )
+  + :is(p, ul, ol) {
+  margin-top: 1.25rem;
 }
 
 /* ── Inline marks ─────────────────────────────────────────────────── */
@@ -132,7 +164,8 @@
 .open-notion-doc s {
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
-  text-decoration-color: var(--ond-text-muted);
+  text-decoration-color: var(--ond-text-faint);
+  color: var(--ond-text-faint);
 }
 
 .open-notion-doc u {
@@ -301,27 +334,25 @@
 .open-notion-doc [data-type="callout"] {
   display: flex;
   gap: 0.75rem;
-  align-items: flex-start;
+  align-items: center;
   padding: 1rem 1.25rem;
   background: var(--ond-bg-callout);
   border: 1px solid var(--ond-border);
   border-radius: var(--ond-radius-md);
 }
 
-.open-notion-doc [data-type="callout"] > [data-type="emoji"] {
+.open-notion-doc [data-type="callout"] [data-type="emoji"] {
   flex-shrink: 0;
-  font-size: 1.25rem;
-  line-height: 1.4;
 }
 
 /* Callout emoji images are larger than inline emoji */
-.open-notion-doc [data-type="callout"] > [data-type="emoji"] img {
+.open-notion-doc [data-type="callout"] [data-type="emoji"] img {
   width: 1.35rem;
   height: 1.35rem;
-  vertical-align: middle;
+  vertical-align: -0.3em;
 }
 
-.open-notion-doc [data-type="callout"] > div {
+.open-notion-doc [data-type="callout"] div {
   flex: 1;
   min-width: 0;
 }
