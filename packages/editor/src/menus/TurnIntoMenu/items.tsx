@@ -15,10 +15,7 @@ import { TextSelection } from "@tiptap/pm/state";
 import { editorStore } from "../../store";
 import type { TurnIntoItem } from "../../config";
 
-// Re-export the type for convenience
 export type { TurnIntoItem };
-
-// ── Runner ────────────────────────────────────────────────────────────
 
 export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
   const editor = editorStore.get().editor;
@@ -27,7 +24,6 @@ export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
   const node = editor.state.doc.nodeAt(blockPos);
   if (!node) return;
 
-  // Fast path: textblock → textblock/wrap. Tiptap preserves inline content.
   if (node.isTextblock) {
     item
       .applyChain(
@@ -40,7 +36,6 @@ export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
     return;
   }
 
-  // Non-textblock (table, custom nodeview, atom): replace the whole node.
   editor
     .chain()
     .focus()
@@ -53,8 +48,6 @@ export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
     })
     .run();
 };
-
-// ── Default items ─────────────────────────────────────────────────────
 
 export const defaultTurnIntoItems: TurnIntoItem[] = [
   {

@@ -10,8 +10,6 @@
   --editor-selected: #21bab237;
 }
 
-/* ── BlockContextMenu scrollbar ────────────────────────────────────── */
-
 .block-context-menu::-webkit-scrollbar {
   width: 4px;
 }
@@ -24,8 +22,6 @@
   background-color: #3f3f46;
   border-radius: 4px;
 }
-
-/* ── ProseMirror surface ───────────────────────────────────────────── */
 
 .tiptap ::selection {
   background: var(--editor-selected);
@@ -46,8 +42,6 @@
   z-index: 1;
 }
 
-/* ── Placeholders ──────────────────────────────────────────────────── */
-
 .ProseMirror p.is-empty::before,
 .ProseMirror h1.is-empty::before,
 .ProseMirror h2.is-empty::before,
@@ -60,10 +54,10 @@
   height: 0;
 }
 
-/* ── Tables — restore display:table so prosemirror-tables `colwidth`
+/* Tables: restore display:table so prosemirror-tables `colwidth`
  * (rendered as <col width=...>) is honored. The shared doc styles set
  * display:block for horizontal scroll, but our CustomTableView wraps
- * the table in .table-container for that. ────────────────────────── */
+ * the table in .table-container for that. */
 
 .ProseMirror .tableWrapper {
   position: relative;

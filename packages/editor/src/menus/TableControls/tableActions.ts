@@ -1,8 +1,6 @@
 import type { Node as PMNode } from "@tiptap/pm/model";
 import { editorStore } from "../../store";
 
-// ── DOM Helpers ────────────────────────────────────────────────────────
-
 export function getColIndex(cellDom: HTMLElement): number {
   const row = cellDom.closest("tr");
   if (!row) return 0;
@@ -16,8 +14,6 @@ export function getRowIndex(cellDom: HTMLElement): number {
   const row = cellDom.closest("tr");
   return row ? rows.indexOf(row) : 0;
 }
-
-// ── ProseMirror Position Helpers ───────────────────────────────────────
 
 export function getTablePos(cellDomPos: number): number | null {
   try {
@@ -33,8 +29,6 @@ export function getTablePos(cellDomPos: number): number | null {
   }
   return null;
 }
-
-// ── Table Node Rebuild Helpers ─────────────────────────────────────────
 
 function rebuildTable(
   tableNode: PMNode,
@@ -59,8 +53,6 @@ function applyTableReplace(tablePos: number, newTable: PMNode): void {
     state.tr.replaceWith(tablePos, tablePos + tableNode.nodeSize, newTable),
   );
 }
-
-// ── Column Operations ──────────────────────────────────────────────────
 
 export function moveColumn(tablePos: number, from: number, to: number): void {
   const { editor } = editorStore.get();
@@ -113,8 +105,6 @@ export function clearColumn(tablePos: number, colIdx: number): void {
   clearCells(tablePos, (_, col) => col === colIdx);
 }
 
-// ── Row Operations ─────────────────────────────────────────────────────
-
 export function moveRow(tablePos: number, from: number, to: number): void {
   const { editor } = editorStore.get();
   if (from === to || !editor) return;
@@ -137,8 +127,6 @@ export function moveRow(tablePos: number, from: number, to: number): void {
 export function clearRow(tablePos: number, rowIdx: number): void {
   clearCells(tablePos, (row) => row === rowIdx);
 }
-
-// ── Background Color Operations ────────────────────────────────────────
 
 function setCellBgs(
   tablePos: number,
@@ -184,8 +172,6 @@ export function setCellBgsForRow(
 ): void {
   setCellBgs(tablePos, (row) => row === rowIdx, color);
 }
-
-// ── Cell Operations ────────────────────────────────────────────────────
 
 export function clearCell(
   tablePos: number,

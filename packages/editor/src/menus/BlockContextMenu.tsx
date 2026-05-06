@@ -28,8 +28,6 @@ import { FontSizeMenu } from "./FontSizeMenu";
 import { FontFamilyMenu } from "./FontFamilyMenu";
 import { editorStore, useEditorStore } from "../store";
 
-// ── Data ──────────────────────────────────────────────────────────────
-
 interface MenuItem {
   id: string;
   label: string;
@@ -61,8 +59,6 @@ const bottomItems: MenuItem[] = [
     shortcut: "Ctrl+Shift+M",
   },
 ];
-
-// ── Component ─────────────────────────────────────────────────────────
 
 type Dropdownprops = Omit<Parameters<typeof DropdownMenu>[0], "children">;
 interface BlockContextMenuProps extends Dropdownprops {

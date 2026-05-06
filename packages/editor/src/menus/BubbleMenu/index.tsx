@@ -23,8 +23,6 @@ import { LinkInput } from "./LinkInput";
 import type { TypedEditor } from "../../types";
 import { NodeSelection } from "@tiptap/pm/state";
 
-// ── Data ──────────────────────────────────────────────────────────────
-
 interface MarkItem {
   id: string;
   label: string;
@@ -71,8 +69,6 @@ const markItems: MarkItem[] = [
   },
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────
-
 /** Returns a human-readable label for the current block type */
 function getActiveBlockLabel(editor: TypedEditor): string {
   if (editor.isActive("heading", { level: 1 })) return "Heading 1";
@@ -80,8 +76,6 @@ function getActiveBlockLabel(editor: TypedEditor): string {
   if (editor.isActive("heading", { level: 3 })) return "Heading 3";
   return "Text";
 }
-
-// ── Component ─────────────────────────────────────────────────────────
 
 interface BubbleToolbarProps {
   editor: TypedEditor;
@@ -150,16 +144,13 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
         )}
       >
         {linkMode !== "closed" ? (
-          /* ── Inline link input mode ────────────────────────── */
           <LinkInput
             editor={editor}
             onClose={handleLinkInputClose}
             isExiting={linkMode === "closing"}
           />
         ) : (
-          /* ── Normal toolbar mode ───────────────────────────── */
           <>
-            {/* Formatting mark toggles */}
             {markItems.map(({ id, label, icon: Icon, markName, command }) => (
               <Toggle
                 key={id}
@@ -176,7 +167,6 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
-            {/* Link button */}
             <Toggle
               size="sm"
               pressed={activeStates.link}
@@ -188,7 +178,6 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
             <Separator orientation="vertical" className="mx-0.5 h-6" />
 
-            {/* Color menu */}
             <ColorMenu
               container={container}
               onSelectText={(c) =>

@@ -14,8 +14,6 @@ import { memo } from "react";
 import { runTurnInto } from "./TurnIntoMenu/items";
 import { getEditorConfig } from "../config";
 
-// ── Component ─────────────────────────────────────────────────────────
-
 interface TurnIntoSubmenuProps {
   blockPos: number | (() => number);
   children: React.ReactNode;

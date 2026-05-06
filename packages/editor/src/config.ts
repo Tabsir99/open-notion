@@ -5,8 +5,6 @@ import type { TypedEditor } from "./types";
 import { getEmojiUrl as defaultGetEmojiUrl } from "./menus/EmojiPicker/getEmojiUrl";
 import type { DocContent } from "@open-notion/serializers";
 
-// ── Public item shapes ────────────────────────────────────────────────
-
 export interface SlashItem {
   id: string;
   title: string;
@@ -46,11 +44,7 @@ export type GetEmojiUrl = (
   source: "inline" | "picker-grid" | "category-bar" | "callout-icon",
 ) => string;
 
-// ── Placeholder type ──────────────────────────────────────────────────
-
 export type PlaceholderConfig = string | ((node: PMNode) => string);
-
-// ── Full resolved config ──────────────────────────────────────────────
 
 export interface EditorConfig {
   slashItems: SlashItem[];
@@ -63,8 +57,6 @@ export interface EditorConfig {
   initialContent?: DocContent | undefined;
   onChange?: ((json: DocContent) => void) | undefined;
 }
-
-// ── Module-level singleton ────────────────────────────────────────────
 
 // NOTE: defaults are set lazily via setEditorConfig on <Editor> mount.
 // These are placeholder values — never read before the editor mounts.

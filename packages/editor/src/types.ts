@@ -1,4 +1,3 @@
-// editor.ts
 import type { Editor, NodeViewProps } from "@tiptap/react";
 import type {
   AnyEditorNode,
@@ -8,13 +7,9 @@ import type {
 } from "@open-notion/serializers";
 import type { DocToHTMLOpt } from "@open-notion/serializers/html";
 
-// ── Inferred registries ───────────────────────────────────────────────
-
 export type NodeName = AnyEditorNode["type"];
 export type MarkName = keyof MarkDefs;
 export type EntityName = NodeName | MarkName;
-
-// ── Inferred attr maps ────────────────────────────────────────────────
 
 export type NodeAttrs = {
   [T in AnyEditorNode as T["type"]]: T extends { attrs?: infer A }
@@ -28,15 +23,11 @@ export type MarkAttrs = {
     : Record<string, never>;
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────
-
 type AttrsFor<T extends EntityName> = T extends keyof NodeAttrs
   ? NodeAttrs[T]
   : T extends keyof MarkAttrs
     ? MarkAttrs[T]
     : never;
-
-// ── Typed editor ──────────────────────────────────────────────────────
 
 export type TypedEditor = Omit<
   Editor,

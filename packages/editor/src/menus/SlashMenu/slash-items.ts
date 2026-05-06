@@ -16,13 +16,9 @@ import {
 } from "lucide-react";
 import { getEditorConfig, type SlashItem } from "../../config";
 
-// Re-export the type for convenience
 export type { SlashItem };
 
-// ── Default items ─────────────────────────────────────────────────────
-
 export const defaultSlashItems: SlashItem[] = [
-  // ── Basic ─────────────────────────────────────
   {
     id: "text",
     title: "Text",
@@ -60,7 +56,6 @@ export const defaultSlashItems: SlashItem[] = [
       editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run(),
   },
 
-  // ── Lists ─────────────────────────────────────
   {
     id: "bullet-list",
     title: "Bullet List",
@@ -89,7 +84,6 @@ export const defaultSlashItems: SlashItem[] = [
       editor.chain().focus().deleteRange(range).toggleTaskList().run(),
   },
 
-  // ── Media ─────────────────────────────────────
   {
     id: "image",
     title: "Image",
@@ -105,7 +99,6 @@ export const defaultSlashItems: SlashItem[] = [
         .run(),
   },
 
-  // ── Advanced ──────────────────────────────────
   {
     id: "quote",
     title: "Quote",
@@ -171,8 +164,6 @@ export const defaultSlashItems: SlashItem[] = [
         .run(),
   },
 ];
-
-// ── Helpers ───────────────────────────────────────────────────────────
 
 /** Filter items by query, matching title */
 export function filterSlashItems(query: string): SlashItem[] {

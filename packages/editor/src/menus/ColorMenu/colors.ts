@@ -1,5 +1,3 @@
-// ── Notion-style color definitions ────────────────────────────────────
-
 export interface ColorOption {
   id: string;
   label: string;
@@ -7,8 +5,6 @@ export interface ColorOption {
   value: string;
   swatch?: string;
 }
-
-// ── Text colors ──────────────────────────────────────────────────────
 
 export const textColors = [
   {
@@ -26,8 +22,6 @@ export const textColors = [
   { id: "pink", label: "Pink", value: "#ad1a72" },
   { id: "red", label: "Red", value: "#e03e3e" },
 ] as const satisfies ColorOption[];
-
-// ── Background colors ────────────────────────────────────────────────
 
 export const bgColors = [
   {

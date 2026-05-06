@@ -30,8 +30,6 @@ import type { TypedEditor } from "../../types";
 
 const ITEM = "flex items-center gap-2 h-8 px-2";
 
-// ── Helpers ────────────────────────────────────────────────────────────
-
 function act(fn: (ed: TypedEditor) => void, onClose: () => void) {
   const { editor } = editorStore.get();
   if (!editor) return;
@@ -71,8 +69,6 @@ function ColorTrigger() {
     </div>
   );
 }
-
-// ── Menus ───────────────────────────────────────────────────────────────
 
 interface MenuProps {
   focused: FocusedCell;
