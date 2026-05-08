@@ -16,7 +16,7 @@ import {
 import { Toggle } from "../../ui/toggle";
 import { Separator } from "../../ui/separator";
 import { buttonVariants } from "../../ui/button";
-import { cn } from "../../lib/utils";
+import { cn, normalizeColor } from "../../lib/utils";
 import { TurnIntomenu } from "../TurnIntoMenu";
 import { ColorMenu } from "../ColorMenu";
 import { LinkInput } from "./LinkInput";
@@ -90,6 +90,12 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
     editor: editor as any,
     selector: (ctx) => {
       const ed = ctx.editor as unknown as TypedEditor;
+      const textStyleAttrs = ed.getAttributes("textStyle") as
+        | { color?: string; backgroundColor?: string }
+        | undefined;
+      const parentNodeAttrs = ed.state.selection.$from.parent.attrs as
+        | { textColor?: string; backgroundColor?: string }
+        | undefined;
       return {
         bold: ed.isActive("bold"),
         italic: ed.isActive("italic"),
@@ -98,6 +104,10 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
         code: ed.isActive("code"),
         link: ed.isActive("link"),
         label: getActiveBlockLabel(ed),
+        activeTextColor:
+          textStyleAttrs?.color ?? parentNodeAttrs?.textColor ?? "",
+        activeBgColor:
+          textStyleAttrs?.backgroundColor ?? parentNodeAttrs?.backgroundColor ?? "",
       };
     },
   });
@@ -108,6 +118,8 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
   }, []);
 
   const container = useRef<HTMLDivElement>(null);
+  const activeTextColor = activeStates.activeTextColor;
+  const activeBgColor = activeStates.activeBgColor;
 
   return (
     <TiptapBubbleMenu
@@ -180,20 +192,24 @@ export function BubbleMenu({ editor }: BubbleToolbarProps) {
 
             <ColorMenu
               container={container}
-              onSelectText={(c) =>
-                editor
-                  .chain()
-                  .focus()
-                  .setColor(c ?? "")
-                  .run()
-              }
-              onSelectBg={(c) =>
-                editor
-                  .chain()
-                  .focus()
-                  .setBackgroundColor(c ?? "")
-                  .run()
-              }
+              activeText={activeTextColor}
+              activeBg={activeBgColor}
+              onSelectText={(c) => {
+                const next = normalizeColor(c);
+                const current = normalizeColor(activeTextColor);
+                const cmd = editor.chain().focus();
+                const shouldUnset = !next || next === current;
+                (shouldUnset ? cmd.unsetColor() : cmd.setColor(c!)).run();
+              }}
+              onSelectBg={(c) => {
+                const next = normalizeColor(c);
+                const current = normalizeColor(activeBgColor);
+                const cmd = editor.chain().focus();
+                const shouldUnset = !next || next === current;
+                (shouldUnset
+                  ? cmd.unsetBackgroundColor()
+                  : cmd.setBackgroundColor(c!)).run();
+              }}
             >
               <Palette className="size-4" />
             </ColorMenu>

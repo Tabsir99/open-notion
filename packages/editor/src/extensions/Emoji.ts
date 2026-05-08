@@ -94,9 +94,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const emojiItem = this.options.emojis.find(
-      (e) => e.id === node.attrs.hexId,
-    );
+    const emojiItem = shortcodeToEmoji(node.attrs.name, this.options.emojis);
     const attributes = mergeAttributes(HTMLAttributes, {
       "data-type": this.name,
     });
@@ -207,8 +205,9 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         handler: ({ range, match, chain }) => {
           const prefix = match[1] || "";
           const name = match[2];
+          const emojiItem = shortcodeToEmoji(name, this.options.emojis);
 
-          if (!shortcodeToEmoji(name, this.options.emojis)) {
+          if (!emojiItem) {
             return;
           }
 
@@ -308,6 +307,10 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
                 const name = emojiToShortcode(emoji, this.options.emojis);
 
                 if (!name) {
+                  return;
+                }
+                const emojiItem = shortcodeToEmoji(name, this.options.emojis);
+                if (!emojiItem) {
                   return;
                 }
 

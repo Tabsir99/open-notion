@@ -66,48 +66,53 @@ interface BlockContextMenuProps extends Dropdownprops {
 }
 export const BlockContextMenu = memo(
   ({ trigger, ...props }: BlockContextMenuProps) => {
-    const handleSelect = useCallback(
-      (id: string) => {
-        const { editor, hoveredBlock } = editorStore.get();
-        if (!editor || !hoveredBlock) return;
+    const handleSelect = useCallback((id: string) => {
+      const { editor, hoveredBlock } = editorStore.get();
+      if (!editor || !hoveredBlock) return;
 
-        const { pos } = hoveredBlock;
-        const node = editor.state.doc.nodeAt(pos);
+      const { pos } = hoveredBlock;
+      const node = editor.state.doc.nodeAt(pos);
 
-        switch (id) {
-          case "delete":
-            if (node) {
-              editor
-                .chain()
-                .focus()
-                .deleteRange({ from: pos, to: pos + node.nodeSize })
-                .run();
-            }
-            break;
-          case "duplicate":
-            if (node) {
-              editor
-                .chain()
-                .focus()
-                .insertContentAt(pos + node.nodeSize, node.toJSON())
-                .run();
-            }
-            break;
-          case "copy-link": {
-            const url = `${window.location.href}#block-${pos}`;
-            navigator.clipboard.writeText(url).catch(() => {
-              console.warn("Failed to copy link to clipboard");
-            });
-            break;
+      switch (id) {
+        case "delete":
+          if (node) {
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from: pos, to: pos + node.nodeSize })
+              .run();
           }
+          break;
+        case "duplicate":
+          if (node) {
+            editor
+              .chain()
+              .focus()
+              .insertContentAt(pos + node.nodeSize, node.toJSON())
+              .run();
+          }
+          break;
+        case "copy-link": {
+          const url = `${window.location.href}#block-${pos}`;
+          navigator.clipboard.writeText(url).catch(() => {
+            console.warn("Failed to copy link to clipboard");
+          });
+          break;
         }
-
-        close();
-      },
-      [close],
-    );
+      }
+    }, []);
 
     const blockpos = useEditorStore((s) => s.hoveredBlock?.pos);
+    const hoveredType = useEditorStore((s) =>
+      s.hoveredBlock
+        ? (s.editor?.state.doc.nodeAt(s.hoveredBlock.pos)?.type.name ?? null)
+        : null,
+    );
+    const supportsBlockStyles =
+      hoveredType === "paragraph" ||
+      hoveredType === "heading" ||
+      hoveredType === "blockquote" ||
+      hoveredType === "callout";
 
     const renderItems = (items: MenuItem[]) =>
       items.map(({ id, label, icon: Icon, shortcut }) => (
@@ -144,20 +149,24 @@ export const BlockContextMenu = memo(
             <span>Turn into</span>
           </TurnIntomenu>
 
-          <BlockColorMenu blockPos={blockpos} isSubMenu>
-            <Palette className="size-4" />
-            <span>Color</span>
-          </BlockColorMenu>
+          {supportsBlockStyles && (
+            <>
+              <BlockColorMenu blockPos={blockpos} isSubMenu>
+                <Palette className="size-4" />
+                <span>Color</span>
+              </BlockColorMenu>
 
-          <FontSizeMenu blockPos={blockpos} isSubMenu>
-            <ALargeSmall className="size-4" />
-            <span>Font size</span>
-          </FontSizeMenu>
+              <FontSizeMenu blockPos={blockpos} isSubMenu>
+                <ALargeSmall className="size-4" />
+                <span>Font size</span>
+              </FontSizeMenu>
 
-          <FontFamilyMenu blockPos={blockpos} isSubMenu>
-            <CaseSensitive className="size-4" />
-            <span>Font family</span>
-          </FontFamilyMenu>
+              <FontFamilyMenu blockPos={blockpos} isSubMenu>
+                <CaseSensitive className="size-4" />
+                <span>Font family</span>
+              </FontFamilyMenu>
+            </>
+          )}
 
           <DropdownMenuSeparator className="h-px my-1" />
 

@@ -31,6 +31,7 @@ export interface MarkDefs {
       color: string | null;
       fontFamily: string | null;
       fontSize: string | null;
+      backgroundColor: string | null;
     };
   };
 }

@@ -56,6 +56,8 @@ export async function loadEmojiData(loader: string | EmojiData) {
         throw err;
       });
   }
+
+  return _inflight;
 }
 
 /** Synchronous access — only valid after loadEmojiData() has resolved */

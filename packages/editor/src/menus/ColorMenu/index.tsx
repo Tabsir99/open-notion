@@ -6,6 +6,7 @@ import {
 import { textColors, bgColors, type ColorOption } from "./colors";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { editorStore } from "../../store";
+import { normalizeColor } from "../../lib/utils";
 
 interface ColorMenuProps {
   children: React.ReactNode;
@@ -34,8 +35,10 @@ export function ColorMenu({
 }: ColorMenuProps) {
   const renderItem = (item: ColorOption, kind: "text" | "bg") => {
     const displayColor = item.swatch ?? item.value;
+    const target = normalizeColor(item.value);
+    const source = normalizeColor(kind === "text" ? activeText : activeBg);
     const active =
-      kind === "text" ? activeText === item.value : activeBg === item.value;
+      source !== "" ? source === target : target === "";
     const handler = kind === "text" ? onSelectText : onSelectBg;
 
     return (
@@ -96,14 +99,29 @@ export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {
   const handle =
     (kind: "textColor" | "backgroundColor") => (color: string | null) => {
       const { editor } = editorStore.get();
-      if (!editor || !color) return;
+      if (!editor) return;
+      const current =
+        blockPos !== undefined ? getBlockAttr(kind, blockPos) : getBlockAttr(kind);
       const cmd = editor.chain().focus();
 
       if (blockPos !== undefined) {
+        if (!color) {
+          if (!current) return;
+          kind === "textColor"
+            ? cmd.toggleBlockTextColor(current, blockPos).run()
+            : cmd.toggleBlockBackground(current, blockPos).run();
+          return;
+        }
         kind === "textColor"
           ? cmd.toggleBlockTextColor(color, blockPos).run()
           : cmd.toggleBlockBackground(color, blockPos).run();
       } else {
+        if (!color) {
+          kind === "textColor"
+            ? cmd.unsetColor().run()
+            : cmd.unsetBackgroundColor().run();
+          return;
+        }
         const active = getBlockAttr(kind) === color;
         if (kind === "textColor") {
           (active ? cmd.unsetColor() : cmd.setColor(color)).run();
