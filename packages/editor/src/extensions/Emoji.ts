@@ -127,7 +127,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
     });
 
     if (!emojiItem) {
-      return ["span", attributes, `:unknown:`];
+      return ["span", attributes, `:${node.attrs.name ?? "unknown"}:`];
     }
 
     return [
@@ -369,10 +369,22 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
             });
           });
 
-          // Sweep also re-evaluates pre-existing emoji shortcodes (`:smile:`)
-          // typed before data loaded.
+          // Sweep also (a) re-renders existing EmojiNodes whose renderHTML
+          // produced ":<name>:" before emoji data was available, and
+          // (b) re-evaluates literal `:shortcode:` text typed before data
+          // loaded.
           if (isSweep) {
             newState.doc.descendants((node, pos) => {
+              if (node.type === extType) {
+                const item = shortcodeToEmoji(node.attrs.name, emojis);
+                if (item) {
+                  const from = tr.mapping.map(pos);
+                  const to = tr.mapping.map(pos + node.nodeSize);
+                  tr.replaceRangeWith(from, to, extType.create(node.attrs));
+                }
+                return;
+              }
+
               if (!node.type.isText || !node.text) return;
               if (newState.doc.resolve(pos).parent.type.spec.code) return;
 

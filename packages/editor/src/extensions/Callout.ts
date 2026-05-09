@@ -1,6 +1,5 @@
 import { mergeAttributes } from "@tiptap/core";
-import { CalloutView } from "../blocks/Callout";
-import { createNode } from "../lib/createNode";
+import { createNode, lazyNodeView } from "../lib/createNode";
 import type { CalloutNode } from "@open-notion/serializers";
 
 declare module "@tiptap/core" {
@@ -91,5 +90,7 @@ export const Callout = createNode({
     };
   },
 
-  NodeView: CalloutView,
+  NodeView: lazyNodeView(() =>
+    import("../blocks/Callout").then((m) => ({ default: m.CalloutView })),
+  ),
 });

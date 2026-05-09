@@ -1,8 +1,27 @@
 import { Node, type NodeConfig } from "@tiptap/core";
-import type { ComponentType } from "react";
+import { lazy, Suspense, createElement, type ComponentType } from "react";
 import type { NodeAttrs, NodeName, TypedNodeViewProps } from "../types";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import type { BlockAttrs } from "@open-notion/serializers";
+
+/**
+ * Wrap a NodeView component loader so the heavy UI ships in a lazy chunk.
+ * The wrapper renders nothing until ProseMirror first mounts a node of the
+ * matching type — so docs without that block pay zero (no chunk fetch).
+ *
+ * Returns `ComponentType<any>` — the loader is responsible for providing a
+ * correctly-typed default export. Call-site assignment to a specific
+ * `NodeView: ComponentType<TypedNodeViewProps<...>>` remains type-safe.
+ */
+export function lazyNodeView(
+  loader: () => Promise<{ default: ComponentType<any> }>,
+): ComponentType<any> {
+  const Lazy = lazy(loader);
+  const Wrapped: ComponentType<any> = (props) =>
+    createElement(Suspense, { fallback: null }, createElement(Lazy, props));
+  Wrapped.displayName = "LazyNodeView";
+  return Wrapped;
+}
 
 type OwnAttrs<T extends NodeName> = Omit<NodeAttrs[T], keyof BlockAttrs>;
 

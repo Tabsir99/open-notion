@@ -2,9 +2,8 @@ import CodeBlock from "@tiptap/extension-code-block";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import { CodeBlockView } from "../blocks/CodeBlock";
 
-import { extendNode } from "../lib/createNode";
+import { extendNode, lazyNodeView } from "../lib/createNode";
 import {
   getHighlighter,
   type AppHighlighterConfig,
@@ -91,7 +90,9 @@ export const CustomCodeBlock = extendNode<"codeBlock">(
       });
     },
 
-    NodeView: CodeBlockView,
+    NodeView: lazyNodeView(() =>
+      import("../blocks/CodeBlock").then((m) => ({ default: m.CodeBlockView })),
+    ),
 
     addProseMirrorPlugins() {
       const ext = this;

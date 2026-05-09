@@ -1,7 +1,6 @@
 import { nodeInputRule } from "@tiptap/core";
 import type { ImageNode } from "@open-notion/serializers";
-import { createNode } from "../lib/createNode";
-import { ImageBlock } from "../blocks/ImageBlock";
+import { createNode, lazyNodeView } from "../lib/createNode";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -72,7 +71,9 @@ export const Image = createNode({
     };
   },
 
-  NodeView: ImageBlock,
+  NodeView: lazyNodeView(() =>
+    import("../blocks/ImageBlock").then((m) => ({ default: m.ImageBlock })),
+  ),
 
   addInputRules() {
     return [
