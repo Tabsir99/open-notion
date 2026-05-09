@@ -1,0 +1,13 @@
+export { default as javascript } from "@devicon/react/javascript/original";
+export { default as typescript } from "@devicon/react/typescript/original";
+export { default as python } from "@devicon/react/python/original";
+export { default as html } from "@devicon/react/html5/original";
+export { default as css } from "@devicon/react/css3/original";
+export { default as json } from "@devicon/react/json/original";
+export { default as bash } from "@devicon/react/bash/original";
+export { default as sql } from "@devicon/react/mysql/original";
+export { default as go } from "@devicon/react/go/original-wordmark";
+export { default as rust } from "@devicon/react/rust/original";
+export { default as yaml } from "@devicon/react/yaml/original";
+export { default as markdown } from "@devicon/react/markdown/original";
+export { default as dockerfile } from "@devicon/react/docker/original";

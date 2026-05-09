@@ -10,7 +10,10 @@ import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import emojiRegex from "emoji-regex";
 
-import { type Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
+import {
+  getEmojiArray,
+  onEmojiDataLoaded,
+} from "../menus/EmojiPicker/createEmojipicker/data";
 import { emojiToShortcode } from "./helpers/emojiToShortcode";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji";
 import { getEditorConfig } from "../config";
@@ -30,12 +33,17 @@ declare module "@tiptap/core" {
 
 export type EmojiOptions = {
   HTMLAttributes: Record<string, any>;
-  emojis: Emoji[];
+};
+
+type EmojiStorage = {
+  unsubscribe: (() => void) | null;
 };
 
 export const inputRegex = /:([a-zA-Z0-9_+-]+):$/;
 
 export const pasteRegex = /(^|\s):([a-zA-Z0-9_+-]+):/g;
+
+const SWEEP_META = "forceEmojiSweep";
 
 export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   name: "emoji",
@@ -47,6 +55,26 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   atom: true,
 
   selectable: false,
+
+  addStorage(): EmojiStorage {
+    return { unsubscribe: null };
+  },
+
+  onCreate() {
+    const storage = this.storage as EmojiStorage;
+    storage.unsubscribe = onEmojiDataLoaded(() => {
+      if (this.editor.view.isDestroyed) return;
+      this.editor.view.dispatch(
+        this.editor.state.tr.setMeta(SWEEP_META, true),
+      );
+    });
+  },
+
+  onDestroy() {
+    const storage = this.storage as EmojiStorage;
+    storage.unsubscribe?.();
+    storage.unsubscribe = null;
+  },
 
   addKeyboardShortcuts() {
     const step = (dir: -1 | 1) => () => {
@@ -73,7 +101,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
 
   addOptions() {
     return {
-      emojis: [],
       HTMLAttributes: {},
     };
   },
@@ -94,7 +121,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const emojiItem = shortcodeToEmoji(node.attrs.name, this.options.emojis);
+    const emojiItem = shortcodeToEmoji(node.attrs.name, getEmojiArray());
     const attributes = mergeAttributes(HTMLAttributes, {
       "data-type": this.name,
     });
@@ -119,8 +146,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   },
 
   renderText({ node }) {
-    const emojiItem = shortcodeToEmoji(node.attrs.name, this.options.emojis);
-
+    const emojiItem = shortcodeToEmoji(node.attrs.name, getEmojiArray());
     return emojiItem?.unicode || `:${node.attrs.name}:`;
   },
 
@@ -128,7 +154,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
     if (!node.attrs?.name) {
       return "";
     }
-
     return `:${node.attrs.name}:`;
   },
 
@@ -137,7 +162,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
       setEmoji:
         (shortcode) =>
         ({ chain }) => {
-          const emojiItem = shortcodeToEmoji(shortcode, this.options.emojis);
+          const emojiItem = shortcodeToEmoji(shortcode, getEmojiArray());
 
           if (!emojiItem) return false;
 
@@ -170,7 +195,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         find: inputRegex,
         handler: ({ range, match, chain }) => {
           const name = match[1];
-          const emojiItem = shortcodeToEmoji(name, this.options.emojis);
+          const emojiItem = shortcodeToEmoji(name, getEmojiArray());
 
           if (!emojiItem) {
             return;
@@ -205,7 +230,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         handler: ({ range, match, chain }) => {
           const prefix = match[1] || "";
           const name = match[2];
-          const emojiItem = shortcodeToEmoji(name, this.options.emojis);
+          const emojiItem = shortcodeToEmoji(name, getEmojiArray());
 
           if (!emojiItem) {
             return;
@@ -240,12 +265,15 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   },
 
   addProseMirrorPlugins() {
+    const extType = this.type;
+    const extName = this.name;
+
     return [
       new Plugin({
         key: new PluginKey("emoji"),
         props: {
           handleDoubleClickOn: (_view, pos, node) => {
-            if (node.type !== this.type) {
+            if (node.type !== extType) {
               return false;
             }
 
@@ -265,29 +293,40 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
           if (this.editor.view.composing) {
             return;
           }
+
+          const isSweep = transactions.some((t) => t.getMeta(SWEEP_META));
           const docChanges =
             transactions.some((transaction) => transaction.docChanged) &&
             !oldState.doc.eq(newState.doc);
 
-          if (!docChanges) {
+          if (!docChanges && !isSweep) {
             return;
           }
 
-          const { tr } = newState;
-          const transform = combineTransactionSteps(
-            oldState.doc,
-            transactions as Transaction[],
-          );
-          const changes = getChangedRanges(transform);
+          const emojis = getEmojiArray();
+          if (emojis.length === 0) return;
 
-          changes.forEach(({ newRange }) => {
-            if (newState.doc.resolve(newRange.from).parent.type.spec.code) {
+          const { tr } = newState;
+
+          // Determine ranges to scan: full doc on sweep, changed ranges otherwise.
+          type ScanRange = { from: number; to: number };
+          const ranges: ScanRange[] = isSweep
+            ? [{ from: 0, to: newState.doc.content.size }]
+            : getChangedRanges(
+                combineTransactionSteps(
+                  oldState.doc,
+                  transactions as Transaction[],
+                ),
+              ).map((c) => ({ from: c.newRange.from, to: c.newRange.to }));
+
+          ranges.forEach(({ from: rFrom, to: rTo }) => {
+            if (newState.doc.resolve(rFrom).parent.type.spec.code) {
               return;
             }
 
             const textNodes = findChildrenInRange(
               newState.doc,
-              newRange,
+              { from: rFrom, to: rTo },
               (node) => node.type.isText,
             );
 
@@ -304,12 +343,12 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
                 }
 
                 const emoji = match[0];
-                const name = emojiToShortcode(emoji, this.options.emojis);
+                const name = emojiToShortcode(emoji, emojis);
 
                 if (!name) {
                   return;
                 }
-                const emojiItem = shortcodeToEmoji(name, this.options.emojis);
+                const emojiItem = shortcodeToEmoji(name, emojis);
                 if (!emojiItem) {
                   return;
                 }
@@ -321,9 +360,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
                 }
 
                 const to = from + emoji.length;
-                const emojiNode = this.type.create({
-                  name,
-                });
+                const emojiNode = extType.create({ name });
 
                 tr.replaceRangeWith(from, to, emojiNode);
 
@@ -331,6 +368,35 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
               });
             });
           });
+
+          // Sweep also re-evaluates pre-existing emoji shortcodes (`:smile:`)
+          // typed before data loaded.
+          if (isSweep) {
+            newState.doc.descendants((node, pos) => {
+              if (!node.type.isText || !node.text) return;
+              if (newState.doc.resolve(pos).parent.type.spec.code) return;
+
+              const re = /:([a-zA-Z0-9_+-]+):/g;
+              let m: RegExpExecArray | null;
+              while ((m = re.exec(node.text))) {
+                const name = m[1];
+                const emojiItem = shortcodeToEmoji(name, emojis);
+                if (!emojiItem) continue;
+                const from = tr.mapping.map(pos + m.index);
+                const to = from + m[0].length;
+                tr.replaceRangeWith(
+                  from,
+                  to,
+                  extType.create({
+                    hexId: emojiItem.id,
+                    name: emojiItem.name,
+                  }),
+                );
+              }
+            });
+            // Tag the appended tr so we don't loop on our own meta.
+            tr.setMeta(extName, true);
+          }
 
           if (!tr.steps.length) {
             return;

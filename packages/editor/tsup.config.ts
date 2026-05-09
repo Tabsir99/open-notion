@@ -15,6 +15,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   minify: true,
+  splitting: true,
+  treeshake: true,
   target: "es2022",
   external: [
     "react",

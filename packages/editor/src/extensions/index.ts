@@ -10,7 +10,7 @@ import Italic from "@tiptap/extension-italic";
 import Strike from "@tiptap/extension-strike";
 import Underline from "@tiptap/extension-underline";
 import Code from "@tiptap/extension-code";
-import Link from "@tiptap/extension-link";
+import { Link } from "./Link";
 import { TextStyleKit } from "@tiptap/extension-text-style/text-style-kit";
 
 // --- Nodes ---
@@ -46,7 +46,6 @@ import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
 import type { PlaceholderConfig } from "../config";
-import type { Emoji } from "../menus/EmojiPicker/createEmojipicker/data";
 
 const bgAttr = {
   backgroundColor: {
@@ -87,7 +86,6 @@ class CustomTableView extends TableView {
 }
 
 export const defaultExtensions = (
-  emojis: Emoji[],
   placeholder?: PlaceholderConfig,
 ): Extensions =>
   [
@@ -105,19 +103,8 @@ export const defaultExtensions = (
     Code,
     Link.configure({
       openOnClick: false,
-      HTMLAttributes: {
-        class: "editor-link",
-      },
       enableClickSelection: true,
-    }).extend({
-      addAttributes() {
-        return {
-          ...this.parent?.(),
-          target: {
-            default: "_blank",
-          },
-        };
-      },
+      HTMLAttributes: { class: "editor-link" },
     }),
     TextStyleKit,
     BlockStyles,
@@ -165,7 +152,7 @@ export const defaultExtensions = (
     UniqueId.configure({ types: ["heading"] }),
 
     // Custom
-    EmojiExtension.configure({ emojis }),
+    EmojiExtension,
     Image,
     CustomCodeBlock,
     Callout,

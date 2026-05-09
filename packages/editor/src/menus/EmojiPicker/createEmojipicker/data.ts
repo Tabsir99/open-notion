@@ -30,12 +30,27 @@ export interface EmojiData {
 let _cache: EmojiData | null = null;
 let _emojiArray: Emoji[] | null = null;
 let _inflight: Promise<EmojiData> | null = null;
+const _listeners = new Set<() => void>();
 
 const _setEmojiData = (data: EmojiData) => {
   _cache = data;
   _emojiArray = Object.values(data.emojis);
+  for (const cb of _listeners) cb();
+  _listeners.clear();
   return data;
 };
+
+/** Run `cb` once the emoji data is available. Fires immediately if already loaded. */
+export function onEmojiDataLoaded(cb: () => void): () => void {
+  if (_cache) {
+    cb();
+    return () => {};
+  }
+  _listeners.add(cb);
+  return () => {
+    _listeners.delete(cb);
+  };
+}
 /**
  * Configurable URL — point this to wherever emoji.json is served.
  * Defaults to /emoji.json (public folder in Next.js / Vite).

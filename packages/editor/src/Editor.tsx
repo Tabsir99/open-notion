@@ -1,15 +1,23 @@
-import { useState, useEffect, useMemo, memo, useRef } from "react";
+import { useEffect, useMemo, memo, useRef, lazy, Suspense } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/core";
-import { BlockSideMenu } from "./menus/BlockSideMenu";
-import { BubbleMenu } from "./menus/BubbleMenu";
-import { SlashMenu } from "./menus/SlashMenu";
-import { EmojiPicker } from "./menus/EmojiPicker";
-import { TableControls } from "./menus/TableControls";
-import {
-  getEmojiArray,
-  loadEmojiData,
-} from "./menus/EmojiPicker/createEmojipicker/data";
+
+const BlockSideMenu = lazy(() =>
+  import("./menus/BlockSideMenu").then((m) => ({ default: m.BlockSideMenu })),
+);
+const BubbleMenu = lazy(() =>
+  import("./menus/BubbleMenu").then((m) => ({ default: m.BubbleMenu })),
+);
+const SlashMenu = lazy(() =>
+  import("./menus/SlashMenu").then((m) => ({ default: m.SlashMenu })),
+);
+const EmojiPicker = lazy(() =>
+  import("./menus/EmojiPicker").then((m) => ({ default: m.EmojiPicker })),
+);
+const TableControls = lazy(() =>
+  import("./menus/TableControls").then((m) => ({ default: m.TableControls })),
+);
+import { loadEmojiData } from "./menus/EmojiPicker/createEmojipicker/data";
 import { defaultExtensions } from "./extensions";
 import { editorStore } from "./store";
 import { setEditorConfig, getEditorConfig, type GetEmojiUrl } from "./config";
@@ -69,18 +77,16 @@ export interface OpenNotionViewProps {
   className?: string | undefined;
 }
 
-function useEmojiData(url?: string) {
-  const [ready, setReady] = useState(false);
-
+function useEmojiLoader(url?: string) {
   useEffect(() => {
-    if (url) loadEmojiData(url).then(() => setReady(true));
-    else
-      import("@open-notion/assets/emojis.json")
-        .then((m) => loadEmojiData(m.default))
-        .then(() => setReady(true));
+    if (url) {
+      void loadEmojiData(url);
+    } else {
+      void import("@open-notion/assets/emojis.json").then((m) =>
+        loadEmojiData(m.default),
+      );
+    }
   }, [url]);
-
-  return ready;
 }
 
 export function useOpenNotion({
@@ -95,7 +101,7 @@ export function useOpenNotion({
   autofocus = true,
   throttle = 0,
 }: Partial<OpenNotionOptions> = {}): TypedEditor | null {
-  const ready = useEmojiData(emojiDataUrl);
+  useEmojiLoader(emojiDataUrl);
 
   useMemo(() => {
     setEditorConfig({
@@ -129,7 +135,7 @@ export function useOpenNotion({
 
   const editor = useEditor(
     {
-      extensions: defaultExtensions(getEmojiArray()),
+      extensions: defaultExtensions(),
       content: initContent,
       editable,
       autofocus,
@@ -195,7 +201,7 @@ export function useOpenNotion({
           }
         : {}),
     },
-    [ready],
+    [],
   ) as unknown as TypedEditor | null;
 
   return useMemo(() => {
@@ -246,11 +252,13 @@ export const OpenNotionView = memo(
         )}
         onClick={() => editor.chain().focus().run()}
       >
-        <BlockSideMenu />
-        <BubbleMenu editor={editor} />
-        <SlashMenu />
-        <EmojiPicker />
-        <TableControls />
+        <Suspense fallback={null}>
+          <BlockSideMenu />
+          <BubbleMenu editor={editor} />
+          <SlashMenu />
+          <EmojiPicker />
+          <TableControls />
+        </Suspense>
 
         <EditorContent editor={editor as any} />
       </div>

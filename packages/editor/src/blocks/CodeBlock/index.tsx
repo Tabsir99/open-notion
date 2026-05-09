@@ -1,16 +1,22 @@
 import { useState, useCallback, memo, type MouseEvent } from "react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { cn } from "../../lib/utils";
-import { Check, ChevronDown, Copy } from "lucide-react";
+import { Check, ChevronDown, Copy, FileCode } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "../../ui/dropdown-menu";
-import { languages, getLanguage } from "./languages";
+import { languages, getLanguage, useLanguageIcon } from "./languages";
 import { shikiPluginKey } from "../../extensions/CustomCodeBlock";
 import type { TypedNodeViewProps } from "../../types";
+
+function LangIcon({ id, size = 14 }: { id: string; size?: number }) {
+  const Icon = useLanguageIcon(id);
+  if (!Icon) return <FileCode size={size} className="opacity-70" />;
+  return <Icon size={size} />;
+}
 
 export const CodeBlockView = memo(
   ({ node, updateAttributes, editor }: TypedNodeViewProps<"codeBlock">) => {
@@ -54,7 +60,7 @@ export const CodeBlockView = memo(
               data-code-block-language
               className="cursor-pointer hover:bg-foreground/5 p-1.5 rounded-md"
             >
-              <Lang.icon size={14} />
+              <LangIcon id={language} size={14} />
               {Lang.name}
               <ChevronDown size={10} />
             </DropdownMenuTrigger>
@@ -72,7 +78,7 @@ export const CodeBlockView = memo(
                   onClick={() => handleLanguageChange(lang.id)}
                 >
                   <span className="flex items-center size-3.5 opacity-70">
-                    <lang.icon />
+                    <LangIcon id={lang.id} />
                   </span>
                   <span className="flex-1">{lang.name}</span>
                   {language === lang.id && (
