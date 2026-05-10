@@ -43,8 +43,6 @@ export const inputRegex = /:([a-zA-Z0-9_+-]+):$/;
 
 export const pasteRegex = /(^|\s):([a-zA-Z0-9_+-]+):/g;
 
-const SWEEP_META = "forceEmojiSweep";
-
 export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   name: "emoji",
 
@@ -58,6 +56,77 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
 
   addStorage(): EmojiStorage {
     return { unsubscribe: null };
+  },
+
+  onCreate() {
+    const storage = this.storage as EmojiStorage;
+    const extType = this.type;
+
+    const runCatchup = () => {
+      const emojis = getEmojiArray();
+      if (emojis.length === 0) return;
+
+      const { state, view } = this.editor;
+      const { tr } = state;
+
+      state.doc.descendants((node, pos) => {
+        if (!node.isText || !node.text) return;
+        if (state.doc.resolve(pos).parent.type.spec.code) return;
+
+        // shortcodes
+        const scRe = /:([a-zA-Z0-9_+-]+):/g;
+        let m: RegExpExecArray | null;
+        while ((m = scRe.exec(node.text))) {
+          const item = shortcodeToEmoji(m[1], emojis);
+          if (!item) continue;
+          const from = tr.mapping.map(pos + m.index);
+          const to = from + m[0].length;
+          tr.replaceRangeWith(
+            from,
+            to,
+            extType.create({
+              hexId: item.id,
+              name: item.name,
+              shortcode: item.shortcodes[0] ?? m[1],
+            }),
+          );
+        }
+
+        // unicode
+        for (const um of node.text.matchAll(emojiRegex())) {
+          if (um.index === undefined) continue;
+          const sc = emojiToShortcode(um[0], emojis);
+          if (!sc) continue;
+          const item = shortcodeToEmoji(sc, emojis);
+          if (!item) continue;
+          const from = tr.mapping.map(pos + um.index);
+          if (state.doc.resolve(from).parent.type.spec.code) continue;
+          const to = from + um[0].length;
+          tr.replaceRangeWith(
+            from,
+            to,
+            extType.create({
+              hexId: item.id,
+              name: item.name,
+              shortcode: item.shortcodes[0] ?? sc,
+            }),
+          );
+        }
+      });
+
+      if (tr.steps.length) view.dispatch(tr);
+    };
+
+    // If data already loaded, run immediately. Otherwise subscribe.
+    if (getEmojiArray().length > 0) {
+      runCatchup();
+    } else {
+      storage.unsubscribe = onEmojiDataLoaded(() => {
+        runCatchup();
+        storage.unsubscribe?.();
+        storage.unsubscribe = null;
+      });
+    }
   },
 
   onDestroy() {
