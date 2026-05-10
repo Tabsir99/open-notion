@@ -1,6 +1,6 @@
 import { useEffect, useMemo, memo, useRef, lazy, Suspense } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import type { Editor } from "@tiptap/core";
+import type { Editor, Extensions } from "@tiptap/core";
 
 const BlockSideMenu = lazy(() =>
   import("./menus/BlockSideMenu").then((m) => ({ default: m.BlockSideMenu })),
@@ -19,8 +19,14 @@ const TableControls = lazy(() =>
 );
 import { loadEmojiData } from "./menus/EmojiPicker/createEmojipicker/data";
 import { defaultExtensions } from "./extensions";
-import { editorStore } from "./store";
-import { setEditorConfig, getEditorConfig, type GetEmojiUrl } from "./config";
+import { EditorContext } from "./context";
+import {
+  getRuntime,
+  OpenNotionRoot,
+  type GetEmojiUrl,
+  type SlashItem,
+  type TurnIntoItem,
+} from "./runtime";
 import { defaultSlashItems } from "./menus/SlashMenu/slash-items";
 import { defaultTurnIntoItems } from "./menus/TurnIntoMenu/items";
 import { getEmojiUrl as twemojiGetEmojiUrl } from "./menus/EmojiPicker/getEmojiUrl";
@@ -34,6 +40,12 @@ import {
   type DocContent,
 } from "@open-notion/serializers";
 import { version, name } from "@open-notion/assets/package.json";
+
+export type ExtensionsResolver = (defaults: Extensions) => Extensions;
+export type SlashItemsResolver = (defaults: SlashItem[]) => SlashItem[];
+export type TurnIntoItemsResolver = (
+  defaults: TurnIntoItem[],
+) => TurnIntoItem[];
 
 export interface OpenNotionOptions {
   /** Initial document content (JSON). Only applied on mount. */
@@ -67,6 +79,19 @@ export interface OpenNotionOptions {
   autofocus: boolean;
 
   throttle: number;
+
+  /**
+   * Compose your own Tiptap extensions array on top of the defaults.
+   * Receives the default extension list and returns the final list.
+   * Example: `(d) => [...d, MyExtension]`
+   */
+  extensions: ExtensionsResolver;
+
+  /** Compose slash-menu items on top of the defaults. */
+  slashItems: SlashItemsResolver;
+
+  /** Compose turn-into menu items on top of the defaults. */
+  turnIntoItems: TurnIntoItemsResolver;
 }
 
 export interface OpenNotionViewProps {
@@ -100,17 +125,42 @@ export function useOpenNotion({
   editable = true,
   autofocus = true,
   throttle = 0,
+  extensions: userExtensions,
+  slashItems: userSlashItems,
+  turnIntoItems: userTurnIntoItems,
 }: Partial<OpenNotionOptions> = {}): TypedEditor | null {
   useEmojiLoader(emojiDataUrl);
 
-  useMemo(() => {
-    setEditorConfig({
-      slashItems: defaultSlashItems,
-      turnIntoItems: defaultTurnIntoItems,
-      getEmojiUrl: getEmojiUrl ?? twemojiGetEmojiUrl,
-      storageKey: storageKey ?? false,
-    });
-  }, [emojiDataUrl, getEmojiUrl, storageKey]);
+  const resolvedSlashItems = useMemo(
+    () =>
+      userSlashItems ? userSlashItems(defaultSlashItems) : defaultSlashItems,
+    [userSlashItems],
+  );
+  const resolvedTurnIntoItems = useMemo(
+    () =>
+      userTurnIntoItems
+        ? userTurnIntoItems(defaultTurnIntoItems)
+        : defaultTurnIntoItems,
+    [userTurnIntoItems],
+  );
+  const resolvedGetEmojiUrl = getEmojiUrl ?? twemojiGetEmojiUrl;
+
+  // Built once on first render. Tiptap's useEditor is given `[]` deps so the
+  // editor is not recreated when these references change — post-mount updates
+  // flow through the runtime via the useEffect below.
+  const initialExtensions = useMemo<Extensions>(() => {
+    const defaults = defaultExtensions();
+    const composed = userExtensions ? userExtensions(defaults) : defaults;
+    return [
+      ...composed,
+      OpenNotionRoot.configure({
+        slashItems: resolvedSlashItems,
+        turnIntoItems: resolvedTurnIntoItems,
+        getEmojiUrl: resolvedGetEmojiUrl,
+      }),
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { initContent, initCursor } = useMemo(() => {
     const key = storageKey ?? false;
@@ -135,7 +185,7 @@ export function useOpenNotion({
 
   const editor = useEditor(
     {
-      extensions: defaultExtensions(),
+      extensions: initialExtensions,
       content: initContent,
       editable,
       autofocus,
@@ -154,10 +204,9 @@ export function useOpenNotion({
               if (throttleSelectionRef.current) return;
               throttleSelectionRef.current = setTimeout(() => {
                 const ed = props.editor;
-                const key = getEditorConfig().storageKey;
-                if (key) {
+                if (storageKey) {
                   const { from } = ed.state.selection;
-                  localStorage.setItem(`${key}-cursor`, String(from));
+                  localStorage.setItem(`${storageKey}-cursor`, String(from));
                 }
                 onSelectionChange?.(ed);
                 throttleSelectionRef.current = null;
@@ -173,9 +222,11 @@ export function useOpenNotion({
               throttleUpdateRef.current = setTimeout(() => {
                 const ed = props.editor;
                 const json = ed.getJSON();
-                const key = getEditorConfig().storageKey;
-                if (key) {
-                  localStorage.setItem(`${key}-content`, JSON.stringify(json));
+                if (storageKey) {
+                  localStorage.setItem(
+                    `${storageKey}-content`,
+                    JSON.stringify(json),
+                  );
                 }
                 onChange?.(json as DocContent);
                 throttleUpdateRef.current = null;
@@ -203,6 +254,17 @@ export function useOpenNotion({
     },
     [],
   ) as unknown as TypedEditor | null;
+
+  // Configure options only seed the runtime at editor init. Post-mount prop
+  // changes flow into the live store here.
+  useEffect(() => {
+    if (!editor) return;
+    getRuntime(editor).set({
+      slashItems: resolvedSlashItems,
+      turnIntoItems: resolvedTurnIntoItems,
+      getEmojiUrl: resolvedGetEmojiUrl,
+    });
+  }, [editor, resolvedSlashItems, resolvedTurnIntoItems, resolvedGetEmojiUrl]);
 
   return useMemo(() => {
     if (!editor) return null;
@@ -237,31 +299,32 @@ export const OpenNotionView = memo(
     if (!editor) return null;
 
     return (
-      <div
-        ref={(el) => {
-          editorStore.set({
-            editor: el ? editor : null,
-            editorContainer: el,
-            hoveredBlock: el ? editorStore.get().hoveredBlock : null,
-          });
-        }}
-        className={cn(
-          "relative w-full cursor-text",
-          "max-w-4xl min-h-svh",
-          className,
-        )}
-        onClick={() => editor.chain().focus().run()}
-      >
-        <Suspense fallback={null}>
-          <BlockSideMenu />
-          <BubbleMenu editor={editor} />
-          <SlashMenu />
-          <EmojiPicker />
-          <TableControls />
-        </Suspense>
+      <EditorContext.Provider value={editor}>
+        <div
+          ref={(el) => {
+            getRuntime(editor).set({
+              editorContainer: el,
+              hoveredBlock: el ? getRuntime(editor).get().hoveredBlock : null,
+            });
+          }}
+          className={cn(
+            "relative w-full cursor-text",
+            "max-w-4xl min-h-svh",
+            className,
+          )}
+          onClick={() => editor.chain().focus().run()}
+        >
+          <Suspense fallback={null}>
+            <BlockSideMenu />
+            <BubbleMenu editor={editor} />
+            <SlashMenu />
+            <EmojiPicker />
+            <TableControls />
+          </Suspense>
 
-        <EditorContent editor={editor as any} />
-      </div>
+          <EditorContent editor={editor as any} />
+        </div>
+      </EditorContext.Provider>
     );
   },
 );

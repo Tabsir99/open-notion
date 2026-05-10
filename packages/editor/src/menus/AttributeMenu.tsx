@@ -8,11 +8,16 @@ import {
   DropdownMenuSubContent,
 } from "../ui/dropdown-menu";
 import { buttonVariants } from "../ui/button";
-import { editorStore, useEditorStore } from "../store";
+import { useEditorRuntime } from "../context";
+import type { TypedEditor } from "../types";
 
-export const getBlockAttr = (key: string, pos?: number): string | null => {
-  if (pos === undefined) return "";
-  const node = editorStore.get().editor?.state.doc.nodeAt(pos);
+export const getBlockAttr = (
+  editor: TypedEditor | null,
+  key: string,
+  pos?: number,
+): string | null => {
+  if (!editor || pos === undefined) return "";
+  const node = editor.state.doc.nodeAt(pos);
   return (node?.attrs[key] as string) ?? "";
 };
 
@@ -33,7 +38,7 @@ export function AttributeMenu({
   const Trigger = isSub ? DropdownMenuSubTrigger : DropdownMenuTrigger;
   const Content = isSub ? DropdownMenuSubContent : DropdownMenuContent;
 
-  const editorContainer = useEditorStore((s) => s.editorContainer);
+  const editorContainer = useEditorRuntime((s) => s.editorContainer);
 
   return (
     <Root>

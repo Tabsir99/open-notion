@@ -3,17 +3,19 @@ import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import { fontFamilies } from "./families";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { cn } from "../../lib/utils";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
+import type { TypedEditor } from "../../types";
 
-function applyFontFamily(family: string, pos?: number) {
-  const { editor } = editorStore.get();
-  if (!editor) return;
-
+function applyFontFamily(
+  editor: TypedEditor,
+  family: string,
+  pos?: number,
+): void {
   const cmd = editor.chain().focus();
   if (pos !== undefined) {
     cmd.toggleBlockFontFamily(family, pos).run();
   } else {
-    const active = getBlockAttr("fontFamily") === family;
+    const active = getBlockAttr(editor, "fontFamily") === family;
     (active ? cmd.unsetFontFamily() : cmd.setFontFamily(family)).run();
   }
 }
@@ -29,7 +31,8 @@ export function FontFamilyMenu({
   isSubMenu,
   blockPos,
 }: FontFamilyMenuProps) {
-  const active = getBlockAttr("fontFamily", blockPos);
+  const editor = useEditor();
+  const active = getBlockAttr(editor, "fontFamily", blockPos);
 
   return (
     <AttributeMenu trigger={children} isSub={isSubMenu}>
@@ -41,7 +44,7 @@ export function FontFamilyMenu({
         return (
           <DropdownMenuItem
             key={item.id}
-            onClick={() => applyFontFamily(item.value, blockPos)}
+            onClick={() => editor && applyFontFamily(editor, item.value, blockPos)}
             className={cn(
               "group flex items-center gap-3 px-2.5 py-2 rounded-md cursor-pointer",
               "focus:bg-accent/60 data-highlighted:bg-accent/60",

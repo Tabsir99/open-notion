@@ -9,10 +9,9 @@ import {
   DropdownMenuContent,
 } from "../ui/dropdown-menu";
 import { Check } from "lucide-react";
-import { useEditor } from "../store";
+import { useEditor, useEditorRuntime } from "../context";
 import { memo } from "react";
 import { runTurnInto } from "./TurnIntoMenu/items";
-import { getEditorConfig } from "../config";
 
 interface TurnIntoSubmenuProps {
   blockPos: number | (() => number);
@@ -39,6 +38,7 @@ export const TurnIntomenu = memo(
       : DropdownMenuContent;
 
     const editor = useEditor();
+    const turnIntoItems = useEditorRuntime((s) => s.turnIntoItems);
     if (!editor) return null;
 
     return (
@@ -49,12 +49,13 @@ export const TurnIntomenu = memo(
           {children}
         </MenuTrigger>
         <MenuContent className={cn("min-w-[180px] p-1")} container={container}>
-          {getEditorConfig().turnIntoItems.map((item) => (
+          {turnIntoItems.map((item) => (
             <DropdownMenuItem
               key={item.label}
               className={cn("flex items-center gap-2 h-8 px-2 py-1")}
               onClick={() => {
                 runTurnInto(
+                  editor,
                   typeof blockPos === "function" ? blockPos() : blockPos,
                   item,
                 );

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getColIndex, getRowIndex, getTablePos } from "./tableActions";
 import { cellAround } from "@tiptap/pm/tables";
 import type { Node as PMNode } from "@tiptap/pm/model";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
 import type { TypedEditor } from "../../types";
 import { BTN } from ".";
 
@@ -42,10 +42,10 @@ function findTableAtSelection(editor: TypedEditor) {
 }
 
 export function useTableFocus(): FocusedCell | null {
+  const editor = useEditor();
   const [focused, setFocused] = useState<FocusedCell | null>(null);
 
   useEffect(() => {
-    const { editor } = editorStore.get();
     if (!editor) return;
 
     let observer: ResizeObserver | null = null;
@@ -101,7 +101,7 @@ export function useTableFocus(): FocusedCell | null {
 
       ensureObserving(cellDom, tableDom);
 
-      const tablePos = getTablePos(cellPos + 1);
+      const tablePos = getTablePos(editor, cellPos + 1);
       if (tablePos === null) return setFocused(null);
 
       setFocused({
@@ -138,7 +138,7 @@ export function useTableFocus(): FocusedCell | null {
       editor.off("focus", measure);
       teardown();
     };
-  }, []);
+  }, [editor]);
 
   return focused;
 }

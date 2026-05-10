@@ -5,13 +5,14 @@ import { PluginKey } from "@tiptap/pm/state";
 import { EmojiExtension } from "../../extensions/Emoji";
 import { PopoverArrow } from "../../ui/PopoverArrow";
 import { createEmojiPicker, type EmojiPickerApi } from "./createEmojipicker";
-import { editorStore, useEditor } from "../../store";
+import { useEditor, useEditorRuntime } from "../../context";
 import { getEmojiArray } from "./createEmojipicker/data";
 
 const EmojiSuggestionPluginKey = new PluginKey("emojiSuggestion");
 
 export const EmojiPicker = memo(() => {
   const editor = useEditor();
+  const getEmojiUrl = useEditorRuntime((s) => s.getEmojiUrl);
 
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const [open, setOpen] = useState(false);
@@ -19,28 +20,33 @@ export const EmojiPicker = memo(() => {
   const apiRef = useRef<EmojiPickerApi | null>(null);
   const rangeRef = useRef<{ from: number; to: number } | null>(null);
 
-  const insertEmoji = useCallback((shortcode: string) => {
-    if (!rangeRef.current) return;
-    editorStore
-      .get()
-      .editor?.chain()
-      .focus()
-      .deleteRange(rangeRef.current)
-      .setEmoji(shortcode)
-      .run();
-  }, []);
+  const insertEmoji = useCallback(
+    (shortcode: string) => {
+      if (!rangeRef.current || !editor) return;
+      editor
+        .chain()
+        .focus()
+        .deleteRange(rangeRef.current)
+        .setEmoji(shortcode)
+        .run();
+    },
+    [editor],
+  );
 
   const setContainer = useCallback(
     (node: HTMLDivElement | null) => {
       if (node) {
-        apiRef.current = createEmojiPicker(node, { onSelect: insertEmoji });
+        apiRef.current = createEmojiPicker(node, {
+          onSelect: insertEmoji,
+          getEmojiUrl,
+        });
         apiRef.current.renderAll();
       } else {
         apiRef.current?.destroy();
         apiRef.current = null;
       }
     },
-    [insertEmoji],
+    [insertEmoji, getEmojiUrl],
   );
 
   useEffect(() => {

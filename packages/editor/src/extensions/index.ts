@@ -45,7 +45,7 @@ import { CustomCodeBlock } from "./CustomCodeBlock";
 import { BlockStyles } from "./BlockStyles";
 
 import type { Extensions } from "@tiptap/core";
-import type { PlaceholderConfig } from "../config";
+import type { PlaceholderConfig } from "../runtime";
 
 const bgAttr = {
   backgroundColor: {

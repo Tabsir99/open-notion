@@ -3,7 +3,7 @@ import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import { Popover, PopoverContent, PopoverTitle } from "../../ui/popover";
 import { createEmojiPicker } from "../../menus/EmojiPicker/createEmojipicker";
 import { PopoverArrow } from "../../ui/PopoverArrow";
-import { getEmojiUrl } from "../../menus/EmojiPicker/getEmojiUrl";
+import { getRuntime } from "../../runtime";
 import { shortcodeToEmoji } from "../../extensions/helpers/shortcodeToEmoji";
 import { getEmojiArray } from "../../menus/EmojiPicker/createEmojipicker/data";
 import type { TypedNodeViewProps } from "../../types";
@@ -12,11 +12,13 @@ export const CalloutView = memo(
   ({ node, updateAttributes, editor }: TypedNodeViewProps<"callout">) => {
     const [pickerOpen, setPickerOpen] = useState(false);
     const btnRef = useRef<HTMLButtonElement>(null);
+    const getEmojiUrl = getRuntime(editor).get().getEmojiUrl;
 
     const setContainer = useCallback(
       (el: HTMLDivElement | null) => {
         if (!el) return;
         const api = createEmojiPicker(el, {
+          getEmojiUrl,
           onSelect: (emoji, id) => {
             updateAttributes({ emoji, hexId: id });
             setPickerOpen(false);
@@ -26,7 +28,7 @@ export const CalloutView = memo(
         api.renderAll();
         return () => api.destroy();
       },
-      [updateAttributes, editor],
+      [updateAttributes, editor, getEmojiUrl],
     );
 
     const emoji = shortcodeToEmoji(node.attrs.emoji, getEmojiArray());

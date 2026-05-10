@@ -26,7 +26,8 @@ import { TurnIntomenu } from "./TurnIntoMenu";
 import { BlockColorMenu } from "./ColorMenu";
 import { FontSizeMenu } from "./FontSizeMenu";
 import { FontFamilyMenu } from "./FontFamilyMenu";
-import { editorStore, useEditorStore } from "../store";
+import { useEditor, useEditorRuntime } from "../context";
+import { getRuntime } from "../runtime";
 
 interface MenuItem {
   id: string;
@@ -66,48 +67,54 @@ interface BlockContextMenuProps extends Dropdownprops {
 }
 export const BlockContextMenu = memo(
   ({ trigger, ...props }: BlockContextMenuProps) => {
-    const handleSelect = useCallback((id: string) => {
-      const { editor, hoveredBlock } = editorStore.get();
-      if (!editor || !hoveredBlock) return;
+    const editor = useEditor();
+    const hoveredBlock = useEditorRuntime((s) => s.hoveredBlock);
 
-      const { pos } = hoveredBlock;
-      const node = editor.state.doc.nodeAt(pos);
+    const handleSelect = useCallback(
+      (id: string) => {
+        if (!editor) return;
+        const { hoveredBlock } = getRuntime(editor).get();
+        if (!hoveredBlock) return;
 
-      switch (id) {
-        case "delete":
-          if (node) {
-            editor
-              .chain()
-              .focus()
-              .deleteRange({ from: pos, to: pos + node.nodeSize })
-              .run();
+        const { pos } = hoveredBlock;
+        const node = editor.state.doc.nodeAt(pos);
+
+        switch (id) {
+          case "delete":
+            if (node) {
+              editor
+                .chain()
+                .focus()
+                .deleteRange({ from: pos, to: pos + node.nodeSize })
+                .run();
+            }
+            break;
+          case "duplicate":
+            if (node) {
+              editor
+                .chain()
+                .focus()
+                .insertContentAt(pos + node.nodeSize, node.toJSON())
+                .run();
+            }
+            break;
+          case "copy-link": {
+            const url = `${window.location.href}#block-${pos}`;
+            navigator.clipboard.writeText(url).catch(() => {
+              console.warn("Failed to copy link to clipboard");
+            });
+            break;
           }
-          break;
-        case "duplicate":
-          if (node) {
-            editor
-              .chain()
-              .focus()
-              .insertContentAt(pos + node.nodeSize, node.toJSON())
-              .run();
-          }
-          break;
-        case "copy-link": {
-          const url = `${window.location.href}#block-${pos}`;
-          navigator.clipboard.writeText(url).catch(() => {
-            console.warn("Failed to copy link to clipboard");
-          });
-          break;
         }
-      }
-    }, []);
-
-    const blockpos = useEditorStore((s) => s.hoveredBlock?.pos);
-    const hoveredType = useEditorStore((s) =>
-      s.hoveredBlock
-        ? (s.editor?.state.doc.nodeAt(s.hoveredBlock.pos)?.type.name ?? null)
-        : null,
+      },
+      [editor],
     );
+
+    const blockpos = hoveredBlock?.pos;
+    const hoveredType =
+      editor && hoveredBlock
+        ? (editor.state.doc.nodeAt(hoveredBlock.pos)?.type.name ?? null)
+        : null;
     const supportsBlockStyles =
       hoveredType === "paragraph" ||
       hoveredType === "heading" ||

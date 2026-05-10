@@ -1,5 +1,5 @@
 import type { Node as PMNode } from "@tiptap/pm/model";
-import { editorStore } from "../../store";
+import type { TypedEditor } from "../../types";
 
 export function getColIndex(cellDom: HTMLElement): number {
   const row = cellDom.closest("tr");
@@ -15,11 +15,11 @@ export function getRowIndex(cellDom: HTMLElement): number {
   return row ? rows.indexOf(row) : 0;
 }
 
-export function getTablePos(cellDomPos: number): number | null {
+export function getTablePos(
+  editor: TypedEditor,
+  cellDomPos: number,
+): number | null {
   try {
-    const { editor } = editorStore.get();
-    if (!editor) throw new Error("Editor not found");
-
     const $pos = editor.state.doc.resolve(cellDomPos);
     for (let d = $pos.depth; d >= 0; d--) {
       if ($pos.node(d).type.name === "table") return $pos.before(d);
@@ -42,10 +42,11 @@ function rebuildTable(
   return tableNode.type.create(tableNode.attrs, newRows, tableNode.marks);
 }
 
-function applyTableReplace(tablePos: number, newTable: PMNode): void {
-  const { editor } = editorStore.get();
-  if (!editor) return;
-
+function applyTableReplace(
+  editor: TypedEditor,
+  tablePos: number,
+  newTable: PMNode,
+): void {
   const { state, dispatch } = editor.view;
   const tableNode = state.doc.nodeAt(tablePos);
   if (!tableNode) return;
@@ -54,9 +55,13 @@ function applyTableReplace(tablePos: number, newTable: PMNode): void {
   );
 }
 
-export function moveColumn(tablePos: number, from: number, to: number): void {
-  const { editor } = editorStore.get();
-  if (from === to || !editor) return;
+export function moveColumn(
+  editor: TypedEditor,
+  tablePos: number,
+  from: number,
+  to: number,
+): void {
+  if (from === to) return;
   const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
@@ -66,12 +71,15 @@ export function moveColumn(tablePos: number, from: number, to: number): void {
     moved.splice(to, 0, cell);
     return moved;
   });
-  applyTableReplace(tablePos, newTable);
+  applyTableReplace(editor, tablePos, newTable);
 }
 
-export function duplicateColumn(tablePos: number, colIdx: number): void {
-  const { editor } = editorStore.get();
-  const tableNode = editor?.state.doc.nodeAt(tablePos);
+export function duplicateColumn(
+  editor: TypedEditor,
+  tablePos: number,
+  colIdx: number,
+): void {
+  const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
   const newTable = rebuildTable(tableNode, (cells) => {
@@ -79,18 +87,18 @@ export function duplicateColumn(tablePos: number, colIdx: number): void {
     result.splice(colIdx + 1, 0, cells[colIdx]);
     return result;
   });
-  applyTableReplace(tablePos, newTable);
+  applyTableReplace(editor, tablePos, newTable);
 }
 
 function clearCells(
+  editor: TypedEditor,
   tablePos: number,
   shouldClear: (rowIdx: number, colIdx: number) => boolean,
 ): void {
-  const { editor } = editorStore.get();
-  const tableNode = editor?.state.doc.nodeAt(tablePos);
+  const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
-  const emptyParagraph = editor!.state.schema.nodes.paragraph.create();
+  const emptyParagraph = editor.state.schema.nodes.paragraph.create();
   const newTable = rebuildTable(tableNode, (cells, rowIdx) =>
     cells.map((cell, colIdx) =>
       shouldClear(rowIdx, colIdx)
@@ -98,16 +106,24 @@ function clearCells(
         : cell,
     ),
   );
-  applyTableReplace(tablePos, newTable);
+  applyTableReplace(editor, tablePos, newTable);
 }
 
-export function clearColumn(tablePos: number, colIdx: number): void {
-  clearCells(tablePos, (_, col) => col === colIdx);
+export function clearColumn(
+  editor: TypedEditor,
+  tablePos: number,
+  colIdx: number,
+): void {
+  clearCells(editor, tablePos, (_, col) => col === colIdx);
 }
 
-export function moveRow(tablePos: number, from: number, to: number): void {
-  const { editor } = editorStore.get();
-  if (from === to || !editor) return;
+export function moveRow(
+  editor: TypedEditor,
+  tablePos: number,
+  from: number,
+  to: number,
+): void {
+  if (from === to) return;
 
   const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
@@ -121,23 +137,27 @@ export function moveRow(tablePos: number, from: number, to: number): void {
     rows,
     tableNode.marks,
   );
-  applyTableReplace(tablePos, newTable);
+  applyTableReplace(editor, tablePos, newTable);
 }
 
-export function clearRow(tablePos: number, rowIdx: number): void {
-  clearCells(tablePos, (row) => row === rowIdx);
+export function clearRow(
+  editor: TypedEditor,
+  tablePos: number,
+  rowIdx: number,
+): void {
+  clearCells(editor, tablePos, (row) => row === rowIdx);
 }
 
 function setCellBgs(
+  editor: TypedEditor,
   tablePos: number,
   shouldColor: (rowIdx: number, colIdx: number) => boolean,
   color: string | null,
 ): void {
-  const { editor } = editorStore.get();
-  const tableNode = editor?.state.doc.nodeAt(tablePos);
+  const tableNode = editor.state.doc.nodeAt(tablePos);
   if (!tableNode) return;
 
-  const tr = editor!.state.tr;
+  const tr = editor.state.tr;
   let rowPos = tablePos + 1;
   let rowIdx = 0;
   tableNode.content.forEach((rowNode) => {
@@ -154,29 +174,36 @@ function setCellBgs(
     rowIdx++;
     rowPos += rowNode.nodeSize;
   });
-  editor!.view.dispatch(tr);
+  editor.view.dispatch(tr);
 }
 
 export function setCellBgsForColumn(
+  editor: TypedEditor,
   tablePos: number,
   colIdx: number,
   color: string | null,
 ): void {
-  setCellBgs(tablePos, (_, col) => col === colIdx, color);
+  setCellBgs(editor, tablePos, (_, col) => col === colIdx, color);
 }
 
 export function setCellBgsForRow(
+  editor: TypedEditor,
   tablePos: number,
   rowIdx: number,
   color: string | null,
 ): void {
-  setCellBgs(tablePos, (row) => row === rowIdx, color);
+  setCellBgs(editor, tablePos, (row) => row === rowIdx, color);
 }
 
 export function clearCell(
+  editor: TypedEditor,
   tablePos: number,
   rowIdx: number,
   colIdx: number,
 ): void {
-  clearCells(tablePos, (row, col) => row === rowIdx && col === colIdx);
+  clearCells(
+    editor,
+    tablePos,
+    (row, col) => row === rowIdx && col === colIdx,
+  );
 }

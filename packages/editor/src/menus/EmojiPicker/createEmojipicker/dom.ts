@@ -1,10 +1,13 @@
 import { getEmojiData } from "./data";
-import { getEmojiUrl } from "../getEmojiUrl";
+import type { GetEmojiUrl } from "../../../runtime";
 import { categoryId } from "./category";
 
 export const COLUMN_COUNT = 10;
 
-export function createEmojiGrid(scroll: HTMLDivElement) {
+export function createEmojiGrid(
+  scroll: HTMLDivElement,
+  getEmojiUrl: GetEmojiUrl,
+) {
   const buttons: HTMLButtonElement[] = [];
   const grids: { start: number; count: number }[] = [];
   const categoryKeys: string[] = [];

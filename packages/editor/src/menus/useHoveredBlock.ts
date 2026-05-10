@@ -1,14 +1,20 @@
 import { useEffect, useRef, useCallback } from "react";
-import { editorStore, useEditor, type NodeBlock } from "../store";
+import { useEditor } from "../context";
+import { getRuntime, type NodeBlock } from "../runtime";
+import type { TypedEditor } from "../types";
 
 interface Options {
   menuRef: React.RefObject<HTMLDivElement | null>;
   open: boolean;
 }
 
-const computeTop = (blockEl: HTMLElement, menu: HTMLElement): number => {
+const computeTop = (
+  editor: TypedEditor,
+  blockEl: HTMLElement,
+  menu: HTMLElement,
+): number => {
   const blockRect = blockEl.getBoundingClientRect();
-  const containerRect = editorStore
+  const containerRect = getRuntime(editor)
     .get()
     .editorContainer?.getBoundingClientRect();
   if (!containerRect) return 0;
@@ -30,19 +36,17 @@ export function useHoveredBlock({ menuRef, open }: Options) {
 
   const getBlockFromEl = useCallback(
     (target: HTMLElement | null): HTMLElement | null => {
-      const { editor } = editorStore.get();
       if (!editor || !target) return null;
       const pm = editor.view.dom;
       let el: HTMLElement | null = target;
       while (el && el.parentElement !== pm) el = el.parentElement;
       return el?.parentElement === pm ? el : null;
     },
-    [],
+    [editor],
   );
 
   const resolveBlockInfo = useCallback(
     (blockEl: HTMLElement): NodeBlock | null => {
-      const { editor } = editorStore.get();
       if (!editor) return null;
 
       try {
@@ -63,16 +67,17 @@ export function useHoveredBlock({ menuRef, open }: Options) {
         return null;
       }
     },
-    [],
+    [editor],
   );
 
   const applyActive = useCallback(
     (block: NodeBlock) => {
+      if (!editor) return;
       const menu = menuRef.current;
       if (!menu || !block.element) return;
 
-      editorStore.set({ hoveredBlock: block });
-      const top = computeTop(block.element, menu);
+      getRuntime(editor).set({ hoveredBlock: block });
+      const top = computeTop(editor, block.element, menu);
 
       if (!hasPositionedRef.current) {
         // First show: snap without transition
@@ -87,23 +92,24 @@ export function useHoveredBlock({ menuRef, open }: Options) {
       }
       menu.dataset.visible = "true";
     },
-    [menuRef],
+    [menuRef, editor],
   );
 
   const clearActive = useCallback(() => {
+    if (!editor) return;
     const menu = menuRef.current;
     if (!menu) return;
 
     const hoveringMenu = menu.matches(":hover");
-    const hoveringBlock = editorStore
+    const hoveringBlock = getRuntime(editor)
       .get()
       .hoveredBlock?.element.matches(":hover");
 
     if (hoveringMenu || hoveringBlock) return;
 
     menu.dataset.visible = "false";
-    editorStore.set({ hoveredBlock: null });
-  }, [menuRef]);
+    getRuntime(editor).set({ hoveredBlock: null });
+  }, [menuRef, editor]);
 
   useEffect(() => {
     let editorDom: HTMLElement | null = null;

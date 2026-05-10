@@ -16,7 +16,8 @@ import {
 } from "../menus/EmojiPicker/createEmojipicker/data";
 import { emojiToShortcode } from "./helpers/emojiToShortcode";
 import { shortcodeToEmoji } from "./helpers/shortcodeToEmoji";
-import { getEditorConfig } from "../config";
+import { getRuntime } from "../runtime";
+import type { Editor } from "@tiptap/core";
 import { createNode } from "../lib/createNode";
 import type { EmojiNode } from "@open-notion/serializers";
 
@@ -207,7 +208,9 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
       [
         "img",
         {
-          src: getEditorConfig().getEmojiUrl(hexId, "inline"),
+          src: getRuntime((this as unknown as { editor: Editor }).editor)
+            .get()
+            .getEmojiUrl(hexId, "inline"),
           draggable: "false",
           loading: "lazy",
           alt: `${name} emoji`,

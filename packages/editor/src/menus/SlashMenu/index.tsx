@@ -5,7 +5,7 @@ import { Popover, PopoverContent } from "../../ui/popover";
 import { Separator } from "../../ui/separator";
 import { cn } from "../../lib/utils";
 import { filterSlashItems, groupItems, type SlashItem } from "./slash-items";
-import { editorStore, useEditor } from "../../store";
+import { useEditor, useEditorRuntime } from "../../context";
 
 const PLUGIN_KEY = new PluginKey("slashCommand");
 
@@ -38,6 +38,7 @@ export function SlashMenu() {
 
   const close = () => setState((s) => ({ ...s, open: false }));
   const editor = useEditor();
+  const slashItems = useEditorRuntime((s) => s.slashItems);
 
   useEffect(() => {
     if (!editor) return;
@@ -47,7 +48,7 @@ export function SlashMenu() {
       char: "/",
       pluginKey: PLUGIN_KEY,
       shouldResetDismissed: () => false,
-      items: ({ query }) => filterSlashItems(query),
+      items: ({ query }) => filterSlashItems(slashItems, query),
       render: () => ({
         onStart: (p) => {
           setState({
@@ -111,7 +112,7 @@ export function SlashMenu() {
     return () => {
       editor.unregisterPlugin(PLUGIN_KEY);
     };
-  }, [editor]);
+  }, [editor, slashItems]);
 
   useLayoutEffect(() => {
     listRef.current
@@ -169,7 +170,6 @@ export function SlashMenu() {
                     )}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
-                      const { editor } = editorStore.get();
                       if (!editor) return;
                       item.action(editor, latest.current.range!);
                     }}

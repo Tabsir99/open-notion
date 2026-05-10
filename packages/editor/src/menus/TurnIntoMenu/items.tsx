@@ -12,15 +12,16 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { TextSelection } from "@tiptap/pm/state";
-import { editorStore } from "../../store";
-import type { TurnIntoItem } from "../../config";
+import type { TurnIntoItem } from "../../runtime";
+import type { TypedEditor } from "../../types";
 
 export type { TurnIntoItem };
 
-export const runTurnInto = (blockPos: number, item: TurnIntoItem) => {
-  const editor = editorStore.get().editor;
-  if (!editor) return;
-
+export const runTurnInto = (
+  editor: TypedEditor,
+  blockPos: number,
+  item: TurnIntoItem,
+) => {
   const node = editor.state.doc.nodeAt(blockPos);
   if (!node) return;
 

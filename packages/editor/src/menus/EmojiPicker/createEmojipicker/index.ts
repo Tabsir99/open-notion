@@ -3,12 +3,14 @@ import { createCategoryBar } from "./category";
 import { createEmojiGrid } from "./dom";
 import { createNavigator } from "./navigation";
 import { getFilteredEmojisByCategory } from "./utils";
+import type { GetEmojiUrl } from "../../../runtime";
 
 const STORAGE_KEY = "recentEmojis";
 const MAX_RECENT = 18;
 
 export interface EmojiPickerOptions {
   onSelect: (shortcode: string, id: string) => void;
+  getEmojiUrl: GetEmojiUrl;
 }
 
 export type EmojiPickerApi = ReturnType<typeof createEmojiPicker>;
@@ -46,9 +48,9 @@ export function createEmojiPicker(
   root.appendChild(scroll);
   root.appendChild(bar);
 
-  const area = createEmojiGrid(scroll);
+  const area = createEmojiGrid(scroll, options.getEmojiUrl);
   const nav = createNavigator(area.buttons, area.grids);
-  const categoryBar = createCategoryBar(bar, scroll, (key) => {
+  const categoryBar = createCategoryBar(bar, scroll, options.getEmojiUrl, (key) => {
     const gridIdx = area.getGridIdxForKey(key);
     nav.setFocusToGrid(gridIdx);
   });

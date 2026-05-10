@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import type { FocusedCell } from "./useTableFocus";
 import { moveColumn, moveRow } from "./tableActions";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
 
 export interface DragState {
   axis: "col" | "row";
@@ -42,8 +42,10 @@ function nearestIdx(mids: number[], v: number): number {
   );
 }
 
-function syncColWidths(tablePos: number) {
-  const { editor } = editorStore.get();
+function syncColWidths(
+  editor: ReturnType<typeof useEditor>,
+  tablePos: number,
+) {
   if (!editor) return;
   const table = editor.state.doc.nodeAt(tablePos);
   if (!table) return;
@@ -85,6 +87,7 @@ function syncColWidths(tablePos: number) {
 }
 
 export function useTableDrag() {
+  const editor = useEditor();
   const [drag, setDrag] = useState<DragState | null>(null);
   const dragRef = useRef<DragState | null>(null);
   const dragCleanupRef = useRef<(() => void) | null>(null);
@@ -136,16 +139,16 @@ export function useTableDrag() {
 
       const onUp = () => {
         const d = dragRef.current;
-        if (d?.isDragging) {
+        if (d?.isDragging && editor) {
           didDragRef.current = true;
           requestAnimationFrame(() => {
             didDragRef.current = false;
           });
           if (d.axis === "col") {
-            moveColumn(d.tablePos, d.fromIdx, d.toIdx);
-            syncColWidths(d.tablePos);
+            moveColumn(editor, d.tablePos, d.fromIdx, d.toIdx);
+            syncColWidths(editor, d.tablePos);
           } else {
-            moveRow(d.tablePos, d.fromIdx, d.toIdx);
+            moveRow(editor, d.tablePos, d.fromIdx, d.toIdx);
           }
         }
         dragRef.current = null;
@@ -162,7 +165,7 @@ export function useTableDrag() {
         window.removeEventListener("mouseup", onUp);
       };
     },
-    [],
+    [editor],
   );
 
   return { drag, didDragRef, startDrag };

@@ -4,17 +4,20 @@ import { useHoveredBlock } from "./useHoveredBlock";
 import { BlockContextMenu } from "./BlockContextMenu";
 import { cn } from "../lib/utils";
 import { Button } from "../ui/button";
-import { editorStore } from "../store";
+import { useEditor } from "../context";
+import { getRuntime } from "../runtime";
 
 export function BlockSideMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const editor = useEditor();
 
   const { clearActive } = useHoveredBlock({ menuRef, open });
 
   const handlePlusClick = useCallback(() => {
-    const { editor, hoveredBlock } = editorStore.get();
-    if (!editor || !hoveredBlock) return;
+    if (!editor) return;
+    const { hoveredBlock } = getRuntime(editor).get();
+    if (!hoveredBlock) return;
 
     const pos = hoveredBlock.pos;
     const $pos = editor.state.doc.resolve(pos);
@@ -27,12 +30,13 @@ export function BlockSideMenu() {
       .setTextSelection(endOfBlock + 1)
       .insertContent("/")
       .run();
-  }, []);
+  }, [editor]);
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLButtonElement>) => {
-      const { editor, hoveredBlock } = editorStore.get();
-      if (!editor || !hoveredBlock) return;
+      if (!editor) return;
+      const { hoveredBlock } = getRuntime(editor).get();
+      if (!hoveredBlock) return;
 
       const { pos, element } = hoveredBlock;
 
@@ -48,7 +52,7 @@ export function BlockSideMenu() {
         e.clientY - rect.top,
       );
     },
-    [],
+    [editor],
   );
 
   return (
@@ -96,17 +100,16 @@ export function BlockSideMenu() {
               className="cursor-grab"
               draggable
               onClick={() => {
-                const { editor, hoveredBlock } = editorStore.get();
-                if (!editor || !hoveredBlock) return;
+                if (!editor) return;
+                const { hoveredBlock } = getRuntime(editor).get();
+                if (!hoveredBlock) return;
 
                 setOpen((p) => !p);
                 editor.chain().focus().setNodeSelection(hoveredBlock.pos).run();
               }}
               onDragStart={handleDragStart}
               onDragEnd={() => {
-                const { editor } = editorStore.get();
                 if (!editor) return;
-
                 editor.view.dragging = null;
               }}
             >

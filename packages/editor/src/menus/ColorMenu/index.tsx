@@ -5,7 +5,7 @@ import {
 } from "../../ui/dropdown-menu";
 import { textColors, bgColors, type ColorOption } from "./colors";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
 import { normalizeColor } from "../../lib/utils";
 
 interface ColorMenuProps {
@@ -96,12 +96,15 @@ interface Props {
 }
 
 export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {
+  const editor = useEditor();
+
   const handle =
     (kind: "textColor" | "backgroundColor") => (color: string | null) => {
-      const { editor } = editorStore.get();
       if (!editor) return;
       const current =
-        blockPos !== undefined ? getBlockAttr(kind, blockPos) : getBlockAttr(kind);
+        blockPos !== undefined
+          ? getBlockAttr(editor, kind, blockPos)
+          : getBlockAttr(editor, kind);
       const cmd = editor.chain().focus();
 
       if (blockPos !== undefined) {
@@ -122,7 +125,7 @@ export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {
             : cmd.unsetBackgroundColor().run();
           return;
         }
-        const active = getBlockAttr(kind) === color;
+        const active = getBlockAttr(editor, kind) === color;
         if (kind === "textColor") {
           (active ? cmd.unsetColor() : cmd.setColor(color)).run();
         } else {
@@ -137,8 +140,8 @@ export function BlockColorMenu({ children, isSubMenu, blockPos }: Props) {
   return (
     <ColorMenu
       isSubMenu={isSubMenu}
-      activeText={getBlockAttr("textColor", blockPos)}
-      activeBg={getBlockAttr("backgroundColor", blockPos)}
+      activeText={getBlockAttr(editor, "textColor", blockPos)}
+      activeBg={getBlockAttr(editor, "backgroundColor", blockPos)}
       onSelectText={handle("textColor")}
       onSelectBg={handle("backgroundColor")}
     >

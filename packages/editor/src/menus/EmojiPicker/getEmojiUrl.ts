@@ -3,7 +3,7 @@
 //   multi  : "1F9D1-200D-1F91D-200D-1F9D1"
 // Internal transforms (lowercase, underscore, etc.) are handled per-provider.
 
-import type { GetEmojiUrl } from "../../config";
+import type { GetEmojiUrl } from "../../runtime";
 
 const CDN = {
   openmoji: "https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest",

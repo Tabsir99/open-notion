@@ -5,17 +5,19 @@ import { Input } from "../../ui/input";
 import { fontSizes } from "./sizes";
 import { AttributeHeader, AttributeMenu, getBlockAttr } from "../AttributeMenu";
 import { cn } from "../../lib/utils";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
+import type { TypedEditor } from "../../types";
 
-function applyFontSize(size: string, pos?: number) {
-  const { editor } = editorStore.get();
-  if (!editor) return;
-
+function applyFontSize(
+  editor: TypedEditor,
+  size: string,
+  pos?: number,
+): void {
   const cmd = editor.chain().focus();
   if (pos !== undefined) {
     cmd.toggleBlockFontSize(size, pos).run();
   } else {
-    const active = getBlockAttr("fontSize") === size;
+    const active = getBlockAttr(editor, "fontSize") === size;
     (active ? cmd.unsetFontSize() : cmd.setFontSize(size)).run();
   }
 }
@@ -31,7 +33,8 @@ export function FontSizeMenu({
   children,
   blockPos,
 }: FontSizeMenuProps) {
-  const active = getBlockAttr("fontSize", blockPos);
+  const editor = useEditor();
+  const active = getBlockAttr(editor, "fontSize", blockPos);
 
   const [customValue, setCustomValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,9 +51,9 @@ export function FontSizeMenu({
 
   const handleCustomSubmit = () => {
     const val = customValue.trim();
-    if (!val) return;
+    if (!val || !editor) return;
     const px = val.endsWith("px") ? val : `${val}px`;
-    applyFontSize(px, blockPos);
+    applyFontSize(editor, px, blockPos);
   };
 
   return (
@@ -63,7 +66,7 @@ export function FontSizeMenu({
         return (
           <DropdownMenuItem
             key={item.id}
-            onClick={() => applyFontSize(item.value, blockPos)}
+            onClick={() => editor && applyFontSize(editor, item.value, blockPos)}
             className={cn(
               "group flex items-center gap-3 px-2.5 py-2 rounded-md cursor-pointer",
               "focus:bg-accent/60 data-highlighted:bg-accent/60",

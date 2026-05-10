@@ -1,10 +1,11 @@
-import { getEditorConfig } from "../../../config";
+import type { GetEmojiUrl } from "../../../runtime";
 import { getEmojiData } from "./data";
 
 export const categoryId = (id: string) => `emoji-category-${id}`;
 export function createCategoryBar(
   bar: HTMLDivElement,
   scroll: HTMLDivElement,
+  getEmojiUrl: GetEmojiUrl,
   onCategoryClick: (id: string) => void,
 ) {
   const build = (hasRecent: boolean) => {
@@ -40,7 +41,7 @@ export function createCategoryBar(
       };
 
       const img = document.createElement("img");
-      img.src = getEditorConfig().getEmojiUrl(icon, "category-bar");
+      img.src = getEmojiUrl(icon, "category-bar");
       img.className = "size-6 select-none";
       img.draggable = false;
       btn.appendChild(img);

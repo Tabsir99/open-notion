@@ -24,14 +24,17 @@ import {
   setCellBgsForRow,
 } from "./tableActions";
 import type { FocusedCell } from "./useTableFocus";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
 import type {} from "@tiptap/core";
 import type { TypedEditor } from "../../types";
 
 const ITEM = "flex items-center gap-2 h-8 px-2";
 
-function act(fn: (ed: TypedEditor) => void, onClose: () => void) {
-  const { editor } = editorStore.get();
+function act(
+  editor: TypedEditor | null,
+  fn: (ed: TypedEditor) => void,
+  onClose: () => void,
+) {
   if (!editor) return;
   fn(editor);
   editor.commands.focus();
@@ -76,7 +79,8 @@ interface MenuProps {
 }
 
 export function ColMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
+  const editor = useEditor();
+  const a = (fn: (ed: TypedEditor) => void) => act(editor, fn, onClose);
   const chain = (ed: TypedEditor) =>
     ed.chain().focus().setTextSelection(focused.cellPosInDoc);
 
@@ -102,7 +106,8 @@ export function ColMenu({ focused, onClose }: MenuProps) {
           {
             icon: Copy,
             label: "Duplicate column",
-            onClick: () => duplicateColumn(focused.tablePos, focused.colIndex),
+            onClick: () =>
+              editor && duplicateColumn(editor, focused.tablePos, focused.colIndex),
           },
           "sep",
         ]}
@@ -110,7 +115,8 @@ export function ColMenu({ focused, onClose }: MenuProps) {
       <ColorMenu
         isSubMenu
         onSelectBg={(c) =>
-          setCellBgsForColumn(focused.tablePos, focused.colIndex, c)
+          editor &&
+          setCellBgsForColumn(editor, focused.tablePos, focused.colIndex, c)
         }
       >
         <ColorTrigger />
@@ -121,7 +127,8 @@ export function ColMenu({ focused, onClose }: MenuProps) {
           {
             icon: Eraser,
             label: "Clear column",
-            onClick: () => clearColumn(focused.tablePos, focused.colIndex),
+            onClick: () =>
+              editor && clearColumn(editor, focused.tablePos, focused.colIndex),
           },
           {
             icon: Trash2,
@@ -136,7 +143,8 @@ export function ColMenu({ focused, onClose }: MenuProps) {
 }
 
 export function RowMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
+  const editor = useEditor();
+  const a = (fn: (ed: TypedEditor) => void) => act(editor, fn, onClose);
   const chain = (ed: TypedEditor) =>
     ed.chain().focus().setTextSelection(focused.cellPosInDoc);
 
@@ -165,7 +173,8 @@ export function RowMenu({ focused, onClose }: MenuProps) {
       <ColorMenu
         isSubMenu
         onSelectBg={(c) =>
-          setCellBgsForRow(focused.tablePos, focused.rowIndex, c)
+          editor &&
+          setCellBgsForRow(editor, focused.tablePos, focused.rowIndex, c)
         }
       >
         <ColorTrigger />
@@ -176,7 +185,8 @@ export function RowMenu({ focused, onClose }: MenuProps) {
           {
             icon: Eraser,
             label: "Clear row",
-            onClick: () => clearRow(focused.tablePos, focused.rowIndex),
+            onClick: () =>
+              editor && clearRow(editor, focused.tablePos, focused.rowIndex),
           },
           {
             icon: Trash2,
@@ -191,7 +201,8 @@ export function RowMenu({ focused, onClose }: MenuProps) {
 }
 
 export function CellMenu({ focused, onClose }: MenuProps) {
-  const a = (fn: (ed: TypedEditor) => void) => act(fn, onClose);
+  const editor = useEditor();
+  const a = (fn: (ed: TypedEditor) => void) => act(editor, fn, onClose);
 
   return (
     <DropdownMenuContent
@@ -237,7 +248,13 @@ export function CellMenu({ focused, onClose }: MenuProps) {
             icon: Eraser,
             label: "Clear cell",
             onClick: () =>
-              clearCell(focused.tablePos, focused.rowIndex, focused.colIndex),
+              editor &&
+              clearCell(
+                editor,
+                focused.tablePos,
+                focused.rowIndex,
+                focused.colIndex,
+              ),
           },
         ]}
       />

@@ -14,7 +14,7 @@ import {
   Table,
   AlertCircle,
 } from "lucide-react";
-import { getEditorConfig, type SlashItem } from "../../config";
+import type { SlashItem } from "../../runtime";
 
 export type { SlashItem };
 
@@ -166,11 +166,12 @@ export const defaultSlashItems: SlashItem[] = [
 ];
 
 /** Filter items by query, matching title */
-export function filterSlashItems(query: string): SlashItem[] {
+export function filterSlashItems(
+  items: SlashItem[],
+  query: string,
+): SlashItem[] {
   const q = query.toLowerCase();
-  return getEditorConfig().slashItems.filter((item) =>
-    item.title.toLowerCase().includes(q),
-  );
+  return items.filter((item) => item.title.toLowerCase().includes(q));
 }
 
 /** Group a flat item list by `group` field, preserving insertion order */

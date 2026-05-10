@@ -1,21 +1,18 @@
 import { Plus } from "lucide-react";
-import { editorStore } from "../../store";
+import { useEditor } from "../../context";
 import { Button } from "../../ui/button";
 import { memo } from "react";
 import { cn } from "../../lib/utils";
+import type { TypedEditor } from "../../types";
 
-function addRowAtEnd(tablePos: number) {
-  const { editor } = editorStore.get();
-  if (!editor) return;
+function addRowAtEnd(editor: TypedEditor, tablePos: number) {
   const table = editor.state.doc.nodeAt(tablePos);
   if (!table) return;
   const lastCellPos = tablePos + table.nodeSize - 3;
   editor.chain().focus().setTextSelection(lastCellPos).addRowAfter().run();
 }
 
-function addColumnAtEnd(tablePos: number) {
-  const { editor } = editorStore.get();
-  if (!editor) return;
+function addColumnAtEnd(editor: TypedEditor, tablePos: number) {
   const table = editor.state.doc.nodeAt(tablePos);
   if (!table) return;
   const lastCellPos = tablePos + table.nodeSize - 3;
@@ -23,11 +20,13 @@ function addColumnAtEnd(tablePos: number) {
 }
 
 export const TableEdgeAddons = memo(({ tablePos }: { tablePos: number }) => {
+  const editor = useEditor();
+
   return (
     <>
       <Button
         variant="outline"
-        onClick={() => addColumnAtEnd(tablePos)}
+        onClick={() => editor && addColumnAtEnd(editor, tablePos)}
         className={cn(
           "absolute z-13 top-0 -right-6 h-full w-5 rounded-sm border-dashed transition-opacity duration-300",
           "opacity-0 group-hover/table:opacity-50 hover:opacity-100",
@@ -40,7 +39,7 @@ export const TableEdgeAddons = memo(({ tablePos }: { tablePos: number }) => {
 
       <Button
         variant="outline"
-        onClick={() => addRowAtEnd(tablePos)}
+        onClick={() => editor && addRowAtEnd(editor, tablePos)}
         className={cn(
           "absolute z-13 -bottom-6 left-0 h-5 w-full rounded-sm border-dashed transition-opacity duration-300",
           "opacity-0 group-hover/table:opacity-60 hover:opacity-100",
