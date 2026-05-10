@@ -60,16 +60,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
     return { unsubscribe: null };
   },
 
-  onCreate() {
-    const storage = this.storage as EmojiStorage;
-    storage.unsubscribe = onEmojiDataLoaded(() => {
-      if (this.editor.view.isDestroyed) return;
-      this.editor.view.dispatch(
-        this.editor.state.tr.setMeta(SWEEP_META, true),
-      );
-    });
-  },
-
   onDestroy() {
     const storage = this.storage as EmojiStorage;
     storage.unsubscribe?.();
@@ -109,6 +99,18 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
     return {
       hexId: { default: null },
       name: { default: null },
+      shortcode: {
+        default: "",
+        parseHTML: (el: HTMLElement) => {
+          const explicit = el.getAttribute("data-shortcode");
+          if (explicit) return explicit;
+          // Backfill from descriptive name when emoji data is loaded
+          // (e.g. parsing legacy HTML written before this attribute existed).
+          const name = el.getAttribute("data-name");
+          if (!name) return "";
+          return shortcodeToEmoji(name, getEmojiArray())?.shortcodes[0] ?? "";
+        },
+      },
     };
   },
 
@@ -121,13 +123,15 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const emojiItem = shortcodeToEmoji(node.attrs.name, getEmojiArray());
     const attributes = mergeAttributes(HTMLAttributes, {
       "data-type": this.name,
     });
 
-    if (!emojiItem) {
-      return ["span", attributes, `:${node.attrs.name ?? "unknown"}:`];
+    const { hexId, name, shortcode } = node.attrs;
+
+    if (!hexId) {
+      const fallback = shortcode || name || "unknown";
+      return ["span", attributes, `:${fallback}:`];
     }
 
     return [
@@ -136,25 +140,25 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
       [
         "img",
         {
-          src: getEditorConfig().getEmojiUrl(emojiItem.id, "inline"),
+          src: getEditorConfig().getEmojiUrl(hexId, "inline"),
           draggable: "false",
           loading: "lazy",
-          alt: `${emojiItem.name} emoji`,
+          alt: `${name} emoji`,
         },
       ],
     ];
   },
 
   renderText({ node }) {
-    const emojiItem = shortcodeToEmoji(node.attrs.name, getEmojiArray());
-    return emojiItem?.unicode || `:${node.attrs.name}:`;
+    const lookup = node.attrs.shortcode || node.attrs.name;
+    const emojiItem = shortcodeToEmoji(lookup, getEmojiArray());
+    return emojiItem?.unicode || `:${lookup || "unknown"}:`;
   },
 
   renderMarkdown: (node) => {
-    if (!node.attrs?.name) {
-      return "";
-    }
-    return `:${node.attrs.name}:`;
+    const code = node.attrs?.shortcode || node.attrs?.name;
+    if (!code) return "";
+    return `:${code}:`;
   },
 
   addCommands() {
@@ -172,6 +176,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
               attrs: {
                 hexId: emojiItem.id,
                 name: emojiItem.name,
+                shortcode: emojiItem.shortcodes[0] ?? emojiItem.name,
               } satisfies EmojiNode["attrs"],
             })
             .command(({ tr, state }) => {
@@ -194,8 +199,8 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
       new InputRule({
         find: inputRegex,
         handler: ({ range, match, chain }) => {
-          const name = match[1];
-          const emojiItem = shortcodeToEmoji(name, getEmojiArray());
+          const typed = match[1];
+          const emojiItem = shortcodeToEmoji(typed, getEmojiArray());
 
           if (!emojiItem) {
             return;
@@ -207,6 +212,7 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
               attrs: {
                 hexId: emojiItem.id,
                 name: emojiItem.name,
+                shortcode: emojiItem.shortcodes[0] ?? typed,
               } satisfies EmojiNode["attrs"],
             })
             .command(({ tr, state }) => {
@@ -229,8 +235,8 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         find: pasteRegex,
         handler: ({ range, match, chain }) => {
           const prefix = match[1] || "";
-          const name = match[2];
-          const emojiItem = shortcodeToEmoji(name, getEmojiArray());
+          const typed = match[2];
+          const emojiItem = shortcodeToEmoji(typed, getEmojiArray());
 
           if (!emojiItem) {
             return;
@@ -245,8 +251,10 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
               {
                 type: this.name,
                 attrs: {
-                  name,
-                },
+                  hexId: emojiItem.id,
+                  name: emojiItem.name,
+                  shortcode: emojiItem.shortcodes[0] ?? typed,
+                } satisfies EmojiNode["attrs"],
               },
               {
                 updateSelection: false,
@@ -266,7 +274,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
 
   addProseMirrorPlugins() {
     const extType = this.type;
-    const extName = this.name;
 
     return [
       new Plugin({
@@ -290,39 +297,26 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         },
 
         appendTransaction: (transactions, oldState, newState) => {
-          if (this.editor.view.composing) {
-            return;
-          }
+          if (this.editor.view.composing) return;
 
-          const isSweep = transactions.some((t) => t.getMeta(SWEEP_META));
           const docChanges =
             transactions.some((transaction) => transaction.docChanged) &&
             !oldState.doc.eq(newState.doc);
-
-          if (!docChanges && !isSweep) {
-            return;
-          }
+          if (!docChanges) return;
 
           const emojis = getEmojiArray();
           if (emojis.length === 0) return;
 
           const { tr } = newState;
-
-          // Determine ranges to scan: full doc on sweep, changed ranges otherwise.
-          type ScanRange = { from: number; to: number };
-          const ranges: ScanRange[] = isSweep
-            ? [{ from: 0, to: newState.doc.content.size }]
-            : getChangedRanges(
-                combineTransactionSteps(
-                  oldState.doc,
-                  transactions as Transaction[],
-                ),
-              ).map((c) => ({ from: c.newRange.from, to: c.newRange.to }));
+          const ranges = getChangedRanges(
+            combineTransactionSteps(
+              oldState.doc,
+              transactions as Transaction[],
+            ),
+          ).map((c) => ({ from: c.newRange.from, to: c.newRange.to }));
 
           ranges.forEach(({ from: rFrom, to: rTo }) => {
-            if (newState.doc.resolve(rFrom).parent.type.spec.code) {
-              return;
-            }
+            if (newState.doc.resolve(rFrom).parent.type.spec.code) return;
 
             const textNodes = findChildrenInRange(
               newState.doc,
@@ -331,90 +325,35 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
             );
 
             textNodes.forEach(({ node, pos }) => {
-              if (!node.text) {
-                return;
-              }
+              if (!node.text) return;
 
               const matches = [...node.text.matchAll(emojiRegex())];
 
-              matches.forEach((match) => {
-                if (match.index === undefined) {
-                  return;
-                }
-
+              for (const match of matches) {
+                if (match.index === undefined) continue;
                 const emoji = match[0];
-                const name = emojiToShortcode(emoji, emojis);
-
-                if (!name) {
-                  return;
-                }
-                const emojiItem = shortcodeToEmoji(name, emojis);
-                if (!emojiItem) {
-                  return;
-                }
-
+                const sc = emojiToShortcode(emoji, emojis);
+                if (!sc) continue;
+                const item = shortcodeToEmoji(sc, emojis);
+                if (!item) continue;
                 const from = tr.mapping.map(pos + match.index);
-
-                if (newState.doc.resolve(from).parent.type.spec.code) {
-                  return;
-                }
-
+                if (newState.doc.resolve(from).parent.type.spec.code) continue;
                 const to = from + emoji.length;
-                const emojiNode = extType.create({ name });
-
-                tr.replaceRangeWith(from, to, emojiNode);
-
-                tr.setStoredMarks(newState.doc.resolve(from).marks());
-              });
-            });
-          });
-
-          // Sweep also (a) re-renders existing EmojiNodes whose renderHTML
-          // produced ":<name>:" before emoji data was available, and
-          // (b) re-evaluates literal `:shortcode:` text typed before data
-          // loaded.
-          if (isSweep) {
-            newState.doc.descendants((node, pos) => {
-              if (node.type === extType) {
-                const item = shortcodeToEmoji(node.attrs.name, emojis);
-                if (item) {
-                  const from = tr.mapping.map(pos);
-                  const to = tr.mapping.map(pos + node.nodeSize);
-                  tr.replaceRangeWith(from, to, extType.create(node.attrs));
-                }
-                return;
-              }
-
-              if (!node.type.isText || !node.text) return;
-              if (newState.doc.resolve(pos).parent.type.spec.code) return;
-
-              const re = /:([a-zA-Z0-9_+-]+):/g;
-              let m: RegExpExecArray | null;
-              while ((m = re.exec(node.text))) {
-                const name = m[1];
-                const emojiItem = shortcodeToEmoji(name, emojis);
-                if (!emojiItem) continue;
-                const from = tr.mapping.map(pos + m.index);
-                const to = from + m[0].length;
                 tr.replaceRangeWith(
                   from,
                   to,
                   extType.create({
-                    hexId: emojiItem.id,
-                    name: emojiItem.name,
+                    hexId: item.id,
+                    name: item.name,
+                    shortcode: item.shortcodes[0] ?? sc,
                   }),
                 );
+                tr.setStoredMarks(newState.doc.resolve(from).marks());
               }
             });
-            // Tag the appended tr so we don't loop on our own meta.
-            tr.setMeta(extName, true);
-          }
+          });
 
-          if (!tr.steps.length) {
-            return;
-          }
-
-          return tr;
+          return tr.steps.length ? tr : null;
         },
       }),
     ];

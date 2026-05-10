@@ -47,8 +47,12 @@ export type HardBreakNode = { type: "hardBreak" };
 export type EmojiNode = {
   type: "emoji";
   attrs: {
+    /** Descriptive name (e.g. "smiling face"). Used for `<img alt>`. */
     name: string;
+    /** Canonical hex codepoint (e.g. "1F600"). Drives image URLs. */
     hexId: string;
+    /** Canonical shortcode (e.g. "smile"). Used for `:fallback:` text and serialization. */
+    shortcode: string;
   };
 };
 export type InlineNode = TextNode | HardBreakNode | EmojiNode;

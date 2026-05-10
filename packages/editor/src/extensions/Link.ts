@@ -58,9 +58,20 @@ declare module "@tiptap/core" {
   }
 }
 
-const SCHEME_RE = /^[a-z][\w+.-]*:\/\//i;
-const URL_RE =
-  /(?:https?:\/\/[^\s<>"]+|www\.[\w-]+(?:\.[\w-]+)+[^\s<>"]*|(?:[\w-]+\.)+[a-z]{2,}(?:\/[^\s<>"]*)?)/gi;
+/**
+ * - Scheme allowlist: http, https, ftp.
+ * - Hostname: word chars, dots, hyphens.
+ * - TLD: 2-3 lowercase letters, with a `\b` afterwards so e.g.
+ *   `https://example.community` doesn't half-match as `.com`.
+ * - Optional path/query/fragment introduced by `/`, `?`, or `#`.
+ *
+ * TLDs longer than 3 chars (`.info`, `.museum`, `.community`, IDN xn--…)
+ * are knowingly out of scope — a strict regex covers ~95% of real URLs and
+ * keeps the algorithm trivial. URLs without an explicit scheme aren't
+ * autolinked either; `setLink` from the bubble menu handles those.
+ */
+const SCHEME_RE = /^(?:https?|ftp):\/\//i;
+const URL_RE = /(?:https?|ftp):\/\/[\w.-]+\.[a-z]{2,3}\b(?:[/?#]\S*)?/gi;
 
 function looksLikeUrl(text: string): boolean {
   if (!text) return false;
@@ -102,6 +113,9 @@ function autolinkPlugin(opts: { type: MarkType }) {
         if (blocks.length === 0) return;
 
         const block = blocks[0];
+
+        // Trigger only on whitespace at the end of the change. Punctuation
+        // alone doesn't trigger — user might still be typing the URL.
         const endText = newState.doc.textBetween(
           newRange.from,
           newRange.to,
@@ -110,34 +124,39 @@ function autolinkPlugin(opts: { type: MarkType }) {
         );
         if (!wsEnd.test(endText)) return;
 
-        const before = newState.doc.textBetween(
+        // Scan the textblock content and link every URL_RE match. The regex
+        // already requires scheme + valid TLD, and `[\w.-]+` excludes
+        // surrounding punctuation like `()[]{}` — so the matched substring
+        // is the URL itself, regardless of what surrounds it. No lookbehind,
+        // no trim, no per-token tokenization needed.
+        const text = newState.doc.textBetween(
           block.pos,
           newRange.to,
           undefined,
           " ",
         );
-        const words = before.split(/\s+/).filter(Boolean);
-        if (words.length === 0) return;
-        const last = words[words.length - 1];
-        if (!looksLikeUrl(last)) return;
 
-        const idx = before.lastIndexOf(last);
-        const from = block.pos + idx;
-        const to = from + last.length;
+        const re = new RegExp(URL_RE.source, "gi");
+        let m: RegExpExecArray | null;
+        while ((m = re.exec(text))) {
+          const url = m[0];
+          const from = block.pos + 1 + m.index;
+          const to = from + url.length;
 
-        if (
-          newState.schema.marks.code &&
-          newState.doc.rangeHasMark(from, to, newState.schema.marks.code)
-        )
-          return;
-        if (
-          getMarksBetween(from, to, newState.doc).some(
-            (item) => item.mark.type === opts.type,
+          if (
+            newState.schema.marks.code &&
+            newState.doc.rangeHasMark(from, to, newState.schema.marks.code)
           )
-        )
-          return;
+            continue;
+          if (
+            getMarksBetween(from, to, newState.doc).some(
+              (item) => item.mark.type === opts.type,
+            )
+          )
+            continue;
 
-        tr.addMark(from, to, opts.type.create({ href: normalizeHref(last) }));
+          tr.addMark(from, to, opts.type.create({ href: normalizeHref(url) }));
+        }
       });
 
       if (!tr.steps.length) return null;

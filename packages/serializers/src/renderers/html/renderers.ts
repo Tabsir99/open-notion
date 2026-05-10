@@ -67,7 +67,6 @@ function renderImage(node: ImageNode): string {
 }
 
 async function renderCallout(node: CalloutNode): Promise<string> {
-  console.log(node);
   const emoji = `<span${attr(DATA_TYPE, type.emoji)}><img${attr(
     "src",
     getEmojiUrl(node.attrs.hexId, "callout-icon"),
