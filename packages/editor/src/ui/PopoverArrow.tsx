@@ -1,5 +1,3 @@
-// components/ui/popover-arrow.tsx
-
 type Side = "top" | "bottom" | "left" | "right";
 type Align = "start" | "center" | "end";
 
@@ -23,7 +21,6 @@ export function PopoverArrow({
   const clipWidth = isHorizontal ? size / 2 : size;
   const clipHeight = isHorizontal ? size : size / 2;
 
-  // Position along the edge based on align + offset
   const alignStyle = (): React.CSSProperties => {
     if (isHorizontal) {
       if (align === "start") return { top: offset };

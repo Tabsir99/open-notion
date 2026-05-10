@@ -73,7 +73,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
         if (!node.isText || !node.text) return;
         if (state.doc.resolve(pos).parent.type.spec.code) return;
 
-        // shortcodes
         const scRe = /:([a-zA-Z0-9_+-]+):/g;
         let m: RegExpExecArray | null;
         while ((m = scRe.exec(node.text))) {
@@ -92,7 +91,6 @@ export const EmojiExtension = createNode<"emoji", EmojiOptions>({
           );
         }
 
-        // unicode
         for (const um of node.text.matchAll(emojiRegex())) {
           if (um.index === undefined) continue;
           const sc = emojiToShortcode(um[0], emojis);

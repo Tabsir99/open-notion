@@ -1,6 +1,6 @@
 {
   "name": "@open-notion/assets",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Drop-in CSS, JS and Emoji assets for content rendered by Open Notion serializers.",
   "license": "MIT",
   "repository": {

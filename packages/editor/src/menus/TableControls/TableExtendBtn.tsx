@@ -25,7 +25,6 @@ function addColumnAtEnd(tablePos: number) {
 export const TableEdgeAddons = memo(({ tablePos }: { tablePos: number }) => {
   return (
     <>
-      {/* Add column — right edge */}
       <Button
         variant="outline"
         onClick={() => addColumnAtEnd(tablePos)}
@@ -39,7 +38,6 @@ export const TableEdgeAddons = memo(({ tablePos }: { tablePos: number }) => {
         <Plus className="size-3" />
       </Button>
 
-      {/* Add row — bottom edge */}
       <Button
         variant="outline"
         onClick={() => addRowAtEnd(tablePos)}

@@ -40,14 +40,11 @@ export function createEmojiPicker(
       ? JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]")
       : [];
 
-  // Layout scaffold
   const { bar, scroll } = createScaffold();
 
   root.className = "h-full flex flex-col relative";
   root.appendChild(scroll);
   root.appendChild(bar);
-
-  // Instantiate factories
 
   const area = createEmojiGrid(scroll);
   const nav = createNavigator(area.buttons, area.grids);
@@ -90,7 +87,6 @@ export function createEmojiPicker(
   scroll.addEventListener("mousemove", handleMouseMove, { passive: true });
   scroll.addEventListener("pointerdown", handlePointerDown);
 
-  // Public render methods
   const renderAll = () => {
     area.clear();
     nav.reset();

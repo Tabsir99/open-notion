@@ -1,4 +1,3 @@
-// editor-store.ts
 import { useSyncExternalStore } from "react";
 import type { TypedEditor } from "./types";
 

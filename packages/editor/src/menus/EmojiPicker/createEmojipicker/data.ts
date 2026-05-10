@@ -25,8 +25,6 @@ export interface EmojiData {
   categories: EmojiCategory[];
 }
 
-// --- Singleton loader ---
-
 let _cache: EmojiData | null = null;
 let _emojiArray: Emoji[] | null = null;
 let _inflight: Promise<EmojiData> | null = null;
