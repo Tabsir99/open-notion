@@ -109,6 +109,7 @@ export const CodeBlockView = memo(
     );
   },
   (p, n) => {
+    if (p.node === n.node) return true;
     if (p.node.attrs.language !== n.node.attrs.language) return false;
     if (p.node.textContent !== n.node.textContent) return false;
     return true;

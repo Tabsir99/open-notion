@@ -182,5 +182,5 @@ export const ImageBlock = memo(
       </NodeViewWrapper>
     );
   },
-  (p, n) => p.node.attrs === n.node.attrs,
+  (p, n) => p.node === n.node || p.node.attrs === n.node.attrs,
 );

@@ -4,9 +4,10 @@ export const CDN = {
 } as const;
 
 export const getEmojiUrl = (
-  hexId: string,
+  hexId: string | null | undefined,
   source: "inline" | "callout-icon",
 ): string => {
+  if (!hexId) return "";
   const lower = hexId.toLowerCase();
   const underscored = lower.replace(/-/g, "_");
 

@@ -19,8 +19,16 @@ export const Callout = createNode({
 
   addAttributes() {
     return {
-      emoji: { default: "bulb" },
-      hexId: { default: "1F4A1" },
+      emoji: {
+        default: "bulb",
+        parseHTML: (el) => el.getAttribute("data-emoji") || "bulb",
+        renderHTML: (attrs) => ({ "data-emoji": attrs.emoji }),
+      },
+      hexId: {
+        default: "1F4A1",
+        parseHTML: (el) => el.getAttribute("data-hexid") || "1F4A1",
+        renderHTML: (attrs) => ({ "data-hexid": attrs.hexId }),
+      },
     };
   },
 
@@ -34,8 +42,8 @@ export const Callout = createNode({
       mergeAttributes(HTMLAttributes, {
         "data-type": "callout",
         "data-emoji": node.attrs.emoji,
+        "data-hexid": node.attrs.hexId,
       }),
-      ["span", { "data-type": "emoji" }, node.attrs.emoji],
       ["div", {}, 0],
     ];
   },
