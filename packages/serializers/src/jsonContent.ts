@@ -55,7 +55,9 @@ export type EmojiNode = {
     shortcode: string;
   };
 };
-export type InlineNode = TextNode | HardBreakNode | EmojiNode;
+// Derived from the open `InlineNodeDefs` interface below — consumers can
+// widen this set via declaration merging.
+export type InlineNode = InlineNodeDefs[keyof InlineNodeDefs];
 
 // ── Block nodes ───────────────────────────────────────────────────────
 
@@ -130,29 +132,65 @@ export type TableRowNode = {
 };
 export type TableNode = { type: "table"; content?: TableRowNode[] };
 
-// ── Unions ────────────────────────────────────────────────────────────
+// ── Registries (open interfaces — extend via declaration merging) ─────
+//
+// `BlockNodeDefs` / `InlineNodeDefs` / `NodeDefs` are open interfaces so
+// consumers can register custom node types and have them flow into
+// `BlockNode`, `InlineNode`, `AnyEditorNode`, `NodeName`, `NodeAttrs`,
+// `DocContent.content`, and the typed editor surface — same pattern
+// `MarkDefs` already uses for marks.
+//
+// Example consumer extension:
+//
+//   declare module "@open-notion/serializers" {
+//     interface BlockNodeDefs {
+//       githubLink: {
+//         type: "githubLink";
+//         attrs: BlockAttrs & { url: string };
+//         content?: InlineNode[];
+//       };
+//     }
+//   }
+//
+// After that one declaration, `BlockNode` / `AnyEditorNode` /
+// `DocContent.content` include `"githubLink"`, and `createNode({ name:
+// "githubLink", ... })` type-checks with the consumer's attrs shape.
 
-export type BlockNode =
-  | ParagraphNode
-  | HeadingNode
-  | BlockquoteNode
-  | CodeBlockNode
-  | HorizontalRule
-  | ImageNode
-  | CalloutNode
-  | BulletListNode
-  | OrderedListNode
-  | TaskListNode
-  | TableNode;
+export interface BlockNodeDefs {
+  paragraph: ParagraphNode;
+  heading: HeadingNode;
+  blockquote: BlockquoteNode;
+  codeBlock: CodeBlockNode;
+  horizontalRule: HorizontalRule;
+  image: ImageNode;
+  callout: CalloutNode;
+  bulletList: BulletListNode;
+  orderedList: OrderedListNode;
+  taskList: TaskListNode;
+  table: TableNode;
+}
 
-export type AnyEditorNode =
-  | BlockNode
-  | InlineNode
-  | ListItemNode
-  | TaskItemNode
-  | TableRowNode
-  | TableCellNode
-  | TableHeaderNode;
+export interface InlineNodeDefs {
+  text: TextNode;
+  hardBreak: HardBreakNode;
+  emoji: EmojiNode;
+}
+
+// Catch-all registry — block + inline + structural (list items, table
+// cells/rows). Consumers normally widen `BlockNodeDefs` or `InlineNodeDefs`
+// directly; `NodeDefs` is the union landing zone everything ends up in.
+export interface NodeDefs extends BlockNodeDefs, InlineNodeDefs {
+  listItem: ListItemNode;
+  taskItem: TaskItemNode;
+  tableRow: TableRowNode;
+  tableCell: TableCellNode;
+  tableHeader: TableHeaderNode;
+}
+
+// ── Unions (derived from registries) ──────────────────────────────────
+
+export type BlockNode = BlockNodeDefs[keyof BlockNodeDefs];
+export type AnyEditorNode = NodeDefs[keyof NodeDefs];
 
 // ── Root ──────────────────────────────────────────────────────────────
 

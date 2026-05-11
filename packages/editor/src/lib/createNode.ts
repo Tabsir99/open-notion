@@ -1,6 +1,11 @@
-import { Node, type NodeConfig } from "@tiptap/core";
+import { Node, type Editor, type NodeConfig } from "@tiptap/core";
 import { lazy, Suspense, createElement, type ComponentType } from "react";
-import type { NodeAttrs, NodeName, TypedNodeViewProps } from "../types";
+import type {
+  NodeAttrs,
+  NodeName,
+  TypedEditor,
+  TypedNodeViewProps,
+} from "../types";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import type { BlockAttrs } from "@open-notion/serializers";
 
@@ -130,10 +135,67 @@ export function lazyNodeView(
 
 type OwnAttrs<T extends NodeName> = Omit<NodeAttrs[T], keyof BlockAttrs>;
 
+/**
+ * Type-level rewrite: replace `editor: Editor` with `editor: TypedEditor`
+ * in a function's `this` context. Used to lift every NodeConfig method
+ * whose `this` carries an editor so that consumers (and us internally)
+ * get registry-aware narrowing on `this.editor.isActive(...)`,
+ * `this.editor.getJSON()`, and `this.editor.getAttributes(...)` without
+ * casting.
+ *
+ * Pure type-level — no runtime effect.
+ */
+type WithTypedEditor<F> =
+  | (F extends (this: infer This, ...args: infer A) => infer R
+      ? This extends { editor: Editor }
+        ? (
+            this: Omit<This, "editor"> & { editor: TypedEditor },
+            ...args: A
+          ) => R
+        : F
+      : F)
+  | Extract<F, null | undefined>;
+
+/**
+ * NodeConfig method keys whose `this` carries an editor. Omitted from the
+ * base `NodeConfig` and re-added via `TypedThisOverlay` with `editor`
+ * narrowed to `TypedEditor`.
+ *
+ *   - `addCommands`, `addKeyboardShortcuts`, `addInputRules`,
+ *     `addPasteRules`, `addProseMirrorPlugins`, `addStorage` — config
+ *     builders.
+ *   - `on*` — every Tiptap lifecycle hook (`onCreate`, `onUpdate`,
+ *     `onSelectionUpdate`, `onTransaction`, `onFocus`, `onBlur`,
+ *     `onDestroy`, `onBeforeCreate`, `onContentError`, `onDrop`,
+ *     `onPaste`, `onDelete`).
+ *
+ * `addOptions` / `addGlobalAttributes` / `addExtensions` are deliberately
+ * not in this list — their `this` doesn't carry an editor.
+ */
+type TypedThisKeys =
+  | "addStorage"
+  | "addCommands"
+  | "addKeyboardShortcuts"
+  | "addInputRules"
+  | "addPasteRules"
+  | "addProseMirrorPlugins"
+  | `on${string}`;
+
+type TypedThisOverlay<Config> = {
+  [K in keyof Config as K extends TypedThisKeys ? K : never]?: WithTypedEditor<
+    Config[K]
+  >;
+};
+
 type TypedNodeConfig<T extends NodeName, Options = any, Storage = any> = Omit<
   NodeConfig<Options, Storage>,
-  "addAttributes" | "parseHTML" | "renderHTML" | "addNodeView"
+  | "addAttributes"
+  | "parseHTML"
+  | "renderHTML"
+  | "addNodeView"
+  | TypedThisKeys
 > &
+  TypedThisOverlay<NodeConfig<Options, Storage>> &
   ThisType<{ options: Options; name: string; storage: Storage }> & {
     name: T;
     group?: string;
@@ -174,6 +236,96 @@ export function createNode<T extends NodeName, Options = any, Storage = any>(
     }),
   } as unknown as NodeConfig<Options, Storage>);
 }
+
+/**
+ * Define a custom block (or inline) node with full editor-aware type
+ * safety. Alias of {@link createNode} — same signature, same behavior —
+ * but the JSDoc walks through the consumer extension flow.
+ *
+ * ## 1. Declare the node's JSON shape via declaration merging
+ *
+ * Add an entry to the appropriate registry in `@open-notion/serializers`
+ * — `BlockNodeDefs` for block-level, `InlineNodeDefs` for inline:
+ *
+ * ```ts
+ * declare module "@open-notion/serializers" {
+ *   interface BlockNodeDefs {
+ *     githubLink: {
+ *       type: "githubLink";
+ *       attrs: BlockAttrs & { url: string; pr?: number };
+ *       content?: InlineNode[];
+ *     };
+ *   }
+ * }
+ * ```
+ *
+ * After this single declaration, `"githubLink"` flows into `NodeName`,
+ * `NodeAttrs["githubLink"]` becomes the consumer's attrs shape,
+ * `editor.isActive("githubLink")` is typed, and
+ * `editor.getJSON().content` can include `githubLink` nodes.
+ *
+ * ## 2. Define the extension
+ *
+ * `name` autocompletes from the registry. `addAttributes` is checked
+ * against your attrs shape. `NodeView` receives a fully typed
+ * `node.attrs`. Inside hooks and config methods (`addCommands`,
+ * `onCreate`, etc.), `this.editor` is `TypedEditor` so
+ * `this.editor.isActive("…")` / `getJSON()` / `getAttributes("…")` are
+ * narrowed against the registry.
+ *
+ * ```ts
+ * export const GithubLink = defineBlock({
+ *   name: "githubLink",
+ *   group: "inline",
+ *   inline: true,
+ *
+ *   addAttributes: () => ({
+ *     url: { default: "" },
+ *     pr:  { default: null },
+ *   }),
+ *
+ *   addCommands() {
+ *     return {
+ *       setGithubLink: (url: string) => ({ commands }) =>
+ *         commands.insertContent({ type: "githubLink", attrs: { url } }),
+ *     };
+ *   },
+ *
+ *   NodeView: ({ node }) => <a href={node.attrs.url}>{node.attrs.url}</a>,
+ * });
+ * ```
+ *
+ * ## 3. (Optional) Augment Tiptap Commands for chain support
+ *
+ * ```ts
+ * declare module "@tiptap/core" {
+ *   interface Commands<ReturnType> {
+ *     githubLink: {
+ *       setGithubLink: (url: string) => ReturnType;
+ *     };
+ *   }
+ * }
+ * ```
+ *
+ * Now `editor.chain().setGithubLink(url).run()` is typed.
+ *
+ * ## 4. Plug into the editor
+ *
+ * ```tsx
+ * const editor = useOpenNotion({
+ *   extensions: (defaults) => [...defaults, GithubLink],
+ *   slashItems: (defaults) => [...defaults, {
+ *     id: "github-link",
+ *     title: "GitHub link",
+ *     icon: GithubIcon,
+ *     group: "Embed",
+ *     action: (editor, range) =>
+ *       editor.chain().focus().deleteRange(range).setGithubLink("").run(),
+ *   }],
+ * });
+ * ```
+ */
+export const defineBlock = createNode;
 
 type TypedExtendConfig<T extends NodeName> = Omit<
   TypedNodeConfig<T>,

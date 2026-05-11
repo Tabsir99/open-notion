@@ -1,6 +1,6 @@
 import { useEffect, useMemo, memo, useRef, lazy, Suspense } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
-import type { Editor, Extensions } from "@tiptap/core";
+import type { Extensions } from "@tiptap/core";
 
 const BlockSideMenu = lazy(() =>
   import("./menus/BlockSideMenu").then((m) => ({ default: m.BlockSideMenu })),
@@ -55,10 +55,10 @@ export interface OpenNotionOptions {
   onChange: (json: DocContent) => void;
 
   /** Called once when the editor is ready. */
-  onReady: (editor: Editor) => void;
+  onReady: (editor: TypedEditor) => void;
 
   /** Called when the selection changes. */
-  onSelectionChange: (editor: Editor) => void;
+  onSelectionChange: (editor: TypedEditor) => void;
 
   /**
    * Enable localStorage persistence. Pass a string to use as the key prefix.
@@ -208,7 +208,7 @@ export function useOpenNotion({
                   const { from } = ed.state.selection;
                   localStorage.setItem(`${storageKey}-cursor`, String(from));
                 }
-                onSelectionChange?.(ed);
+                onSelectionChange?.(ed as unknown as TypedEditor);
                 throttleSelectionRef.current = null;
               }, throttle);
             },
@@ -247,7 +247,7 @@ export function useOpenNotion({
                 }
               }
               if (autofocus) ed.commands.focus();
-              onReady?.(ed);
+              onReady?.(ed as unknown as TypedEditor);
             },
           }
         : {}),

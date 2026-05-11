@@ -16,9 +16,22 @@ export type {
   PlaceholderConfig,
 } from "./runtime";
 
-export type { TypedEditor } from "./types";
+export type {
+  TypedEditor,
+  NodeName,
+  MarkName,
+  EntityName,
+  NodeAttrs,
+  MarkAttrs,
+  TypedNodeViewProps,
+} from "./types";
 
 export { defaultExtensions } from "./extensions";
-export { createNode, lazyNodeView } from "./lib/createNode";
+export {
+  createNode,
+  defineBlock,
+  extendNode,
+  lazyNodeView,
+} from "./lib/createNode";
 
 export * from "@open-notion/serializers";
