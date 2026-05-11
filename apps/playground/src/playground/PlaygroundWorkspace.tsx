@@ -29,7 +29,7 @@ export function PlaygroundWorkspace({
   const editor = useOpenNotion({
     storageKey: "oeditor",
     onChange: () => onChange(editor),
-    throttle: 100,
+    throttle: 250,
   });
 
   const { pdf, handlePdfPreview, handlePdfDownload } = usePdfActions(
