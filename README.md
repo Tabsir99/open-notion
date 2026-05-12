@@ -85,7 +85,7 @@ Understanding how data moves—from user input to rendering—is crucial.
 - **`useSyncExternalStore` (Pub-Sub Store):** Keeps state completely outside the React lifecycle, subscribing targeted UI components selectively.
 - **Headless Accessible UI (Base UI):** Uses underlying accessible patterns (like focus-trapping, ARIA tags, portaling) without imposing styles.
 - **React NodeView Renderer:** A bridge pattern where Tiptap controls the schema representation, but hands rendering responsibilities of the visual entity over to a decoupled Context-aware React component.
-- **Central Type Registry (`types.ts`):** Defines explicit union types instead of strings (e.g., `NodeName`, `MarkName`, `NodeAttrs`). Generates strict `typeof` configurations to make `editor.getAttributes("heading")` securely type-infer `{"level": 1 | 2 | 3}`.
+- **Central Type Registry (`types.ts`):** Defines explicit union types instead of strings (e.g., `NodeName`, `MarkName`, `NodeAttrs`). Generates strict `typeof` configurations to make `editor.getAttributes("heading")` securely type-infer `{"level": 2 | 3 | 4}`.
 
 ---
 

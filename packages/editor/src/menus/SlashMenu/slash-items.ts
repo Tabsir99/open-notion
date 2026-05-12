@@ -35,7 +35,7 @@ export const defaultSlashItems: SlashItem[] = [
     icon: Heading1,
     group: "Basic",
     action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run(),
   },
   {
     id: "heading2",
@@ -44,7 +44,7 @@ export const defaultSlashItems: SlashItem[] = [
     icon: Heading2,
     group: "Basic",
     action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run(),
   },
   {
     id: "heading3",
@@ -53,7 +53,7 @@ export const defaultSlashItems: SlashItem[] = [
     icon: Heading3,
     group: "Basic",
     action: (editor, range) =>
-      editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run(),
+      editor.chain().focus().deleteRange(range).setHeading({ level: 4 }).run(),
   },
 
   {

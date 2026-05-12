@@ -144,7 +144,7 @@ declare module "@open-notion/serializers" {
     // attrs across declarations.
     heading: {
       type: "heading";
-      attrs: BlockAttrs & { level: 1 | 2 | 3; id: string; anchor?: string };
+      attrs: BlockAttrs & { level: 2 | 3 | 4; id: string; anchor?: string };
       content?: InlineNode[];
     };
   }

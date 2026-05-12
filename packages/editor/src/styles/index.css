@@ -43,9 +43,9 @@
 }
 
 .ProseMirror p.is-empty::before,
-.ProseMirror h1.is-empty::before,
 .ProseMirror h2.is-empty::before,
 .ProseMirror h3.is-empty::before,
+.ProseMirror h4.is-empty::before,
 .ProseMirror [data-type="callout"] p.is-empty::before {
   content: attr(data-placeholder);
   float: left;

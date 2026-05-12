@@ -133,16 +133,12 @@ const renderBlock = (
       );
 
     case "heading": {
-      const headingStyle =
-        node.attrs.level === 1
-          ? pdfStyles.h1
-          : node.attrs.level === 2
-            ? pdfStyles.h2
-            : pdfStyles.h3;
+      const level = `h${node.attrs.level}` as keyof typeof pdfStyles;
+
       return (
         <Text
           key={key}
-          style={[headingStyle, isFirst ? pdfStyles.firstBlock : {}]}
+          style={[pdfStyles[level], isFirst ? pdfStyles.firstBlock : {}]}
         >
           {renderInlines(node.content)}
         </Text>

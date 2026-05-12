@@ -68,7 +68,7 @@ export type ParagraphNode = {
 };
 export type HeadingNode = {
   type: "heading";
-  attrs: BlockAttrs & { level: 1 | 2 | 3; id: string };
+  attrs: BlockAttrs & { level: 2 | 3 | 4; id: string };
   content?: InlineNode[];
 };
 export type BlockquoteNode = {
@@ -198,7 +198,7 @@ export type DocContent = { type: "doc"; content: BlockNode[] };
 
 export type TocItem = {
   id: string;
-  level: 1 | 2 | 3;
+  level: HeadingNode["attrs"]["level"];
   text: string;
   children: TocItem[];
 };

@@ -37,7 +37,7 @@ export const pdfStyles = StyleSheet.create({
   },
 
   // ── Headings ──
-  h1: {
+  h2: {
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 22,
@@ -45,7 +45,7 @@ export const pdfStyles = StyleSheet.create({
     letterSpacing: -0.5,
     lineHeight: 1.2,
   },
-  h2: {
+  h3: {
     fontSize: 18,
     fontWeight: "bold",
     marginTop: 18,
@@ -53,7 +53,7 @@ export const pdfStyles = StyleSheet.create({
     letterSpacing: -0.3,
     lineHeight: 1.25,
   },
-  h3: {
+  h4: {
     fontSize: 14,
     fontWeight: "bold",
     marginTop: 14,

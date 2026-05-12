@@ -110,7 +110,7 @@ export const defaultExtensions = (
     BlockStyles,
 
     // Nodes
-    Heading,
+    Heading.configure({ levels: [2, 3, 4] }),
     Blockquote,
     HorizontalRule,
     ListKit,
@@ -137,7 +137,7 @@ export const defaultExtensions = (
             ? () => placeholder as string
             : ({ node }) => {
                 if (node.type.name === "heading")
-                  return `Heading ${node.attrs.level}`;
+                  return `Heading ${(node.attrs.level as number) - 1}`;
                 if (node.type.name === "paragraph")
                   return "Type '/' for commands...";
                 return "";

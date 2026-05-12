@@ -25,7 +25,7 @@ All serializers import types from `src/jsonContent.ts`.
 
 ### Blocks
 
-Blocks are a closed union: paragraph, heading (levels 1–3), blockquote, code block, horizontal rule, image, callout, bullet / ordered / task lists, table.
+Blocks are a closed union: paragraph, heading (levels 2–4), blockquote, code block, horizontal rule, image, callout, bullet / ordered / task lists, table.
 
 ### Inline nodes
 
