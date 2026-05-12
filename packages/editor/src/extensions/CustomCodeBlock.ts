@@ -11,63 +11,67 @@ import {
 
 export const shikiPluginKey = new PluginKey("shikiHighlight");
 
-function buildDecorations(
+function tokenizeNode(
+  node: ProseMirrorNode,
+  pos: number,
+  highlighter: AppHighlighterConfig,
+): Decoration[] {
+  const { h, darkTheme, lightTheme } = highlighter;
+  const lang = node.attrs.language || "plaintext";
+  const code = node.textContent;
+  if (
+    !code.length ||
+    lang === "plaintext" ||
+    !h.getLoadedLanguages().includes(lang)
+  ) {
+    return [];
+  }
+
+  const decorations: Decoration[] = [];
+  try {
+    const lines = h.codeToTokensWithThemes(code, {
+      lang,
+      themes: { light: lightTheme, dark: darkTheme },
+    });
+    let offset = pos + 1;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i] ?? [];
+      for (let j = 0; j < line.length; j++) {
+        const tok = line[j]!;
+        const from = offset;
+        const to = from + tok.content.length;
+        const lightColor = tok.variants.light?.color;
+        const darkColor = tok.variants.dark?.color;
+        if (lightColor || darkColor) {
+          const styleParts: string[] = [];
+          if (lightColor) styleParts.push(`--shiki-light: ${lightColor}`);
+          if (darkColor) styleParts.push(`--shiki-dark: ${darkColor}`);
+          decorations.push(
+            Decoration.inline(from, to, { style: styleParts.join("; ") }),
+          );
+        }
+        offset = to;
+      }
+      if (i < lines.length - 1) offset += 1;
+    }
+  } catch {
+    /* language parse error — render plain */
+  }
+  return decorations;
+}
+
+function buildAllDecorations(
   doc: ProseMirrorNode,
   highlighter: AppHighlighterConfig | null,
   typeName: string,
 ): DecorationSet {
   if (!highlighter) return DecorationSet.empty;
-
-  const { h, darkTheme, lightTheme } = highlighter;
-  const loaded = h.getLoadedLanguages();
   const decorations: Decoration[] = [];
-
   doc.descendants((node, pos) => {
     if (node.type.name !== typeName) return;
-
-    const lang = node.attrs.language || "plaintext";
-    const code = node.textContent;
-    if (!code.length || lang === "plaintext" || !loaded.includes(lang)) return;
-
-    try {
-      const { tokens: lightTokens } = h.codeToTokens(code, {
-        lang,
-        theme: lightTheme,
-      });
-      const { tokens: darkTokens } = h.codeToTokens(code, {
-        lang,
-        theme: darkTheme,
-      });
-      let offset = pos + 1;
-
-      for (let i = 0; i < lightTokens.length; i++) {
-        const lightLine = lightTokens[i] ?? [];
-        const darkLine = darkTokens[i] ?? [];
-        for (let j = 0; j < lightLine.length; j++) {
-          const lightTok = lightLine[j]!;
-          const darkTok = darkLine[j];
-          const from = offset;
-          const to = from + lightTok.content.length;
-          const lightColor = lightTok.color;
-          const darkColor = darkTok?.color;
-
-          if (lightColor || darkColor) {
-            const styleParts: string[] = [];
-            if (lightColor) styleParts.push(`--shiki-light: ${lightColor}`);
-            if (darkColor) styleParts.push(`--shiki-dark: ${darkColor}`);
-            decorations.push(
-              Decoration.inline(from, to, { style: styleParts.join("; ") }),
-            );
-          }
-          offset = to;
-        }
-        if (i < lightTokens.length - 1) offset += 1;
-      }
-    } catch {
-      /* language parse error — render plain */
-    }
+    decorations.push(...tokenizeNode(node, pos, highlighter));
+    return false;
   });
-
   return DecorationSet.create(doc, decorations);
 }
 
@@ -102,15 +106,52 @@ export const CustomCodeBlock = extendNode<"codeBlock">(
           key: shikiPluginKey,
           state: {
             init(_, { doc }) {
-              return buildDecorations(doc, ext.storage.highlighter, ext.name);
+              return buildAllDecorations(doc, ext.storage.highlighter, ext.name);
             },
             apply(tr, old, _, newState) {
-              if (!tr.docChanged && !tr.getMeta(shikiPluginKey)) return old;
-              return buildDecorations(
-                newState.doc,
-                ext.storage.highlighter,
-                ext.name,
-              );
+              const hl = ext.storage.highlighter;
+
+              if (tr.getMeta(shikiPluginKey)) {
+                return buildAllDecorations(newState.doc, hl, ext.name);
+              }
+              if (!tr.docChanged) return old;
+              if (!hl) return old.map(tr.mapping, newState.doc);
+
+              // Multi-step transactions (paste, undo replays, structural
+              // edits) are rare outside the typing hot path — rebuild fully
+              // to keep the incremental branch simple and correct.
+              if (tr.steps.length !== 1) {
+                return buildAllDecorations(newState.doc, hl, ext.name);
+              }
+
+              let changedFrom = Infinity;
+              let changedTo = -Infinity;
+              tr.steps[0]!.getMap().forEach((_a, _b, ns, ne) => {
+                if (ns < changedFrom) changedFrom = ns;
+                if (ne > changedTo) changedTo = ne;
+              });
+
+              // Step exposed no position range (e.g. AttrStep) — safest to
+              // rebuild; this path doesn't fire on plain typing.
+              if (changedFrom === Infinity) {
+                return buildAllDecorations(newState.doc, hl, ext.name);
+              }
+
+              let next = old.map(tr.mapping, newState.doc);
+
+              newState.doc.descendants((node, pos) => {
+                if (node.type.name !== ext.name) return;
+                const from = pos;
+                const to = pos + node.nodeSize;
+                if (changedTo <= from || changedFrom >= to) return false;
+                const existing = next.find(from, to);
+                if (existing.length) next = next.remove(existing);
+                const decos = tokenizeNode(node, pos, hl);
+                if (decos.length) next = next.add(newState.doc, decos);
+                return false;
+              });
+
+              return next;
             },
           },
           props: {

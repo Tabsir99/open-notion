@@ -189,11 +189,7 @@ type TypedThisOverlay<Config> = {
 
 type TypedNodeConfig<T extends NodeName, Options = any, Storage = any> = Omit<
   NodeConfig<Options, Storage>,
-  | "addAttributes"
-  | "parseHTML"
-  | "renderHTML"
-  | "addNodeView"
-  | TypedThisKeys
+  "addAttributes" | "parseHTML" | "renderHTML" | "addNodeView" | TypedThisKeys
 > &
   TypedThisOverlay<NodeConfig<Options, Storage>> &
   ThisType<{ options: Options; name: string; storage: Storage }> & {
