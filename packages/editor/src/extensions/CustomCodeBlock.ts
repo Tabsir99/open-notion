@@ -8,6 +8,7 @@ import {
   getHighlighter,
   type AppHighlighterConfig,
 } from "@open-notion/serializers";
+import { getRuntime } from "../runtime";
 
 export const shikiPluginKey = new PluginKey("shikiHighlight");
 
@@ -85,7 +86,8 @@ export const CustomCodeBlock = extendNode<"codeBlock">(
     },
 
     onCreate() {
-      getHighlighter().then((h) => {
+      const engine = getRuntime(this.editor).get().highlightEngine;
+      getHighlighter({ engine }).then((h) => {
         this.storage.highlighter = h;
         if (this.editor.view.isDestroyed) return;
         this.editor.view.dispatch(

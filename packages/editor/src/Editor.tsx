@@ -38,6 +38,7 @@ import {
   docToMarkdown,
   docToText,
   type DocContent,
+  type HighlightEngine,
 } from "@open-notion/serializers";
 import { version, name } from "@open-notion/assets/package.json";
 
@@ -92,6 +93,17 @@ export interface OpenNotionOptions {
 
   /** Compose turn-into menu items on top of the defaults. */
   turnIntoItems: TurnIntoItemsResolver;
+
+  /**
+   * Engine used by Shiki for code-block syntax highlighting.
+   * - `"js"` (default): pure-JS regex engine. ~20 KB gzipped lazy chunk. Slow
+   *   per-token; only matters in very large code blocks.
+   * - `"wasm"`: WASM oniguruma engine. ~230 KB gzipped lazy chunk. Several
+   *   times faster, no main-thread lag even in large blocks.
+   *
+   * Read once when the first code block initializes; later changes are ignored.
+   */
+  highlightEngine: HighlightEngine;
 }
 
 export interface OpenNotionViewProps {
@@ -128,6 +140,7 @@ export function useOpenNotion({
   extensions: userExtensions,
   slashItems: userSlashItems,
   turnIntoItems: userTurnIntoItems,
+  highlightEngine,
 }: Partial<OpenNotionOptions> = {}): TypedEditor | null {
   useEmojiLoader(emojiDataUrl);
 
@@ -157,6 +170,7 @@ export function useOpenNotion({
         slashItems: resolvedSlashItems,
         turnIntoItems: resolvedTurnIntoItems,
         getEmojiUrl: resolvedGetEmojiUrl,
+        ...(highlightEngine !== undefined && { highlightEngine }),
       }),
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,6 +2,7 @@ import { Extension } from "@tiptap/core";
 import type { Range, ChainedCommands } from "@tiptap/core";
 import type { Node as PMNode, Schema } from "@tiptap/pm/model";
 import type { LucideIcon } from "lucide-react";
+import type { HighlightEngine } from "@open-notion/serializers";
 import type { TypedEditor } from "./types";
 
 export interface SlashItem {
@@ -59,6 +60,8 @@ export interface EditorRuntimeState {
   getEmojiUrl: GetEmojiUrl;
   hoveredBlock: NodeBlock | null;
   editorContainer: HTMLElement | null;
+  /** Engine used for code-block syntax highlighting. */
+  highlightEngine: HighlightEngine;
 }
 
 export interface EditorRuntime {
@@ -83,6 +86,7 @@ export const EMPTY_RUNTIME_STATE: EditorRuntimeState = {
   getEmojiUrl: () => "",
   hoveredBlock: null,
   editorContainer: null,
+  highlightEngine: "js",
 };
 
 /** Read the per-editor runtime from a Tiptap editor instance. */
@@ -94,6 +98,7 @@ export interface OpenNotionRootOptions {
   slashItems?: SlashItem[];
   turnIntoItems?: TurnIntoItem[];
   getEmojiUrl?: GetEmojiUrl;
+  highlightEngine?: HighlightEngine;
 }
 
 /**
@@ -117,12 +122,14 @@ export const OpenNotionRoot = Extension.create<
   name: "openNotion",
 
   addStorage() {
-    const { slashItems, turnIntoItems, getEmojiUrl } = this.options;
+    const { slashItems, turnIntoItems, getEmojiUrl, highlightEngine } =
+      this.options;
     let state: EditorRuntimeState = {
       ...EMPTY_RUNTIME_STATE,
       ...(slashItems !== undefined && { slashItems }),
       ...(turnIntoItems !== undefined && { turnIntoItems }),
       ...(getEmojiUrl !== undefined && { getEmojiUrl }),
+      ...(highlightEngine !== undefined && { highlightEngine }),
     };
     const listeners = new Set<() => void>();
 

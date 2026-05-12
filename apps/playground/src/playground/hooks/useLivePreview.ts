@@ -5,8 +5,8 @@ import type { PreviewMode } from "../Toolbar";
 type HtmlState = { live: string; static: string };
 
 export function useLivePreview() {
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("live");
-  const previewModeRef = useRef<PreviewMode>("live");
+  const [previewMode, setPreviewMode] = useState<PreviewMode>("static");
+  const previewModeRef = useRef<PreviewMode>("static");
   previewModeRef.current = previewMode;
 
   const [html, setHtml] = useState<HtmlState>({ live: "", static: "" });

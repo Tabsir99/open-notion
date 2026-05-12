@@ -1,57 +1,88 @@
-import type { HighlighterCore } from "@shikijs/core";
+import type { HighlighterCore, RegexEngine } from "@shikijs/core";
 
 type AppHighlighter = HighlighterCore;
 
-let _promise: Promise<{
-  h: AppHighlighter;
-  darkTheme: string;
-  lightTheme: string;
-}> | null = null;
-
-export async function getHighlighter(): Promise<{
-  h: AppHighlighter;
-  darkTheme: string;
-  lightTheme: string;
-}> {
-  if (!_promise) {
-    _promise = (async () => {
-      const [
-        { createHighlighterCore },
-        { createJavaScriptRegexEngine },
-        { default: lightPlus },
-        { default: darkPlus },
-      ] = await Promise.all([
-        import("@shikijs/core"),
-        import("@shikijs/engine-javascript"),
-        import("@shikijs/themes/light-plus"),
-        import("@shikijs/themes/dark-plus"),
-      ]);
-      const h = await createHighlighterCore({
-        themes: [lightPlus, darkPlus],
-        langs: [
-          import("@shikijs/langs/typescript"),
-          import("@shikijs/langs/python"),
-          import("@shikijs/langs/html"),
-          import("@shikijs/langs/css"),
-          import("@shikijs/langs/json"),
-          import("@shikijs/langs/bash"),
-          import("@shikijs/langs/sql"),
-          import("@shikijs/langs/go"),
-          import("@shikijs/langs/rust"),
-          import("@shikijs/langs/yaml"),
-          import("@shikijs/langs/markdown"),
-          import("@shikijs/langs/dockerfile"),
-        ],
-        engine: createJavaScriptRegexEngine(),
-      });
-      return { h, darkTheme: darkPlus.name!, lightTheme: lightPlus.name! };
-    })();
-  }
-  return _promise;
-}
+export type HighlightEngine = "js" | "wasm";
 
 export type AppHighlighterConfig = {
   h: AppHighlighter;
   darkTheme: string;
   lightTheme: string;
 };
+
+const _promises = new Map<HighlightEngine, Promise<AppHighlighterConfig>>();
+let _default: HighlightEngine = "js";
+
+/**
+ * Set the engine returned by `getHighlighter()` calls that don't pass one
+ * explicitly. Per-engine caches are unaffected — a later call with an
+ * explicit `engine` still receives that engine's highlighter.
+ */
+export function setHighlightEngine(engine: HighlightEngine): void {
+  _default = engine;
+}
+
+async function createJsEngine(): Promise<RegexEngine> {
+  const { createJavaScriptRegexEngine } = await import(
+    "@shikijs/engine-javascript"
+  );
+  return createJavaScriptRegexEngine();
+}
+
+async function createWasmEngine(): Promise<RegexEngine> {
+  const [{ createOnigurumaEngine }, wasmInlined] = await Promise.all([
+    import("@shikijs/engine-oniguruma"),
+    import("@shikijs/engine-oniguruma/wasm-inlined"),
+  ]);
+  return createOnigurumaEngine(wasmInlined);
+}
+
+async function build(engine: HighlightEngine): Promise<AppHighlighterConfig> {
+  const [
+    { createHighlighterCore },
+    { default: lightPlus },
+    { default: darkPlus },
+    regexEngine,
+  ] = await Promise.all([
+    import("@shikijs/core"),
+    import("@shikijs/themes/light-plus"),
+    import("@shikijs/themes/dark-plus"),
+    engine === "wasm" ? createWasmEngine() : createJsEngine(),
+  ]);
+  const h = await createHighlighterCore({
+    themes: [lightPlus, darkPlus],
+    langs: [
+      import("@shikijs/langs/typescript"),
+      import("@shikijs/langs/python"),
+      import("@shikijs/langs/html"),
+      import("@shikijs/langs/css"),
+      import("@shikijs/langs/json"),
+      import("@shikijs/langs/bash"),
+      import("@shikijs/langs/sql"),
+      import("@shikijs/langs/go"),
+      import("@shikijs/langs/rust"),
+      import("@shikijs/langs/yaml"),
+      import("@shikijs/langs/markdown"),
+      import("@shikijs/langs/dockerfile"),
+    ],
+    engine: regexEngine,
+  });
+  return { h, darkTheme: darkPlus.name!, lightTheme: lightPlus.name! };
+}
+
+/**
+ * Return the highlighter for the requested engine. Each engine is built at
+ * most once; concurrent callers for the same engine share the in-flight
+ * promise. Different engines yield independent highlighter instances.
+ */
+export async function getHighlighter(opts?: {
+  engine?: HighlightEngine;
+}): Promise<AppHighlighterConfig> {
+  const engine = opts?.engine ?? _default;
+  let p = _promises.get(engine);
+  if (!p) {
+    p = build(engine);
+    _promises.set(engine, p);
+  }
+  return p;
+}
