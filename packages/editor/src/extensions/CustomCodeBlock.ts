@@ -4,161 +4,125 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
 import { extendNode, lazyNodeView } from "../lib/createNode";
-import {
-  getHighlighter,
-  type AppHighlighterConfig,
-} from "@open-notion/serializers";
 import { getRuntime } from "../runtime";
+import type { WorkerReqBody, WorkerResBody } from "./shikiWorker";
 
-export const shikiPluginKey = new PluginKey("shikiHighlight");
-
-function tokenizeNode(
-  node: ProseMirrorNode,
-  pos: number,
-  highlighter: AppHighlighterConfig,
-): Decoration[] {
-  const { h, darkTheme, lightTheme } = highlighter;
-  const lang = node.attrs.language || "plaintext";
-  const code = node.textContent;
-  if (
-    !code.length ||
-    lang === "plaintext" ||
-    !h.getLoadedLanguages().includes(lang)
-  ) {
-    return [];
-  }
-
-  const decorations: Decoration[] = [];
-  try {
-    const lines = h.codeToTokensWithThemes(code, {
-      lang,
-      themes: { light: lightTheme, dark: darkTheme },
-    });
-    let offset = pos + 1;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i] ?? [];
-      for (let j = 0; j < line.length; j++) {
-        const tok = line[j]!;
-        const from = offset;
-        const to = from + tok.content.length;
-        const lightColor = tok.variants.light?.color;
-        const darkColor = tok.variants.dark?.color;
-        if (lightColor || darkColor) {
-          const styleParts: string[] = [];
-          if (lightColor) styleParts.push(`--shiki-light: ${lightColor}`);
-          if (darkColor) styleParts.push(`--shiki-dark: ${darkColor}`);
-          decorations.push(
-            Decoration.inline(from, to, { style: styleParts.join("; ") }),
-          );
-        }
-        offset = to;
-      }
-      if (i < lines.length - 1) offset += 1;
-    }
-  } catch {
-    /* language parse error — render plain */
-  }
-  return decorations;
+interface ResultMeta {
+  kind: "result";
+  pos: number;
+  to: number;
+  decos: Decoration[];
 }
 
-function buildAllDecorations(
-  doc: ProseMirrorNode,
-  highlighter: AppHighlighterConfig | null,
-  typeName: string,
-): DecorationSet {
-  if (!highlighter) return DecorationSet.empty;
-  const decorations: Decoration[] = [];
-  doc.descendants((node, pos) => {
-    if (node.type.name !== typeName) return;
-    decorations.push(...tokenizeNode(node, pos, highlighter));
-    return false;
-  });
-  return DecorationSet.create(doc, decorations);
-}
+export const shikiPluginKey = new PluginKey<DecorationSet>("shikiHighlight");
 
 export const CustomCodeBlock = extendNode<"codeBlock">(
   CodeBlock.configure({
     defaultLanguage: "javascript",
   }),
   {
-    addStorage() {
-      return { highlighter: null as AppHighlighterConfig | null };
-    },
-
-    onCreate() {
-      const engine = getRuntime(this.editor).get().highlightEngine;
-      getHighlighter({ engine }).then((h) => {
-        this.storage.highlighter = h;
-        if (this.editor.view.isDestroyed) return;
-        this.editor.view.dispatch(
-          this.editor.view.state.tr.setMeta(shikiPluginKey, true),
-        );
-      });
-    },
-
     NodeView: lazyNodeView(() =>
       import("../blocks/CodeBlock").then((m) => ({ default: m.CodeBlockView })),
     ),
 
     addProseMirrorPlugins() {
       const ext = this;
+
       return [
         ...(this.parent?.() ?? []),
-        new Plugin({
+        new Plugin<DecorationSet>({
           key: shikiPluginKey,
           state: {
-            init(_, { doc }) {
-              return buildAllDecorations(doc, ext.storage.highlighter, ext.name);
-            },
+            init: () => DecorationSet.empty,
             apply(tr, old, _, newState) {
-              const hl = ext.storage.highlighter;
-
-              if (tr.getMeta(shikiPluginKey)) {
-                return buildAllDecorations(newState.doc, hl, ext.name);
+              const meta = tr.getMeta(shikiPluginKey) as ResultMeta | undefined;
+              if (meta?.kind === "result") {
+                let next = old;
+                const existing = next.find(meta.pos, meta.to);
+                if (existing.length) next = next.remove(existing);
+                if (meta.decos.length)
+                  next = next.add(newState.doc, meta.decos);
+                return next;
               }
               if (!tr.docChanged) return old;
-              if (!hl) return old.map(tr.mapping, newState.doc);
+              // Map positions through the change. Colors visually stay put
+              // (just shifted with text) until the worker round-trips fresh
+              // tokens.
+              return old.map(tr.mapping, newState.doc);
+            },
+          },
+          view(editorView) {
+            // Worker is per-view, not per-plugin. ProseMirror may create
+            // multiple plugin-view instances for the same plugin spec over
+            // an editor's lifetime; a worker captured in the outer closure
+            // would get terminated by the first destroy() and break the
+            // remaining views.
+            const worker = new Worker(
+              new URL("./shikiWorker.ts", import.meta.url),
+              { type: "module" },
+            );
+            // Tokenized content keyed by node identity. ProseMirror nodes
+            // are immutable — a content change yields a new Node, so this
+            // WeakMap is a built-in "is this content still the same?" check.
+            const lastSent = new WeakMap<ProseMirrorNode, string>();
 
-              // Multi-step transactions (paste, undo replays, structural
-              // edits) are rare outside the typing hot path — rebuild fully
-              // to keep the incremental branch simple and correct.
-              if (tr.steps.length !== 1) {
-                return buildAllDecorations(newState.doc, hl, ext.name);
-              }
+            const send = (pos: number, node: ProseMirrorNode) => {
+              lastSent.set(node, node.textContent);
+              worker.postMessage({
+                pos,
+                code: node.textContent,
+                lang: node.attrs.language || "plaintext",
+                engine: getRuntime(ext.editor).get().highlightEngine,
+              } satisfies WorkerReqBody);
+            };
 
-              let changedFrom = Infinity;
-              let changedTo = -Infinity;
-              tr.steps[0]!.getMap().forEach((_a, _b, ns, ne) => {
-                if (ns < changedFrom) changedFrom = ns;
-                if (ne > changedTo) changedTo = ne;
-              });
-
-              // Step exposed no position range (e.g. AttrStep) — safest to
-              // rebuild; this path doesn't fire on plain typing.
-              if (changedFrom === Infinity) {
-                return buildAllDecorations(newState.doc, hl, ext.name);
-              }
-
-              let next = old.map(tr.mapping, newState.doc);
-
-              newState.doc.descendants((node, pos) => {
+            const walkAndSend = (doc: ProseMirrorNode) => {
+              doc.descendants((node, pos) => {
                 if (node.type.name !== ext.name) return;
-                const from = pos;
-                const to = pos + node.nodeSize;
-                if (changedTo <= from || changedFrom >= to) return false;
-                const existing = next.find(from, to);
-                if (existing.length) next = next.remove(existing);
-                const decos = tokenizeNode(node, pos, hl);
-                if (decos.length) next = next.add(newState.doc, decos);
+                if (lastSent.get(node) === node.textContent) return false;
+                send(pos, node);
                 return false;
               });
+            };
 
-              return next;
-            },
+            const onMessage = (e: MessageEvent<WorkerResBody>) => {
+              const { pos, decos: workerDecos } = e.data;
+              if (editorView.isDestroyed) return;
+              const node = editorView.state.doc.nodeAt(pos);
+              if (!node || node.type.name !== ext.name) return;
+
+              const decos = workerDecos.map((d) =>
+                Decoration.inline(pos + d.from, pos + d.to, { style: d.style }),
+              );
+              editorView.dispatch(
+                editorView.state.tr.setMeta(shikiPluginKey, {
+                  kind: "result",
+                  pos,
+                  to: pos + node.nodeSize,
+                  decos,
+                } satisfies ResultMeta),
+              );
+            };
+            worker.addEventListener("message", onMessage);
+
+            let lastDoc = editorView.state.doc;
+            walkAndSend(lastDoc);
+
+            return {
+              update(view) {
+                if (view.state.doc === lastDoc) return;
+                lastDoc = view.state.doc;
+                walkAndSend(view.state.doc);
+              },
+              destroy() {
+                worker.removeEventListener("message", onMessage);
+                worker.terminate();
+              },
+            };
           },
           props: {
             decorations(state) {
-              return this.getState(state);
+              return shikiPluginKey.getState(state);
             },
           },
         }),

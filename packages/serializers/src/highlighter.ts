@@ -1,5 +1,12 @@
 import type { HighlighterCore, RegexEngine } from "@shikijs/core";
 
+// Bundlers (Vite/Webpack/esbuild) inline `process.env.NODE_ENV` at build
+// time; the typeof guard makes the runtime safe in environments where the
+// constant wasn't inlined (e.g. raw browser ESM).
+declare const process:
+  | { env: { NODE_ENV?: string } }
+  | undefined;
+
 type AppHighlighter = HighlighterCore;
 
 export type HighlightEngine = "js" | "wasm";
@@ -81,6 +88,19 @@ export async function getHighlighter(opts?: {
   const engine = opts?.engine ?? _default;
   let p = _promises.get(engine);
   if (!p) {
+    if (
+      _promises.size > 0 &&
+      typeof process !== "undefined" &&
+      process.env.NODE_ENV !== "production"
+    ) {
+      const loaded = Array.from(_promises.keys()).join(", ");
+      console.warn(
+        `[open-notion] Loading shiki engine "${engine}" while "${loaded}" ` +
+          `${_promises.size === 1 ? "is" : "are"} already loaded. ` +
+          `Multiple engines double the bundle cost; pick one via setHighlightEngine() ` +
+          `or useOpenNotion({ highlightEngine }).`,
+      );
+    }
     p = build(engine);
     _promises.set(engine, p);
   }

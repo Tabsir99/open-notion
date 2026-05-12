@@ -48,6 +48,11 @@
     "./const": {
       "source": "./src/renderers/html/dataAttr.ts",
       "import": "./dist/renderers/html/dataAttr.js"
+    },
+    "./highlighter": {
+      "source": "./src/highlighter.ts",
+      "types": "./dist/highlighter.d.ts",
+      "import": "./dist/highlighter.js"
     }
   },
   "main": "./dist/index.js",

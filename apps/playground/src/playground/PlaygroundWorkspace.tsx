@@ -29,6 +29,7 @@ export function PlaygroundWorkspace({
   const editor = useOpenNotion({
     storageKey: "oeditor",
     onChange: () => onChange(editor),
+    highlightEngine: "wasm",
     throttle: 250,
   });
 
