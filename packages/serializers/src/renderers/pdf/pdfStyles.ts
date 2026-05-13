@@ -1,26 +1,80 @@
 import { StyleSheet } from "@react-pdf/renderer";
 
+/** Family name we register a TTF mono font under (see index.tsx). */
+export const MONO_FAMILY = "OpenNotionMono";
+
+/**
+ * Base font size in points. Everything that should scale with reading
+ * size (headings, code, emoji, table cells, captions…) is derived from
+ * this. Bumping this rescales typography but leaves spacing alone.
+ */
+export const BASE_FONT_SIZE = 12;
+
+/**
+ * Spacing scale in points — intentionally decoupled from font size.
+ * Block gaps, heading top margins, padding, and similar live here so
+ * you can tune density without changing reading size (and vice versa).
+ */
+const SP = 10;
+
+/**
+ * Type ratios — mirror doc.css `em`/`rem` values. Heading ratios are
+ * deliberately a bit smaller than their CSS twins because PDF renders
+ * at print scale where a `2.4×` heading feels heavier than on screen.
+ */
+export const ratios = {
+  // Heading sizes — doc.css styles `h1`/`h2`/`h3`, the editor emits
+  // JSON levels 2/3/4 (UI labels 1/2/3). Original doc.css ratios were
+  // 2.4 / 1.75 / 1.2 — tightened here.
+  heading: { 2: 1.85, 3: 1.42, 4: 1.15 } as const,
+  // doc.css `[data-type="emoji"] img { width: 1.2em }`
+  emoji: 1.2,
+  // doc.css `.callout [data-type="emoji"] img { width: 1.35rem }` — toned
+  // down so the icon doesn't dwarf body text in print.
+  calloutEmoji: 1.2,
+  // doc.css `:not(pre) > code { font-size: 0.875em }`
+  inlineCode: 0.875,
+  // doc.css `pre { font-size: 0.875em }`
+  code: 0.875,
+  // doc.css `figcaption { font-size: 0.875rem }`
+  caption: 0.85,
+  // doc.css `table { font-size: 0.95em }`
+  tableCell: 0.92,
+} as const;
+
+/** PDF font size for a heading at the given JSON level. */
+export const headingFontSize = (level: 2 | 3 | 4): number =>
+  BASE_FONT_SIZE * ratios.heading[level];
+
+export const codeFontSize = BASE_FONT_SIZE * ratios.code;
+export const inlineCodeFontSize = BASE_FONT_SIZE * ratios.inlineCode;
+export const captionFontSize = BASE_FONT_SIZE * ratios.caption;
+export const tableCellFontSize = BASE_FONT_SIZE * ratios.tableCell;
+export const calloutEmojiSize = BASE_FONT_SIZE * ratios.calloutEmoji;
+
 export const tokens = {
-  // Colors
-  text: "#1f2328",
-  textMuted: "#59636e",
-  textFaint: "#818b98",
+  // Colors — mirrors doc.css `--ond-*` tokens (light variant)
+  text: "#0d1117",
+  textMuted: "#5b6573",
+  textFaint: "#8e96a3",
   bg: "#ffffff",
   bgSubtle: "#f6f8fa",
   bgCode: "#f6f8fa",
-  bgCallout: "#f6f8fa",
-  border: "#d1d9e0",
+  bgCallout: "#eef1ff",
+  border: "#d7dbe1",
   borderStrong: "#b6bcc4",
-  accent: "#0969da",
+  accent: "#4f62ef",
 
   // Typography
   fontSans: "Helvetica",
-  fontMono: "Courier",
-  fontSize: 11,
-  leading: 1.55,
+  fontMono: MONO_FAMILY,
+  fontSize: BASE_FONT_SIZE,
+  leading: 1.65, // doc.css `--ond-leading: 1.65`
 
-  // Spacing
-  blockGap: 9,
+  // Spacing — pt values driven by `SP`, not `BASE_FONT_SIZE`. Same
+  // numeric feel as before when base was 10pt.
+  blockGap: SP * 1.05,
+  blockGapLg: SP * 1.6,
 } as const;
 
 export const pdfStyles = StyleSheet.create({
@@ -38,26 +92,26 @@ export const pdfStyles = StyleSheet.create({
 
   // ── Headings ──
   h2: {
-    fontSize: 24,
+    fontSize: headingFontSize(2),
     fontWeight: "bold",
-    marginTop: 22,
-    marginBottom: 6,
+    marginTop: SP * 2.4,
+    marginBottom: 0,
     letterSpacing: -0.5,
     lineHeight: 1.2,
   },
   h3: {
-    fontSize: 18,
+    fontSize: headingFontSize(3),
     fontWeight: "bold",
-    marginTop: 18,
-    marginBottom: 6,
+    marginTop: SP * 1.95,
+    marginBottom: 0,
     letterSpacing: -0.3,
     lineHeight: 1.25,
   },
   h4: {
-    fontSize: 14,
+    fontSize: headingFontSize(4),
     fontWeight: "bold",
-    marginTop: 14,
-    marginBottom: 4,
+    marginTop: SP * 1.55,
+    marginBottom: 0,
     lineHeight: 1.3,
   },
   // First-child reset (apply manually on first node)
@@ -74,28 +128,36 @@ export const pdfStyles = StyleSheet.create({
   link: { color: tokens.accent, textDecoration: "underline" },
   inlineCode: {
     fontFamily: tokens.fontMono,
-    fontSize: 10,
+    fontSize: inlineCodeFontSize,
     backgroundColor: tokens.bgCode,
     color: tokens.text,
   },
 
   // ── Code block ──
+  // No `wrap={false}` on the View — long blocks need to split across pages.
   codeBlock: {
-    marginTop: tokens.blockGap,
-    padding: 12,
+    marginTop: tokens.blockGapLg,
+    paddingVertical: SP,
+    paddingHorizontal: SP * 1.25,
     backgroundColor: tokens.bgCode,
     borderWidth: 1,
     borderColor: tokens.border,
     borderRadius: 4,
     fontFamily: tokens.fontMono,
-    fontSize: 10,
-    lineHeight: 1.5,
+    fontSize: codeFontSize,
+    lineHeight: 1.55,
+  },
+  codeLine: {
+    fontFamily: tokens.fontMono,
+    fontSize: codeFontSize,
+    lineHeight: 1.55,
+    color: tokens.text,
   },
 
   // ── Blockquote ──
   blockquote: {
     marginTop: tokens.blockGap,
-    paddingLeft: 14,
+    paddingLeft: SP,
     paddingVertical: 2,
     borderLeftWidth: 3,
     borderLeftColor: tokens.borderStrong,
@@ -104,7 +166,7 @@ export const pdfStyles = StyleSheet.create({
 
   // ── Horizontal rule ──
   hr: {
-    marginVertical: 22,
+    marginVertical: SP * 2,
     height: 1,
     backgroundColor: tokens.border,
   },
@@ -118,7 +180,7 @@ export const pdfStyles = StyleSheet.create({
   imageFull: { width: "100%" },
   caption: {
     marginTop: 6,
-    fontSize: 9,
+    fontSize: captionFontSize,
     color: tokens.textMuted,
     textAlign: "center",
   },
@@ -129,18 +191,24 @@ export const pdfStyles = StyleSheet.create({
     gap: 10,
     alignItems: "flex-start",
     padding: 12,
-    marginTop: tokens.blockGap,
+    marginTop: tokens.blockGapLg,
     backgroundColor: tokens.bgCallout,
     borderWidth: 1,
     borderColor: tokens.border,
     borderRadius: 4,
   },
-  calloutIcon: { width: 16, height: 16, flexShrink: 0, marginTop: 1 },
+  // 1.35rem in doc.css — absolute relative to root, not the body text.
+  calloutIcon: {
+    width: calloutEmojiSize,
+    height: calloutEmojiSize,
+    flexShrink: 0,
+    marginTop: 1,
+  },
   calloutBody: { flex: 1 },
 
   // ── Lists ──
   list: { marginTop: tokens.blockGap, paddingLeft: 4 },
-  nestedList: { marginTop: 3, marginLeft: 14 },
+  nestedList: { marginTop: 3, marginLeft: SP },
   listItem: { flexDirection: "row", marginBottom: 3 },
   listMarker: { width: 18, color: tokens.text },
   listContent: { flex: 1 },
@@ -153,8 +221,8 @@ export const pdfStyles = StyleSheet.create({
     marginBottom: 3,
   },
   checkbox: {
-    width: 11,
-    height: 11,
+    width: SP,
+    height: SP,
     marginTop: 3,
     borderWidth: 1,
     borderColor: tokens.borderStrong,
@@ -176,7 +244,7 @@ export const pdfStyles = StyleSheet.create({
 
   // ── Table ──
   table: {
-    marginTop: tokens.blockGap,
+    marginTop: tokens.blockGapLg,
     borderWidth: 1,
     borderColor: tokens.border,
     borderRadius: 4,
@@ -191,7 +259,7 @@ export const pdfStyles = StyleSheet.create({
   tableCell: {
     flex: 1,
     padding: 8,
-    fontSize: 10,
+    fontSize: tableCellFontSize,
     borderRightWidth: 1,
     borderRightColor: tokens.border,
   },
@@ -200,7 +268,4 @@ export const pdfStyles = StyleSheet.create({
     backgroundColor: tokens.bgSubtle,
     fontWeight: "bold",
   },
-
-  // ── Emoji ──
-  emojiImage: { width: 12, height: 12 },
 });
