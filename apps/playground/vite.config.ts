@@ -21,6 +21,10 @@ export default defineConfig({
     conditions: ["source"],
   },
   assetsInclude: ["**/*.svg"],
+  // The shiki worker (`packages/editor/src/extensions/shikiWorker.ts`)
+  // dynamically imports `@shikijs/*`. Code-splitting needs ES modules;
+  // Vite's default `iife` format errors out on a multi-chunk worker.
+  worker: { format: "es" },
   build: {
     rollupOptions: {
       output: {
