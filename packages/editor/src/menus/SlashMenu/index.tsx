@@ -160,51 +160,57 @@ export function SlashMenu() {
         side="bottom"
         align="start"
         sideOffset={6}
-        className="p-1 w-64 max-h-80 overflow-y-auto no-scrollbar"
+        className="p-1 w-64 max-h-80 overflow-y-auto no-scrollbar transition-[height] duration-200 ease-out [interpolate-size:allow-keywords]"
       >
-        <div ref={listRef}>
-          {groups.map((group, i) => (
-            <div key={group.label || `group-${i}`}>
-              {i !== 0 && <Separator className="mb-1 mt-2.5" />}
-              {group.label && (
-                <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  {group.label}
-                </div>
-              )}
-              {group.items.map((item) => {
-                const selected = item.id === selectedId;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    data-selected={selected}
-                    className={cn(
-                      "flex items-center gap-3 w-full px-2 py-1.5 rounded-md text-sm text-left transition-colors duration-200",
-                      selected && "bg-accent",
-                    )}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      if (!editor) return;
-                      item.action(editor, latest.current.range!);
-                    }}
-                    onPointerMove={(e) => {
-                      if (e.movementX === 0 && e.movementY === 0) return;
-                      const idx = indexById.get(item.id);
-                      if (idx !== undefined && idx !== state.selectedIndex) {
-                        setState((s) => ({ ...s, selectedIndex: idx }));
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-center size-7 rounded-md shrink-0 bg-muted ring-1 ring-border">
-                      <item.icon className="size-4" strokeWidth={1.5} />
-                    </div>
-                    <span className="font-normal truncate">{item.title}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        {state.items.length === 0 && state.query.length > 0 ? (
+          <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+            No results
+          </div>
+        ) : (
+          <div ref={listRef}>
+            {groups.map((group, i) => (
+              <div key={group.label || `group-${i}`}>
+                {i !== 0 && <Separator className="mb-1 mt-2.5" />}
+                {group.label && (
+                  <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                    {group.label}
+                  </div>
+                )}
+                {group.items.map((item) => {
+                  const selected = item.id === selectedId;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      data-selected={selected}
+                      className={cn(
+                        "flex items-center gap-3 w-full px-2 py-1.5 rounded-md text-sm text-left transition-colors duration-200",
+                        selected && "bg-accent",
+                      )}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        if (!editor) return;
+                        item.action(editor, latest.current.range!);
+                      }}
+                      onPointerMove={(e) => {
+                        if (e.movementX === 0 && e.movementY === 0) return;
+                        const idx = indexById.get(item.id);
+                        if (idx !== undefined && idx !== state.selectedIndex) {
+                          setState((s) => ({ ...s, selectedIndex: idx }));
+                        }
+                      }}
+                    >
+                      <div className="flex items-center justify-center size-7 rounded-md shrink-0 bg-muted ring-1 ring-border">
+                        <item.icon className="size-4" strokeWidth={1.5} />
+                      </div>
+                      <span className="font-normal truncate">{item.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );

@@ -54,6 +54,13 @@ export interface NodeBlock {
   nodeType: string;
 }
 
+export interface DropTarget {
+  /** Top-level block element the highlight covers. */
+  element: HTMLElement;
+  /** Doc position to insert at (always before this block). */
+  blockPos: number;
+}
+
 /**
  * Per-editor runtime state. Lives at `editor.storage.openNotion` for the
  * editor's lifetime (one instance per editor; auto-GC'd with the editor).
@@ -66,6 +73,7 @@ export interface EditorRuntimeState {
   turnIntoItems: TurnIntoItem[];
   getEmojiUrl: GetEmojiUrl;
   hoveredBlock: NodeBlock | null;
+  dropTarget: DropTarget | null;
   editorContainer: HTMLElement | null;
   /** Engine used for code-block syntax highlighting. */
   highlightEngine: HighlightEngine;
@@ -92,6 +100,7 @@ export const EMPTY_RUNTIME_STATE: EditorRuntimeState = {
   turnIntoItems: [],
   getEmojiUrl: () => "",
   hoveredBlock: null,
+  dropTarget: null,
   editorContainer: null,
   highlightEngine: "js",
 };

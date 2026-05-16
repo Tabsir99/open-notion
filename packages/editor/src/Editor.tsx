@@ -5,6 +5,11 @@ import type { Extensions } from "@tiptap/core";
 const BlockSideMenu = lazy(() =>
   import("./menus/BlockSideMenu").then((m) => ({ default: m.BlockSideMenu })),
 );
+const BlockDropIndicator = lazy(() =>
+  import("./menus/BlockDropIndicator").then((m) => ({
+    default: m.BlockDropIndicator,
+  })),
+);
 const BubbleMenu = lazy(() =>
   import("./menus/BubbleMenu").then((m) => ({ default: m.BubbleMenu })),
 );
@@ -330,6 +335,7 @@ export const OpenNotionView = memo(
         >
           <Suspense fallback={null}>
             <BlockSideMenu />
+            <BlockDropIndicator />
             <BubbleMenu editor={editor} />
             <SlashMenu />
             <EmojiPicker />

@@ -100,6 +100,8 @@ export function useHoveredBlock({ menuRef, open }: Options) {
     const menu = menuRef.current;
     if (!menu) return;
 
+    if (editor.view.dragging) return;
+
     const hoveringMenu = menu.matches(":hover");
     const hoveringBlock = getRuntime(editor)
       .get()

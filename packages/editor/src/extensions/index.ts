@@ -29,7 +29,6 @@ import { Callout } from "./Callout";
 // --- Functionality ---
 import TextAlign from "@tiptap/extension-text-align";
 import {
-  Dropcursor,
   Gapcursor,
   TrailingNode,
   CharacterCount,
@@ -143,7 +142,6 @@ export const defaultExtensions = (
                 return "";
               },
     }),
-    Dropcursor,
     Gapcursor,
     TrailingNode,
     UndoRedo,
