@@ -9,6 +9,13 @@ export interface SlashItem {
   id: string;
   title: string;
   description?: string;
+  /**
+   * Extra search terms — synonyms, abbreviations, related domain words.
+   * Weighted highest in fuzzy matching so e.g. `aliases: ["Horizontal Rule"]`
+   * makes a "Divider" item match `/horizontal`. Title is searched too at a
+   * lower weight; description at lowest.
+   */
+  aliases?: string[];
   icon: LucideIcon;
   group: string;
   action: (editor: TypedEditor, range: Range) => void;

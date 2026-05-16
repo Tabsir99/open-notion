@@ -11,6 +11,7 @@ const PLUGIN_KEY = new PluginKey("slashCommand");
 
 type State = {
   open: boolean;
+  query: string;
   items: SlashItem[];
   selectedIndex: number;
   clientRect: DOMRect | null;
@@ -19,6 +20,7 @@ type State = {
 
 const INITIAL: State = {
   open: false,
+  query: "",
   items: [],
   selectedIndex: 0,
   clientRect: null,
@@ -47,12 +49,15 @@ export function SlashMenu() {
       editor: editor as any,
       char: "/",
       pluginKey: PLUGIN_KEY,
+      decorationClass: "open-notion-suggest",
+      decorationContent: "Filter…",
       shouldResetDismissed: () => false,
       items: ({ query }) => filterSlashItems(slashItems, query),
       render: () => ({
         onStart: (p) => {
           setState({
             open: true,
+            query: p.query ?? "",
             items: p.items,
             selectedIndex: 0,
             clientRect: p.clientRect?.() ?? null,
@@ -62,6 +67,7 @@ export function SlashMenu() {
         onUpdate: (p) => {
           setState((s) => ({
             open: true,
+            query: p.query ?? "",
             items: p.items,
             selectedIndex: Math.min(
               s.selectedIndex,
@@ -125,7 +131,13 @@ export function SlashMenu() {
     [state.clientRect],
   );
 
-  const groups = useMemo(() => groupItems(state.items), [state.items]);
+  const groups = useMemo(
+    () =>
+      state.query
+        ? [{ label: "", items: state.items }]
+        : groupItems(state.items),
+    [state.items, state.query],
+  );
 
   const indexById = useMemo(() => {
     const m = new Map<string, number>();
@@ -152,11 +164,13 @@ export function SlashMenu() {
       >
         <div ref={listRef}>
           {groups.map((group, i) => (
-            <div key={group.label}>
+            <div key={group.label || `group-${i}`}>
               {i !== 0 && <Separator className="mb-1 mt-2.5" />}
-              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                {group.label}
-              </div>
+              {group.label && (
+                <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                  {group.label}
+                </div>
+              )}
               {group.items.map((item) => {
                 const selected = item.id === selectedId;
                 return (

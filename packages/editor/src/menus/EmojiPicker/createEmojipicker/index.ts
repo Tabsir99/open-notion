@@ -2,7 +2,7 @@ import { getEmojiData } from "./data";
 import { createCategoryBar } from "./category";
 import { createEmojiGrid } from "./dom";
 import { createNavigator } from "./navigation";
-import { getFilteredEmojisByCategory } from "./utils";
+import { getRankedEmojiIds } from "./utils";
 import type { GetEmojiUrl } from "../../../runtime";
 
 const STORAGE_KEY = "recentEmojis";
@@ -115,18 +115,12 @@ export function createEmojiPicker(
     nav.reset();
     bar.style.display = "none";
 
-    const groups = getFilteredEmojisByCategory(query);
-    if (groups.length === 0) {
+    const ids = getRankedEmojiIds(query);
+    if (ids.length === 0) {
       area.showEmpty("No emojis found");
       return;
     }
-    for (const { categoryId, ids } of groups) {
-      area.addCategory(
-        categoryId.replace("-", " & "),
-        `search-${categoryId}`,
-        ids,
-      );
-    }
+    area.addCategory("Results", "search", ids);
   };
 
   const handleKey = (event: KeyboardEvent) =>

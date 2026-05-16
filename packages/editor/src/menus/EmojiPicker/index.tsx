@@ -56,6 +56,8 @@ export const EmojiPicker = memo(() => {
       editor: editor as any,
       char: ":",
       pluginKey: EmojiSuggestionPluginKey,
+      decorationClass: "open-notion-suggest",
+      decorationContent: "Search emoji…",
       render: () => ({
         onStart(props) {
           if (!getEmojiArray().length) return;
