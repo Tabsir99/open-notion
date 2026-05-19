@@ -7,8 +7,20 @@ import { getLanguageIconUrl } from "./languageIcons";
 const { type, codeBlock } = DA;
 const html = String.raw;
 
-const COPY_ICON_URL =
-  "https://cdn.jsdelivr.net/npm/lucide-static@0.511.0/icons/copy.svg";
+const COPY_ICON = html`<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1rem"
+  height="1rem"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+</svg>`;
 
 const CHECK_ICON = html`<svg
   xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +43,6 @@ export async function renderCodeBlock(node: CodeBlockNode): Promise<string> {
   const loaded = highlighter?.h.getLoadedLanguages() ?? [];
 
   let highlighted = escapeText(text);
-
   if (text.length && lang !== "plaintext" && loaded.includes(lang)) {
     try {
       const raw = highlighter.h.codeToHtml(text, {
@@ -54,7 +65,7 @@ export async function renderCodeBlock(node: CodeBlockNode): Promise<string> {
       <button
         type="button"${dataAttrFlag(codeBlock.copy)}${attr(codeBlock.copyText, text)}
       >
-        <img src="${COPY_ICON_URL}" alt="" aria-hidden="true"${dataAttrFlag(codeBlock.copyIconImg)} />
+        <span aria-hidden="true"${dataAttrFlag(codeBlock.copyIconImg)}>${COPY_ICON}</span>
         <span aria-hidden="true"${dataAttrFlag(codeBlock.checkIcon)} style="display:none">${CHECK_ICON}</span>
         <span${dataAttrFlag(codeBlock.copyLabel)}>Copy</span>
       </button>
