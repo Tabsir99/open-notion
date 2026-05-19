@@ -3,7 +3,7 @@
 * blockquote, links, code, tables, callouts, emoji, etc. */
 @import "@open-notion/assets/doc.css";
 
-@source "../../dist/index.js";
+@source "../../dist";
 @source "../**/*.{ts,tsx}";
 
 :root {
